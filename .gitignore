@@ -1,0 +1,26 @@
+# Root-level safety net (each subproject also has its own .gitignore)
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# Logs
+*.log
+
+# Secrets — never commit
+**/application-secrets.properties
+**/*.env
+**/*.env.local
+.env*
+!.env.example
+
+# Build output
+**/target/
+**/dist/
+**/build/
+**/node_modules/
