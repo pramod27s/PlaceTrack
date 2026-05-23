@@ -24,3 +24,9 @@ Thumbs.db
 **/dist/
 **/build/
 **/node_modules/
+
+# Local-only docs (kept on disk, not in repo)
+/FEATURES.md
+/PROJECT_IDEA.md
+/deploy.md
+/frontend/README.md
