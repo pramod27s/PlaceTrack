@@ -16,7 +16,9 @@ export function RoundListItem({
 }) {
   const type = ROUND_TYPE_META[round.type]
   const status = ROUND_STATUS_META[round.status]
-  const upcoming = round.status === 'SCHEDULED' && !isPastIso(round.scheduledAt)
+  const isPast = isPastIso(round.scheduledAt)
+  const upcoming = round.status === 'SCHEDULED' && !isPast
+  const overdue = round.status === 'SCHEDULED' && isPast
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/40 transition hover:border-slate-300 hover:shadow-md sm:flex-row sm:items-center">
@@ -24,7 +26,11 @@ export function RoundListItem({
       <div
         className={cn(
           'flex w-full shrink-0 flex-row items-center justify-between rounded-lg px-3 py-2 sm:w-24 sm:flex-col sm:justify-center sm:gap-0.5 sm:py-3',
-          upcoming ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-500',
+          overdue
+            ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'
+            : upcoming
+              ? 'bg-indigo-50 text-indigo-700'
+              : 'bg-slate-100 text-slate-500',
         )}
       >
         <span className="text-xs font-semibold uppercase tracking-wide">
@@ -38,6 +44,12 @@ export function RoundListItem({
         <div className="flex flex-wrap items-center gap-1.5">
           <Badge className={type.badge}>{type.label}</Badge>
           <Badge className={status.badge}>{status.label}</Badge>
+          {overdue && (
+            <Badge className="bg-amber-100 text-amber-800 ring-1 ring-amber-200">
+              <TriangleAlert size={11} className="mr-0.5 inline-block" />
+              Ended — update status
+            </Badge>
+          )}
         </div>
         <p className="mt-1.5 text-sm">
           <Link
