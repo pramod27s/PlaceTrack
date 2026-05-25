@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -21,7 +21,7 @@ interface KanbanBoardProps {
 }
 
 /** The visual content of a company card, shared by the board and the drag overlay. */
-function CardBody({ company }: { company: Company }) {
+const CardBody = memo(function CardBody({ company }: { company: Company }) {
   return (
     <>
       <div className="flex items-start justify-between gap-2">
@@ -56,36 +56,39 @@ function CardBody({ company }: { company: Company }) {
       </div>
     </>
   )
-}
+})
 
-function KanbanCard({
+const KanbanCard = memo(function KanbanCard({
   company,
-  onClick,
+  onSelect,
 }: {
   company: Company
-  onClick: () => void
+  onSelect: (company: Company) => void
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: String(company.id),
   })
+  // Only animate color/border on hover — leaving `transition` (all properties)
+  // here causes dnd-kit's per-frame transform updates to fight a CSS transition
+  // and produces visible drag lag.
   return (
     <div
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      onClick={onClick}
+      onClick={() => onSelect(company)}
       className={cn(
-        'cursor-grab rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition',
-        'hover:border-indigo-300 hover:shadow-md active:cursor-grabbing',
+        'cursor-grab rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition-colors',
+        'hover:border-indigo-300 active:cursor-grabbing',
         isDragging && 'opacity-40',
       )}
     >
       <CardBody company={company} />
     </div>
   )
-}
+})
 
-function KanbanColumn({
+const KanbanColumn = memo(function KanbanColumn({
   stage,
   companies,
   onCardClick,
@@ -109,18 +112,14 @@ function KanbanColumn({
       <div
         ref={setNodeRef}
         className={cn(
-          'min-h-[11rem] space-y-2 rounded-lg border-2 border-dashed p-2 transition',
+          'min-h-[11rem] space-y-2 rounded-lg border-2 border-dashed p-2 transition-colors',
           isOver
             ? 'border-indigo-400 bg-indigo-50'
             : 'border-transparent bg-slate-100/70',
         )}
       >
         {companies.map((company) => (
-          <KanbanCard
-            key={company.id}
-            company={company}
-            onClick={() => onCardClick(company)}
-          />
+          <KanbanCard key={company.id} company={company} onSelect={onCardClick} />
         ))}
         {companies.length === 0 && (
           <div className="flex min-h-[9rem] items-center justify-center rounded-md border border-dashed border-slate-200 bg-white/45 px-4 text-center text-xs font-medium text-slate-400">
@@ -130,7 +129,7 @@ function KanbanColumn({
       </div>
     </div>
   )
-}
+})
 
 export function KanbanBoard({ companies, onCardClick }: KanbanBoardProps) {
   const updateStage = useUpdateCompanyStage()
@@ -157,29 +156,37 @@ export function KanbanBoard({ companies, onCardClick }: KanbanBoardProps) {
     return groups
   }, [companies])
 
-  const activeCompany = companies.find((c) => c.id === activeId) ?? null
+  const activeCompany = useMemo(
+    () => companies.find((c) => c.id === activeId) ?? null,
+    [companies, activeId],
+  )
 
-  const handleDragStart = (event: DragStartEvent) => {
+  const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveId(Number(event.active.id))
-  }
+  }, [])
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    setActiveId(null)
-    const { active, over } = event
-    if (!over) return
-    const company = companies.find((c) => c.id === Number(active.id))
-    const targetStage = over.id as Stage
-    if (company && company.stage !== targetStage) {
-      updateStage.mutate({ id: company.id, stage: targetStage })
-    }
-  }
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      setActiveId(null)
+      const { active, over } = event
+      if (!over) return
+      const company = companies.find((c) => c.id === Number(active.id))
+      const targetStage = over.id as Stage
+      if (company && company.stage !== targetStage) {
+        updateStage.mutate({ id: company.id, stage: targetStage })
+      }
+    },
+    [companies, updateStage],
+  )
+
+  const handleDragCancel = useCallback(() => setActiveId(null), [])
 
   return (
     <DndContext
       sensors={sensors}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      onDragCancel={() => setActiveId(null)}
+      onDragCancel={handleDragCancel}
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
         {STAGE_ORDER.map((stage) => (

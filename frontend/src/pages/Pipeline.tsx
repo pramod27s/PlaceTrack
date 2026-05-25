@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Building2, Plus } from 'lucide-react'
 import { useCompanies } from '../hooks/queries'
@@ -10,6 +10,11 @@ export default function Pipeline() {
   const navigate = useNavigate()
   const { data: companies, isLoading, isError } = useCompanies()
   const [modalOpen, setModalOpen] = useState(false)
+
+  const handleCardClick = useCallback(
+    (company: { id: number }) => navigate(`/companies/${company.id}`),
+    [navigate],
+  )
 
   if (isLoading) return <LoadingState label="Loading your pipeline…" />
   if (isError || !companies) return <ErrorNote message="Couldn't load your pipeline. Please retry." />
@@ -43,10 +48,7 @@ export default function Pipeline() {
           }
         />
       ) : (
-        <KanbanBoard
-          companies={companies}
-          onCardClick={(company) => navigate(`/companies/${company.id}`)}
-        />
+        <KanbanBoard companies={companies} onCardClick={handleCardClick} />
       )}
 
       <CompanyModal open={modalOpen} onClose={() => setModalOpen(false)} />
