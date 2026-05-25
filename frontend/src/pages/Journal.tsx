@@ -1,11 +1,21 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CalendarClock, NotebookPen, Pencil, Search, Star, Trash2 } from 'lucide-react'
+import {
+  CalendarClock,
+  NotebookPen,
+  Pencil,
+  Plus,
+  Search,
+  Star,
+  Trash2,
+} from 'lucide-react'
 import { apiError } from '../lib/api'
 import { useAllJournal, useDeleteJournal } from '../hooks/queries'
 import { JournalModal } from '../components/JournalModal'
+import type { JournalRoundContext } from '../components/JournalModal'
 import {
   Badge,
+  Button,
   Card,
   ConfirmDialog,
   EmptyState,
@@ -18,6 +28,14 @@ import { ROUND_TYPE_META } from '../lib/constants'
 import { cn, formatDate } from '../lib/format'
 import type { JournalEntry } from '../lib/types'
 
+/** All entries that belong to the same round, plus the round context. */
+interface RoundGroup {
+  round: JournalRoundContext
+  entries: JournalEntry[]
+  /** Most-recent updatedAt across the group's entries (for sorting groups). */
+  latestUpdatedAt: string
+}
+
 function Rating({ value }: { value: number | null }) {
   if (!value) return null
   return (
@@ -25,7 +43,7 @@ function Rating({ value }: { value: number | null }) {
       {[1, 2, 3, 4, 5].map((n) => (
         <Star
           key={n}
-          size={14}
+          size={13}
           className={cn(n <= value ? 'fill-amber-400 text-amber-400' : 'text-slate-200')}
         />
       ))}
@@ -43,7 +61,7 @@ function Section({ label, value }: { label: string; value: string | null }) {
   )
 }
 
-function JournalCard({
+function EntryCard({
   entry,
   onEdit,
   onDelete,
@@ -52,48 +70,102 @@ function JournalCard({
   onEdit: () => void
   onDelete: () => void
 }) {
-  const type = ROUND_TYPE_META[entry.roundType]
+  const hasContent =
+    entry.questionsAsked ||
+    entry.topics ||
+    entry.whatWentWell ||
+    entry.whatFlopped ||
+    entry.resources
+
   return (
-    <Card className="p-5">
+    <div className="rounded-lg border border-slate-200 bg-white p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              to={`/companies/${entry.companyId}`}
-              className="text-sm font-semibold text-slate-900 hover:text-indigo-600"
-            >
-              {entry.companyName}
-            </Link>
-            <Badge className={type.badge}>{type.label}</Badge>
-          </div>
-          {entry.title?.trim() && (
-            <p className="mt-1 text-sm font-medium text-slate-700">{entry.title}</p>
-          )}
+          <p className="text-sm font-semibold text-slate-800">
+            {entry.title?.trim() || (
+              <span className="font-medium text-slate-400">Untitled entry</span>
+            )}
+          </p>
+          <p className="mt-0.5 text-xs text-slate-400">
+            Logged {formatDate(entry.createdAt)}
+            {entry.updatedAt !== entry.createdAt && (
+              <> · edited {formatDate(entry.updatedAt)}</>
+            )}
+          </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Rating value={entry.rating} />
-          <span className="text-xs text-slate-400">{formatDate(entry.roundScheduledAt)}</span>
-          <div className="flex items-center gap-1">
-            <IconButton title="Edit entry" onClick={onEdit}>
-              <Pencil size={15} />
-            </IconButton>
-            <IconButton
-              title="Delete entry"
-              onClick={onDelete}
-              className="hover:bg-rose-50 hover:text-rose-600"
-            >
-              <Trash2 size={15} />
-            </IconButton>
-          </div>
+          <IconButton title="Edit entry" onClick={onEdit}>
+            <Pencil size={14} />
+          </IconButton>
+          <IconButton
+            title="Delete entry"
+            onClick={onDelete}
+            className="hover:bg-rose-50 hover:text-rose-600"
+          >
+            <Trash2 size={14} />
+          </IconButton>
         </div>
       </div>
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <Section label="Questions asked" value={entry.questionsAsked} />
-        <Section label="Topics" value={entry.topics} />
-        <Section label="What went well" value={entry.whatWentWell} />
-        <Section label="What flopped" value={entry.whatFlopped} />
-        <Section label="Resources to revisit" value={entry.resources} />
+      {hasContent && (
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <Section label="Questions asked" value={entry.questionsAsked} />
+          <Section label="Topics" value={entry.topics} />
+          <Section label="What went well" value={entry.whatWentWell} />
+          <Section label="What flopped" value={entry.whatFlopped} />
+          <Section label="Resources to revisit" value={entry.resources} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function RoundGroupCard({
+  group,
+  onAddEntry,
+  onEditEntry,
+  onDeleteEntry,
+}: {
+  group: RoundGroup
+  onAddEntry: (round: JournalRoundContext) => void
+  onEditEntry: (entry: JournalEntry) => void
+  onDeleteEntry: (entry: JournalEntry) => void
+}) {
+  const type = ROUND_TYPE_META[group.round.type]
+  return (
+    <Card className="p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              to={`/companies/${group.entries[0].companyId}`}
+              className="text-base font-semibold text-slate-900 hover:text-indigo-600"
+            >
+              {group.round.companyName}
+            </Link>
+            <Badge className={type.badge}>{type.label}</Badge>
+          </div>
+          <p className="mt-0.5 text-xs text-slate-500">
+            {formatDate(group.round.scheduledAt)} ·{' '}
+            {group.entries.length} {group.entries.length === 1 ? 'entry' : 'entries'}
+          </p>
+        </div>
+        <Button variant="secondary" onClick={() => onAddEntry(group.round)}>
+          <Plus size={14} />
+          Add entry
+        </Button>
+      </div>
+
+      <div className="mt-4 space-y-3">
+        {group.entries.map((entry) => (
+          <EntryCard
+            key={entry.id}
+            entry={entry}
+            onEdit={() => onEditEntry(entry)}
+            onDelete={() => onDeleteEntry(entry)}
+          />
+        ))}
       </div>
     </Card>
   )
@@ -151,30 +223,67 @@ function JournalStarter() {
   )
 }
 
+/** Build round-keyed groups from a flat list of entries. */
+function groupByRound(entries: JournalEntry[]): RoundGroup[] {
+  const byRound = new Map<number, RoundGroup>()
+  for (const entry of entries) {
+    const existing = byRound.get(entry.roundId)
+    if (existing) {
+      existing.entries.push(entry)
+      if (entry.updatedAt > existing.latestUpdatedAt) {
+        existing.latestUpdatedAt = entry.updatedAt
+      }
+    } else {
+      byRound.set(entry.roundId, {
+        round: {
+          id: entry.roundId,
+          companyName: entry.companyName,
+          type: entry.roundType,
+          scheduledAt: entry.roundScheduledAt,
+        },
+        entries: [entry],
+        latestUpdatedAt: entry.updatedAt,
+      })
+    }
+  }
+  // Within group: oldest entry first (reads like a reflection trail).
+  for (const group of byRound.values()) {
+    group.entries.sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt))
+  }
+  // Across groups: most recently active first.
+  return Array.from(byRound.values()).sort(
+    (a, b) => +new Date(b.latestUpdatedAt) - +new Date(a.latestUpdatedAt),
+  )
+}
+
 export default function Journal() {
   const { data: entries, isLoading, isError } = useAllJournal()
   const deleteJournal = useDeleteJournal()
   const [query, setQuery] = useState('')
   const [editEntry, setEditEntry] = useState<JournalEntry | null>(null)
+  const [addRound, setAddRound] = useState<JournalRoundContext | null>(null)
   const [pendingDelete, setPendingDelete] = useState<JournalEntry | null>(null)
   const [error, setError] = useState('')
 
-  const filtered = useMemo(() => {
+  const groups = useMemo(() => {
+    if (!entries) return []
     const q = query.trim().toLowerCase()
-    if (!q) return entries ?? []
-    return (entries ?? []).filter((e) =>
-      [
-        e.companyName,
-        e.title,
-        e.topics,
-        e.questionsAsked,
-        e.whatWentWell,
-        e.whatFlopped,
-        e.resources,
-      ]
-        .filter(Boolean)
-        .some((field) => field!.toLowerCase().includes(q)),
-    )
+    const filtered = !q
+      ? entries
+      : entries.filter((e) =>
+          [
+            e.companyName,
+            e.title,
+            e.topics,
+            e.questionsAsked,
+            e.whatWentWell,
+            e.whatFlopped,
+            e.resources,
+          ]
+            .filter(Boolean)
+            .some((field) => field!.toLowerCase().includes(q)),
+        )
+    return groupByRound(filtered)
   }, [entries, query])
 
   if (isLoading) return <LoadingState label="Loading your journal…" />
@@ -200,8 +309,9 @@ export default function Journal() {
         <div>
           <h2 className="text-lg font-semibold text-slate-900">Interview journal</h2>
           <p className="text-sm text-slate-500">
-            {entries.length} {entries.length === 1 ? 'entry' : 'entries'} — your personal
-            interview-prep dataset.
+            {entries.length} {entries.length === 1 ? 'entry' : 'entries'} across{' '}
+            {new Set(entries.map((e) => e.roundId)).size} rounds — your personal interview-prep
+            dataset.
           </p>
         </div>
         {entries.length > 0 && (
@@ -224,7 +334,7 @@ export default function Journal() {
 
       {entries.length === 0 ? (
         <JournalStarter />
-      ) : filtered.length === 0 ? (
+      ) : groups.length === 0 ? (
         <EmptyState
           icon={<Search size={22} />}
           title="No matches"
@@ -232,12 +342,13 @@ export default function Journal() {
         />
       ) : (
         <div className="space-y-4">
-          {filtered.map((entry) => (
-            <JournalCard
-              key={entry.id}
-              entry={entry}
-              onEdit={() => setEditEntry(entry)}
-              onDelete={() => setPendingDelete(entry)}
+          {groups.map((group) => (
+            <RoundGroupCard
+              key={group.round.id}
+              group={group}
+              onAddEntry={setAddRound}
+              onEditEntry={setEditEntry}
+              onDeleteEntry={setPendingDelete}
             />
           ))}
         </div>
@@ -254,6 +365,9 @@ export default function Journal() {
           entry={editEntry}
           onClose={() => setEditEntry(null)}
         />
+      )}
+      {addRound && (
+        <JournalModal round={addRound} onClose={() => setAddRound(null)} />
       )}
       <ConfirmDialog
         open={pendingDelete !== null}
