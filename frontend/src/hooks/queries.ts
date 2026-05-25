@@ -74,11 +74,22 @@ export function useUpdateCompanyStage() {
       }
       return { previous }
     },
+    // Use the server's confirmed Company as the new authoritative cache value
+    // for that one row — no refetch race, and rapid back-to-back drags don't
+    // get squashed by a stale GET.
+    onSuccess: (data, { id }) => {
+      qc.setQueryData<Company[]>(qk.companies, (prev) =>
+        prev ? prev.map((c) => (c.id === id ? data : c)) : prev,
+      )
+      qc.setQueryData(qk.company(id), data)
+    },
     onError: (_err, _vars, context) => {
       if (context?.previous) qc.setQueryData(qk.companies, context.previous)
     },
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: qk.companies })
+      // Only refresh analytics. The companies cache is already up-to-date via
+      // onMutate's optimistic update and onSuccess's authoritative replace,
+      // so re-fetching here would just create the snap-back race.
       qc.invalidateQueries({ queryKey: qk.analytics })
     },
   })
