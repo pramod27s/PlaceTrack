@@ -7,8 +7,9 @@ import java.util.List;
 
 /**
  * Pure scheduling logic: finds rounds whose time windows overlap. Two rounds
- * conflict when {@code startA < endB AND startB < endA}. Cancelled rounds are
- * ignored.
+ * conflict when {@code startA < endB AND startB < endA}. Only rounds that are
+ * still {@code SCHEDULED} count — completed, cleared, failed, and cancelled
+ * rounds are no longer actionable and so cannot conflict with new ones.
  */
 @Service
 public class ConflictDetectionService {
@@ -18,11 +19,14 @@ public class ConflictDetectionService {
      * excluding {@code target} itself.
      */
     public List<Round> findConflicts(Round target, List<Round> candidates) {
+        if (target.getStatus() != RoundStatus.SCHEDULED) {
+            return List.of();
+        }
         LocalDateTime targetStart = target.getScheduledAt();
         LocalDateTime targetEnd = endOf(target);
         return candidates.stream()
                 .filter(r -> !r.getId().equals(target.getId()))
-                .filter(r -> r.getStatus() != RoundStatus.CANCELLED)
+                .filter(r -> r.getStatus() == RoundStatus.SCHEDULED)
                 .filter(r -> overlaps(targetStart, targetEnd, r.getScheduledAt(), endOf(r)))
                 .toList();
     }

@@ -171,6 +171,7 @@ function RoundForm({
             id="r-duration"
             type="number"
             min={5}
+            max={600}
             step={5}
             value={form.durationMinutes}
             onChange={(e) => set('durationMinutes', Number(e.target.value) || 60)}

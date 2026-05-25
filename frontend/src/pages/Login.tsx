@@ -86,13 +86,15 @@ export default function Login() {
         </Button>
       </form>
 
-      <button
-        type="button"
-        onClick={fillDemo}
-        className="mt-4 w-full rounded-lg border border-dashed border-indigo-200 bg-indigo-50/60 px-4 py-2.5 text-sm text-indigo-700 transition hover:bg-indigo-50"
-      >
-        Explore with the demo account →
-      </button>
+      {import.meta.env.DEV && (
+        <button
+          type="button"
+          onClick={fillDemo}
+          className="mt-4 w-full rounded-lg border border-dashed border-indigo-200 bg-indigo-50/60 px-4 py-2.5 text-sm text-indigo-700 transition hover:bg-indigo-50"
+        >
+          Explore with the demo account →
+        </button>
+      )}
 
       <p className="mt-6 text-center text-sm text-slate-500">
         New here?{' '}

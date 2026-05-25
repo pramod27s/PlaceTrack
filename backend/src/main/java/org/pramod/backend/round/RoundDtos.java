@@ -1,5 +1,7 @@
 package org.pramod.backend.round;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -17,7 +19,7 @@ public final class RoundDtos {
             @NotNull RoundType type,
             @Size(max = 120) String title,
             @NotNull LocalDateTime scheduledAt,
-            Integer durationMinutes,
+            @Min(5) @Max(600) Integer durationMinutes,
             RoundMode mode,
             @Size(max = 1000) String meetingLink,
             @Size(max = 200) String location,

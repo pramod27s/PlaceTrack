@@ -48,7 +48,11 @@ function CardBody({ company }: { company: Company }) {
         <span>
           {company.roundCount} {company.roundCount === 1 ? 'round' : 'rounds'}
         </span>
-        <span>Applied {formatDate(company.appliedOn)}</span>
+        {company.stage === 'PPT' ? (
+          <span>Pre-placement talk</span>
+        ) : (
+          <span>Applied {formatDate(company.appliedOn)}</span>
+        )}
       </div>
     </>
   )
@@ -139,6 +143,7 @@ export function KanbanBoard({ companies, onCardClick }: KanbanBoardProps) {
 
   const byStage = useMemo(() => {
     const groups: Record<Stage, Company[]> = {
+      PPT: [],
       APPLIED: [],
       OA: [],
       SHORTLISTED: [],
@@ -176,7 +181,7 @@ export function KanbanBoard({ companies, onCardClick }: KanbanBoardProps) {
       onDragEnd={handleDragEnd}
       onDragCancel={() => setActiveId(null)}
     >
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
         {STAGE_ORDER.map((stage) => (
           <KanbanColumn
             key={stage}

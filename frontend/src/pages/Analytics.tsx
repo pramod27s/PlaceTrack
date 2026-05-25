@@ -67,7 +67,12 @@ export default function Analytics() {
     }
   }
 
-  const maxStage = Math.max(1, ...STAGE_ORDER.map((s) => data.stageCounts[s] ?? 0))
+  // Exclude REJECTED from the bar scale so a pile of rejections doesn't squash
+  // the active stages into invisible slivers.
+  const maxStage = Math.max(
+    1,
+    ...STAGE_ORDER.filter((s) => s !== 'REJECTED').map((s) => data.stageCounts[s] ?? 0),
+  )
 
   return (
     <div className="space-y-6">
