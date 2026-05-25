@@ -25,7 +25,7 @@ public class AnalyticsService {
 
     /** The forward pipeline order used to compute the conversion funnel. */
     private static final List<Stage> PIPELINE = List.of(
-            Stage.PPT, Stage.APPLIED, Stage.OA, Stage.SHORTLISTED, Stage.GD,
+            Stage.APPLIED, Stage.PPT, Stage.OA, Stage.SHORTLISTED, Stage.GD,
             Stage.TECH, Stage.HR, Stage.OFFER);
 
     private static final Map<Stage, String> FUNNEL_LABELS = Map.of(

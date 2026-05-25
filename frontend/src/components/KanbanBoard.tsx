@@ -3,12 +3,14 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
+  pointerWithin,
+  rectIntersection,
   useDraggable,
   useDroppable,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
-import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
+import type { CollisionDetection, DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 import { CircleCheckBig, MapPin } from 'lucide-react'
 import { useUpdateCompanyStage } from '../hooks/queries'
 import { STAGE_META, STAGE_ORDER } from '../lib/constants'
@@ -18,6 +20,16 @@ import type { Company, Stage } from '../lib/types'
 interface KanbanBoardProps {
   companies: Company[]
   onCardClick: (company: Company) => void
+}
+
+const stageSet = new Set<Stage>(STAGE_ORDER)
+
+const isStage = (value: unknown): value is Stage =>
+  typeof value === 'string' && stageSet.has(value as Stage)
+
+const columnCollisionDetection: CollisionDetection = (args) => {
+  const pointerCollisions = pointerWithin(args)
+  return pointerCollisions.length > 0 ? pointerCollisions : rectIntersection(args)
 }
 
 /** The visual content of a company card, shared by the board and the drag overlay. */
@@ -101,7 +113,7 @@ const KanbanColumn = memo(function KanbanColumn({
   const meta = STAGE_META[stage]
 
   return (
-    <div className="flex min-w-0 flex-col">
+    <div ref={setNodeRef} className="flex min-w-0 flex-col">
       <div className="mb-2 flex items-center gap-2 px-1">
         <span className={cn('h-2 w-2 rounded-full', meta.dot)} />
         <span className="text-sm font-semibold text-slate-700">{meta.label}</span>
@@ -110,7 +122,6 @@ const KanbanColumn = memo(function KanbanColumn({
         </span>
       </div>
       <div
-        ref={setNodeRef}
         className={cn(
           'min-h-[11rem] space-y-2 rounded-lg border-2 border-dashed p-2 transition-colors',
           isOver
@@ -142,8 +153,8 @@ export function KanbanBoard({ companies, onCardClick }: KanbanBoardProps) {
 
   const byStage = useMemo(() => {
     const groups: Record<Stage, Company[]> = {
-      PPT: [],
       APPLIED: [],
+      PPT: [],
       OA: [],
       SHORTLISTED: [],
       GD: [],
@@ -171,7 +182,8 @@ export function KanbanBoard({ companies, onCardClick }: KanbanBoardProps) {
       const { active, over } = event
       if (!over) return
       const company = companies.find((c) => c.id === Number(active.id))
-      const targetStage = over.id as Stage
+      const targetStage = over.id
+      if (!isStage(targetStage)) return
       if (company && company.stage !== targetStage) {
         updateStage.mutate({ id: company.id, stage: targetStage })
       }
@@ -184,6 +196,7 @@ export function KanbanBoard({ companies, onCardClick }: KanbanBoardProps) {
   return (
     <DndContext
       sensors={sensors}
+      collisionDetection={columnCollisionDetection}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}

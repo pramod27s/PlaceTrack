@@ -5,8 +5,8 @@ package org.pramod.backend.company;
  * through these as the process progresses. REJECTED is a terminal side-state.
  */
 public enum Stage {
-    PPT,
     APPLIED,
+    PPT,
     OA,
     SHORTLISTED,
     GD,

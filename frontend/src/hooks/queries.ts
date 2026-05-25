@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../lib/api'
 import type {
@@ -28,14 +29,15 @@ export const qk = {
 export function useCompanies() {
   return useQuery({
     queryKey: qk.companies,
-    queryFn: async () => (await api.get<Company[]>('/companies')).data,
+    queryFn: async ({ signal }) => (await api.get<Company[]>('/companies', { signal })).data,
   })
 }
 
 export function useCompany(id: number) {
   return useQuery({
     queryKey: qk.company(id),
-    queryFn: async () => (await api.get<Company>(`/companies/${id}`)).data,
+    queryFn: async ({ signal }) =>
+      (await api.get<Company>(`/companies/${id}`, { signal })).data,
     enabled: Number.isFinite(id),
   })
 }
@@ -60,11 +62,13 @@ export function useSaveCompany() {
 /** Optimistic stage move — keeps the Kanban board snappy during drag-and-drop. */
 export function useUpdateCompanyStage() {
   const qc = useQueryClient()
+  const latestStageByCompany = useRef(new Map<number, Stage>())
   return useMutation({
     mutationFn: async ({ id, stage }: { id: number; stage: Stage }) =>
       (await api.patch<Company>(`/companies/${id}/stage`, { stage })).data,
     onMutate: async ({ id, stage }) => {
       await qc.cancelQueries({ queryKey: qk.companies })
+      latestStageByCompany.current.set(id, stage)
       const previous = qc.getQueryData<Company[]>(qk.companies)
       if (previous) {
         qc.setQueryData<Company[]>(
@@ -77,16 +81,21 @@ export function useUpdateCompanyStage() {
     // Use the server's confirmed Company as the new authoritative cache value
     // for that one row — no refetch race, and rapid back-to-back drags don't
     // get squashed by a stale GET.
-    onSuccess: (data, { id }) => {
+    onSuccess: (data, { id, stage }) => {
+      if (latestStageByCompany.current.get(id) !== stage) return
       qc.setQueryData<Company[]>(qk.companies, (prev) =>
         prev ? prev.map((c) => (c.id === id ? data : c)) : prev,
       )
       qc.setQueryData(qk.company(id), data)
     },
-    onError: (_err, _vars, context) => {
+    onError: (_err, { id, stage }, context) => {
+      if (latestStageByCompany.current.get(id) !== stage) return
       if (context?.previous) qc.setQueryData(qk.companies, context.previous)
     },
-    onSettled: () => {
+    onSettled: (_data, _error, { id, stage }) => {
+      if (latestStageByCompany.current.get(id) === stage) {
+        latestStageByCompany.current.delete(id)
+      }
       // Only refresh analytics. The companies cache is already up-to-date via
       // onMutate's optimistic update and onSuccess's authoritative replace,
       // so re-fetching here would just create the snap-back race.

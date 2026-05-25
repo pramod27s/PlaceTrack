@@ -13,8 +13,8 @@ interface StageMeta {
 }
 
 export const STAGE_ORDER: Stage[] = [
-  'PPT',
   'APPLIED',
+  'PPT',
   'OA',
   'SHORTLISTED',
   'GD',
