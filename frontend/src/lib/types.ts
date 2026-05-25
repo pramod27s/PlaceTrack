@@ -1,6 +1,7 @@
 // Shared API types — these mirror the backend DTOs exactly.
 
 export type Stage =
+  | 'PPT'
   | 'APPLIED'
   | 'OA'
   | 'SHORTLISTED'

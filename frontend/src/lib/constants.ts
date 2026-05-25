@@ -13,6 +13,7 @@ interface StageMeta {
 }
 
 export const STAGE_ORDER: Stage[] = [
+  'PPT',
   'APPLIED',
   'OA',
   'SHORTLISTED',
@@ -24,6 +25,13 @@ export const STAGE_ORDER: Stage[] = [
 ]
 
 export const STAGE_META: Record<Stage, StageMeta> = {
+  PPT: {
+    label: 'Pre-Placement Talk',
+    short: 'PPT',
+    badge: 'bg-zinc-100 text-zinc-700 ring-1 ring-zinc-200',
+    dot: 'bg-zinc-400',
+    bar: 'bg-zinc-400',
+  },
   APPLIED: {
     label: 'Applied',
     short: 'Applied',
