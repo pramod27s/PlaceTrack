@@ -1,8 +1,19 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CalendarClock, NotebookPen, Search, Star } from 'lucide-react'
-import { useAllJournal } from '../hooks/queries'
-import { Badge, Card, EmptyState, ErrorNote, Input, LoadingState } from '../components/ui'
+import { CalendarClock, NotebookPen, Pencil, Search, Star, Trash2 } from 'lucide-react'
+import { apiError } from '../lib/api'
+import { useAllJournal, useDeleteJournal } from '../hooks/queries'
+import { JournalModal } from '../components/JournalModal'
+import {
+  Badge,
+  Card,
+  ConfirmDialog,
+  EmptyState,
+  ErrorNote,
+  IconButton,
+  Input,
+  LoadingState,
+} from '../components/ui'
 import { ROUND_TYPE_META } from '../lib/constants'
 import { cn, formatDate } from '../lib/format'
 import type { JournalEntry } from '../lib/types'
@@ -32,23 +43,48 @@ function Section({ label, value }: { label: string; value: string | null }) {
   )
 }
 
-function JournalCard({ entry }: { entry: JournalEntry }) {
+function JournalCard({
+  entry,
+  onEdit,
+  onDelete,
+}: {
+  entry: JournalEntry
+  onEdit: () => void
+  onDelete: () => void
+}) {
   const type = ROUND_TYPE_META[entry.roundType]
   return (
     <Card className="p-5">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <Link
-            to={`/companies/${entry.companyId}`}
-            className="text-sm font-semibold text-slate-900 hover:text-indigo-600"
-          >
-            {entry.companyName}
-          </Link>
-          <Badge className={type.badge}>{type.label}</Badge>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              to={`/companies/${entry.companyId}`}
+              className="text-sm font-semibold text-slate-900 hover:text-indigo-600"
+            >
+              {entry.companyName}
+            </Link>
+            <Badge className={type.badge}>{type.label}</Badge>
+          </div>
+          {entry.title?.trim() && (
+            <p className="mt-1 text-sm font-medium text-slate-700">{entry.title}</p>
+          )}
         </div>
         <div className="flex items-center gap-3">
           <Rating value={entry.rating} />
           <span className="text-xs text-slate-400">{formatDate(entry.roundScheduledAt)}</span>
+          <div className="flex items-center gap-1">
+            <IconButton title="Edit entry" onClick={onEdit}>
+              <Pencil size={15} />
+            </IconButton>
+            <IconButton
+              title="Delete entry"
+              onClick={onDelete}
+              className="hover:bg-rose-50 hover:text-rose-600"
+            >
+              <Trash2 size={15} />
+            </IconButton>
+          </div>
         </div>
       </div>
 
@@ -117,13 +153,25 @@ function JournalStarter() {
 
 export default function Journal() {
   const { data: entries, isLoading, isError } = useAllJournal()
+  const deleteJournal = useDeleteJournal()
   const [query, setQuery] = useState('')
+  const [editEntry, setEditEntry] = useState<JournalEntry | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<JournalEntry | null>(null)
+  const [error, setError] = useState('')
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return entries ?? []
     return (entries ?? []).filter((e) =>
-      [e.companyName, e.topics, e.questionsAsked, e.whatWentWell, e.whatFlopped, e.resources]
+      [
+        e.companyName,
+        e.title,
+        e.topics,
+        e.questionsAsked,
+        e.whatWentWell,
+        e.whatFlopped,
+        e.resources,
+      ]
         .filter(Boolean)
         .some((field) => field!.toLowerCase().includes(q)),
     )
@@ -131,6 +179,20 @@ export default function Journal() {
 
   if (isLoading) return <LoadingState label="Loading your journal…" />
   if (isError || !entries) return <ErrorNote message="Couldn't load your journal. Please retry." />
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return
+    setError('')
+    try {
+      await deleteJournal.mutateAsync({
+        entryId: pendingDelete.id,
+        roundId: pendingDelete.roundId,
+      })
+      setPendingDelete(null)
+    } catch (err) {
+      setError(apiError(err))
+    }
+  }
 
   return (
     <div className="space-y-5">
@@ -158,21 +220,53 @@ export default function Journal() {
         )}
       </div>
 
+      {error && <ErrorNote message={error} />}
+
       {entries.length === 0 ? (
         <JournalStarter />
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={<Search size={22} />}
           title="No matches"
-          description={`Nothing in your journal matches “${query}”.`}
+          description={`Nothing in your journal matches "${query}".`}
         />
       ) : (
         <div className="space-y-4">
           {filtered.map((entry) => (
-            <JournalCard key={entry.id} entry={entry} />
+            <JournalCard
+              key={entry.id}
+              entry={entry}
+              onEdit={() => setEditEntry(entry)}
+              onDelete={() => setPendingDelete(entry)}
+            />
           ))}
         </div>
       )}
+
+      {editEntry && (
+        <JournalModal
+          round={{
+            id: editEntry.roundId,
+            companyName: editEntry.companyName,
+            type: editEntry.roundType,
+            scheduledAt: editEntry.roundScheduledAt,
+          }}
+          entry={editEntry}
+          onClose={() => setEditEntry(null)}
+        />
+      )}
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={confirmDelete}
+        loading={deleteJournal.isPending}
+        title="Delete this entry?"
+        message={
+          pendingDelete
+            ? `"${pendingDelete.title?.trim() || 'Untitled entry'}" for ${pendingDelete.companyName} will be permanently removed.`
+            : ''
+        }
+      />
     </div>
   )
 }

@@ -2,6 +2,7 @@ package org.pramod.backend.journal;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import org.pramod.backend.round.RoundType;
 
 import java.time.Instant;
@@ -14,6 +15,7 @@ public final class JournalDtos {
     }
 
     public record JournalRequest(
+            @Size(max = 120) String title,
             String questionsAsked,
             String topics,
             String whatWentWell,
@@ -29,12 +31,14 @@ public final class JournalDtos {
             String companyName,
             RoundType roundType,
             LocalDateTime roundScheduledAt,
+            String title,
             String questionsAsked,
             String topics,
             String whatWentWell,
             String whatFlopped,
             String resources,
             Integer rating,
+            Instant createdAt,
             Instant updatedAt) {
     }
 }

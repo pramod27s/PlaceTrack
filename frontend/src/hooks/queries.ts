@@ -18,7 +18,7 @@ export const qk = {
   companyRounds: (id: number) => ['company-rounds', id] as const,
   rounds: ['rounds'] as const,
   upcoming: ['rounds', 'upcoming'] as const,
-  journal: (roundId: number) => ['journal', roundId] as const,
+  roundJournals: (roundId: number) => ['journal', 'round', roundId] as const,
   journalAll: ['journal-all'] as const,
   analytics: ['analytics'] as const,
 }
@@ -165,14 +165,11 @@ export function useDeleteRound() {
 
 // ------------------------------------------------------------------ Journal
 
-export function useRoundJournal(roundId: number) {
+export function useRoundJournals(roundId: number) {
   return useQuery({
-    queryKey: qk.journal(roundId),
-    queryFn: async () => {
-      const res = await api.get<JournalEntry>(`/rounds/${roundId}/journal`)
-      // 204 No Content -> no entry written yet.
-      return res.status === 204 ? null : res.data
-    },
+    queryKey: qk.roundJournals(roundId),
+    queryFn: async () =>
+      (await api.get<JournalEntry[]>(`/rounds/${roundId}/journal`)).data,
     enabled: Number.isFinite(roundId),
   })
 }
@@ -184,18 +181,50 @@ export function useAllJournal() {
   })
 }
 
-export function useSaveJournal() {
+function invalidateJournalData(qc: ReturnType<typeof useQueryClient>, roundId?: number) {
+  if (roundId !== undefined) {
+    qc.invalidateQueries({ queryKey: qk.roundJournals(roundId) })
+  } else {
+    qc.invalidateQueries({ queryKey: ['journal', 'round'] })
+  }
+  qc.invalidateQueries({ queryKey: qk.journalAll })
+  qc.invalidateQueries({ queryKey: ['company-rounds'] })
+  qc.invalidateQueries({ queryKey: qk.rounds })
+  qc.invalidateQueries({ queryKey: qk.upcoming })
+  qc.invalidateQueries({ queryKey: qk.analytics })
+}
+
+export function useCreateJournal() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async ({ roundId, input }: { roundId: number; input: JournalInput }) =>
-      (await api.put<JournalEntry>(`/rounds/${roundId}/journal`, input)).data,
-    onSuccess: (_data, { roundId }) => {
-      qc.invalidateQueries({ queryKey: qk.journal(roundId) })
-      qc.invalidateQueries({ queryKey: qk.journalAll })
-      qc.invalidateQueries({ queryKey: ['company-rounds'] })
-      qc.invalidateQueries({ queryKey: qk.rounds })
-      qc.invalidateQueries({ queryKey: qk.analytics })
+      (await api.post<JournalEntry>(`/rounds/${roundId}/journal`, input)).data,
+    onSuccess: (_data, { roundId }) => invalidateJournalData(qc, roundId),
+  })
+}
+
+export function useUpdateJournal() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({
+      entryId,
+      input,
+    }: {
+      entryId: number
+      roundId: number
+      input: JournalInput
+    }) => (await api.put<JournalEntry>(`/journal/${entryId}`, input)).data,
+    onSuccess: (_data, { roundId }) => invalidateJournalData(qc, roundId),
+  })
+}
+
+export function useDeleteJournal() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ entryId }: { entryId: number; roundId: number }) => {
+      await api.delete(`/journal/${entryId}`)
     },
+    onSuccess: (_data, { roundId }) => invalidateJournalData(qc, roundId),
   })
 }
 

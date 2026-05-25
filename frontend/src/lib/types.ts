@@ -74,12 +74,14 @@ export interface JournalEntry {
   companyName: string
   roundType: RoundType
   roundScheduledAt: string
+  title: string | null
   questionsAsked: string | null
   topics: string | null
   whatWentWell: string | null
   whatFlopped: string | null
   resources: string | null
   rating: number | null
+  createdAt: string
   updatedAt: string
 }
 
@@ -130,6 +132,7 @@ export interface RoundInput {
 }
 
 export interface JournalInput {
+  title: string
   questionsAsked: string
   topics: string
   whatWentWell: string

@@ -8,7 +8,8 @@ import java.time.Instant;
 
 /**
  * A structured reflection logged after a round — the building block of the
- * student's personal interview-prep dataset. One entry per round.
+ * student's personal interview-prep dataset. A round can have many entries
+ * (e.g. immediate notes, a fuller reflection the next day).
  */
 @Entity
 @Table(name = "journal_entries")
@@ -23,9 +24,13 @@ public class JournalEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "round_id", unique = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "round_id")
     private Round round;
+
+    /** Optional short label, e.g. "Immediate notes" or "Day-after reflection". */
+    @Column(length = 120)
+    private String title;
 
     @Column(columnDefinition = "text")
     private String questionsAsked;

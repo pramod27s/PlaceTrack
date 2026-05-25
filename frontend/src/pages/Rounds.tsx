@@ -3,7 +3,7 @@ import { CalendarClock, NotebookPen, Pencil, Trash2 } from 'lucide-react'
 import { useAllRounds, useDeleteRound } from '../hooks/queries'
 import { RoundListItem } from '../components/RoundListItem'
 import { RoundModal } from '../components/RoundModal'
-import { JournalModal } from '../components/JournalModal'
+import { RoundJournalsModal } from '../components/RoundJournalsModal'
 import { ConfirmDialog, EmptyState, ErrorNote, IconButton, LoadingState } from '../components/ui'
 import { cn, isPastIso } from '../lib/format'
 import type { Round } from '../lib/types'
@@ -110,7 +110,10 @@ export default function Rounds() {
         <RoundModal open onClose={() => setEditRound(null)} round={editRound} />
       )}
       {journalRound && (
-        <JournalModal round={journalRound} onClose={() => setJournalRound(null)} />
+        <RoundJournalsModal
+          round={journalRound}
+          onClose={() => setJournalRound(null)}
+        />
       )}
       <ConfirmDialog
         open={pendingDelete !== null}

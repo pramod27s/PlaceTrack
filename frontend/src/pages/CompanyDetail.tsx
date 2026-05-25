@@ -24,7 +24,7 @@ import {
 } from '../hooks/queries'
 import { CompanyModal } from '../components/CompanyModal'
 import { RoundModal } from '../components/RoundModal'
-import { JournalModal } from '../components/JournalModal'
+import { RoundJournalsModal } from '../components/RoundJournalsModal'
 import { RoundListItem } from '../components/RoundListItem'
 import {
   Badge,
@@ -272,7 +272,10 @@ export default function CompanyDetail() {
         <RoundModal open onClose={() => setEditRound(null)} round={editRound} />
       )}
       {journalRound && (
-        <JournalModal round={journalRound} onClose={() => setJournalRound(null)} />
+        <RoundJournalsModal
+          round={journalRound}
+          onClose={() => setJournalRound(null)}
+        />
       )}
       <ConfirmDialog
         open={pendingRound !== null}
