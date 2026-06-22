@@ -4,7 +4,9 @@ export const TOKEN_KEY = 'placetrack.token'
 export const USER_KEY = 'placetrack.user'
 
 /** Axios instance pointed at the API. `/api` is proxied to the backend in dev. */
-export const api = axios.create({ baseURL: '/api' })
+export const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? '/api',
+})
 
 // Attach the bearer token to every outgoing request.
 api.interceptors.request.use((config) => {
