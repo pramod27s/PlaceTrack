@@ -2,7 +2,8 @@ import { memo, useCallback, useMemo, useState } from 'react'
 import {
   DndContext,
   DragOverlay,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   pointerWithin,
   rectIntersection,
   useDraggable,
@@ -147,8 +148,12 @@ export function KanbanBoard({ companies, onCardClick }: KanbanBoardProps) {
   const [activeId, setActiveId] = useState<number | null>(null)
 
   // A small drag threshold lets a plain click still open the company.
+  // On touch screens, a short hold distinguishes dragging from page scrolling.
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 8 },
+    }),
   )
 
   const byStage = useMemo(() => {
