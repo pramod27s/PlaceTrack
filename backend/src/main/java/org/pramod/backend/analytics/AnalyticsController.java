@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AnalyticsController {
 
+
     private final AnalyticsService analyticsService;
 
     @GetMapping("/overview")
