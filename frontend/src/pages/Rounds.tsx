@@ -68,7 +68,7 @@ export default function Rounds() {
           if (list.length === 0) return null
           return (
             <section key={key}>
-              <div className="mb-3 flex items-baseline gap-2">
+              <div className="mb-3 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                 <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
                 <span className="text-xs text-slate-400">· {description}</span>
               </div>

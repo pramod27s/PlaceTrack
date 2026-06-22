@@ -17,16 +17,17 @@ import { NotificationBell } from './NotificationBell'
 interface NavItem {
   to: string
   label: string
+  mobileLabel: string
   icon: LucideIcon
   end?: boolean
 }
 
 const NAV: NavItem[] = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/pipeline', label: 'Pipeline', icon: KanbanSquare },
-  { to: '/rounds', label: 'Rounds', icon: CalendarClock },
-  { to: '/journal', label: 'Journal', icon: NotebookPen },
-  { to: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { to: '/', label: 'Dashboard', mobileLabel: 'Home', icon: LayoutDashboard, end: true },
+  { to: '/pipeline', label: 'Pipeline', mobileLabel: 'Pipeline', icon: KanbanSquare },
+  { to: '/rounds', label: 'Rounds', mobileLabel: 'Rounds', icon: CalendarClock },
+  { to: '/journal', label: 'Journal', mobileLabel: 'Journal', icon: NotebookPen },
+  { to: '/analytics', label: 'Analytics', mobileLabel: 'Insights', icon: BarChart3 },
 ]
 
 /** Maps the current path to the heading shown in the top bar. */
@@ -109,14 +110,14 @@ export function AppLayout() {
 
       {/* Main column */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 px-5 backdrop-blur sm:px-8">
+        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 px-4 backdrop-blur sm:px-8">
           <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="min-w-0 flex items-center gap-3">
               {/* Compact brand for small screens where the sidebar is hidden. */}
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 lg:hidden">
                 <RouteIcon size={18} className="text-white" />
               </div>
-              <h1 className="text-lg font-semibold text-slate-900">
+              <h1 className="truncate text-base font-semibold text-slate-900 sm:text-lg">
                 {sectionTitle(location.pathname)}
               </h1>
             </div>
@@ -150,27 +151,31 @@ export function AppLayout() {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-7xl flex-1 px-5 pb-24 pt-6 sm:px-8 sm:pt-8 lg:pb-10">
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-28 pt-5 sm:px-8 sm:pt-8 lg:pb-10">
           <Outlet />
         </main>
       </div>
 
       {/* Mobile bottom navigation */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 flex border-t border-slate-200 bg-white/95 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur lg:hidden">
-        {NAV.map(({ to, label, icon: Icon, end }) => (
+      <nav
+        aria-label="Primary navigation"
+        className="mobile-safe-bottom fixed inset-x-0 bottom-0 z-30 flex border-t border-slate-200 bg-white/95 px-1 pt-1 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur lg:hidden"
+      >
+        {NAV.map(({ to, mobileLabel, icon: Icon, end }) => (
           <NavLink
             key={to}
             to={to}
             end={end}
             className={({ isActive }) =>
               cn(
-                'flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium transition',
-                isActive ? 'text-indigo-600' : 'text-slate-400',
+                'min-w-0 flex-1 rounded-lg px-0.5 py-1.5 text-[10px] font-medium transition',
+                'flex flex-col items-center gap-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500',
+                isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600',
               )
             }
           >
             <Icon size={19} />
-            {label}
+            <span className="truncate">{mobileLabel}</span>
           </NavLink>
         ))}
       </nav>

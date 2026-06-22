@@ -1,8 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import type {
   ButtonHTMLAttributes,
   InputHTMLAttributes,
   ReactNode,
+  Ref,
   SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from 'react'
@@ -48,9 +49,14 @@ export function Button({
 
 // ------------------------------------------------------------------ IconButton
 
-export function IconButton({ className, ...props }: ButtonProps) {
+export function IconButton({
+  className,
+  ref,
+  ...props
+}: ButtonProps & { ref?: Ref<HTMLButtonElement> }) {
   return (
     <button
+      ref={ref}
       className={cn(
         'inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition',
         'hover:bg-slate-100 hover:text-slate-700',
@@ -223,16 +229,39 @@ export function Modal({
   footer,
   size = 'md',
 }: ModalProps) {
+  const titleId = useId()
+  const descriptionId = useId()
+  const closeRef = useRef<HTMLButtonElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     if (!open) return
+    const previouslyFocused = document.activeElement as HTMLElement | null
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
+      if (e.key !== 'Tab') return
+
+      const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      )
+      if (!focusable?.length) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
     }
     document.addEventListener('keydown', onKey)
     document.body.style.overflow = 'hidden'
+    closeRef.current?.focus()
     return () => {
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = ''
+      previouslyFocused?.focus()
     }
   }, [open, onClose])
 
@@ -241,27 +270,34 @@ export function Modal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/55 p-4 backdrop-blur-[2px] sm:p-8"
-      onMouseDown={onClose}
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose()
+      }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={description ? descriptionId : undefined}
         className={cn(
           'animate-pop my-auto w-full overflow-hidden rounded-xl bg-white shadow-2xl shadow-slate-950/20',
           size === 'lg' ? 'max-w-2xl' : 'max-w-lg',
         )}
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-4">
-          <div>
-            <h2 className="text-base font-semibold text-slate-900">{title}</h2>
-            {description && <p className="mt-0.5 text-sm text-slate-500">{description}</p>}
+        <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-4 py-4 sm:px-6">
+          <div className="min-w-0">
+            <h2 id={titleId} className="text-base font-semibold text-slate-900">{title}</h2>
+            {description && <p id={descriptionId} className="mt-0.5 text-sm text-slate-500">{description}</p>}
           </div>
-          <IconButton onClick={onClose} aria-label="Close" type="button">
+          <IconButton ref={closeRef} onClick={onClose} aria-label="Close dialog" type="button">
             <X size={18} />
           </IconButton>
         </div>
-        <div className="px-6 py-5">{children}</div>
+        <div className="px-4 py-5 sm:px-6">{children}</div>
         {footer && (
-          <div className="flex flex-wrap justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4">
+          <div className="flex flex-wrap justify-end gap-2 border-t border-slate-200 bg-slate-50 px-4 py-4 sm:px-6">
             {footer}
           </div>
         )}

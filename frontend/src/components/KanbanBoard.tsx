@@ -12,7 +12,7 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import type { CollisionDetection, DragEndEvent, DragStartEvent } from '@dnd-kit/core'
-import { CircleCheckBig, MapPin } from 'lucide-react'
+import { CircleCheckBig, MapPin, MoveRight } from 'lucide-react'
 import { useUpdateCompanyStage } from '../hooks/queries'
 import { STAGE_META, STAGE_ORDER } from '../lib/constants'
 import { cn, formatDate } from '../lib/format'
@@ -74,9 +74,11 @@ const CardBody = memo(function CardBody({ company }: { company: Company }) {
 const KanbanCard = memo(function KanbanCard({
   company,
   onSelect,
+  onMove,
 }: {
   company: Company
   onSelect: (company: Company) => void
+  onMove: (company: Company, stage: Stage) => void
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: String(company.id),
@@ -90,13 +92,36 @@ const KanbanCard = memo(function KanbanCard({
       {...listeners}
       {...attributes}
       onClick={() => onSelect(company)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter') onSelect(company)
+      }}
       className={cn(
         'cursor-grab rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition-colors',
-        'hover:border-indigo-300 active:cursor-grabbing',
+        'hover:border-indigo-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:cursor-grabbing',
         isDragging && 'opacity-40',
       )}
     >
       <CardBody company={company} />
+      <label
+        className="mt-3 flex items-center gap-2 border-t border-slate-100 pt-2 text-xs font-medium text-slate-500 sm:hidden"
+        onPointerDown={(event) => event.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <MoveRight size={14} className="shrink-0 text-indigo-500" />
+        <span className="sr-only">Move {company.name} to stage</span>
+        <select
+          aria-label={`Move ${company.name} to stage`}
+          value={company.stage}
+          onChange={(event) => onMove(company, event.target.value as Stage)}
+          className="min-w-0 flex-1 cursor-pointer bg-transparent py-1 text-xs font-semibold text-slate-600 outline-none"
+        >
+          {STAGE_ORDER.map((stage) => (
+            <option key={stage} value={stage}>
+              {stage === company.stage ? `Current: ${STAGE_META[stage].short}` : `Move to ${STAGE_META[stage].short}`}
+            </option>
+          ))}
+        </select>
+      </label>
     </div>
   )
 })
@@ -105,10 +130,12 @@ const KanbanColumn = memo(function KanbanColumn({
   stage,
   companies,
   onCardClick,
+  onMove,
 }: {
   stage: Stage
   companies: Company[]
   onCardClick: (company: Company) => void
+  onMove: (company: Company, stage: Stage) => void
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: stage })
   const meta = STAGE_META[stage]
@@ -131,7 +158,12 @@ const KanbanColumn = memo(function KanbanColumn({
         )}
       >
         {companies.map((company) => (
-          <KanbanCard key={company.id} company={company} onSelect={onCardClick} />
+          <KanbanCard
+            key={company.id}
+            company={company}
+            onSelect={onCardClick}
+            onMove={onMove}
+          />
         ))}
         {companies.length === 0 && (
           <div className="flex min-h-[9rem] items-center justify-center rounded-md border border-dashed border-slate-200 bg-white/45 px-4 text-center text-xs font-medium text-slate-400">
@@ -198,6 +230,13 @@ export function KanbanBoard({ companies, onCardClick }: KanbanBoardProps) {
 
   const handleDragCancel = useCallback(() => setActiveId(null), [])
 
+  const handleMove = useCallback(
+    (company: Company, stage: Stage) => {
+      if (company.stage !== stage) updateStage.mutate({ id: company.id, stage })
+    },
+    [updateStage],
+  )
+
   return (
     <DndContext
       sensors={sensors}
@@ -213,6 +252,7 @@ export function KanbanBoard({ companies, onCardClick }: KanbanBoardProps) {
             stage={stage}
             companies={byStage[stage]}
             onCardClick={onCardClick}
+            onMove={handleMove}
           />
         ))}
       </div>
