@@ -14,6 +14,7 @@ import {
 import type { CollisionDetection, DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 import { CircleCheckBig, IndianRupee, MapPin, MoveRight, Layers } from 'lucide-react'
 import { useUpdateCompanyStage } from '../hooks/queries'
+import { useToast } from '../store/toast'
 import { STAGE_META, STAGE_ORDER } from '../lib/constants'
 import { cn, formatDate, initials } from '../lib/format'
 import type { Company, Stage } from '../lib/types'
@@ -229,6 +230,8 @@ export function KanbanBoard({ companies, onCardClick }: KanbanBoardProps) {
     [companies, activeId],
   )
 
+  const showToast = useToast((s) => s.showToast)
+
   const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveId(Number(event.active.id))
   }, [])
@@ -242,19 +245,41 @@ export function KanbanBoard({ companies, onCardClick }: KanbanBoardProps) {
       const targetStage = over.id
       if (!isStage(targetStage)) return
       if (company && company.stage !== targetStage) {
+        const prevStage = company.stage
         updateStage.mutate({ id: company.id, stage: targetStage })
+        showToast({
+          title: 'Stage updated',
+          message: `Moved ${company.name} to ${STAGE_META[targetStage].label}.`,
+          type: 'success',
+          action: {
+            label: 'Undo',
+            onClick: () => updateStage.mutate({ id: company.id, stage: prevStage }),
+          },
+        })
       }
     },
-    [companies, updateStage],
+    [companies, updateStage, showToast],
   )
 
   const handleDragCancel = useCallback(() => setActiveId(null), [])
 
   const handleMove = useCallback(
     (company: Company, stage: Stage) => {
-      if (company.stage !== stage) updateStage.mutate({ id: company.id, stage })
+      if (company.stage !== stage) {
+        const prevStage = company.stage
+        updateStage.mutate({ id: company.id, stage })
+        showToast({
+          title: 'Stage updated',
+          message: `Moved ${company.name} to ${STAGE_META[stage].label}.`,
+          type: 'success',
+          action: {
+            label: 'Undo',
+            onClick: () => updateStage.mutate({ id: company.id, stage: prevStage }),
+          },
+        })
+      }
     },
-    [updateStage],
+    [updateStage, showToast],
   )
 
   return (

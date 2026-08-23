@@ -1,11 +1,13 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { ExternalLink, MapPin, TriangleAlert, Video } from 'lucide-react'
+import { Check, ExternalLink, MapPin, TriangleAlert, Video, XCircle } from 'lucide-react'
 import { ROUND_STATUS_META, ROUND_TYPE_META } from '../lib/constants'
 import { cn, formatDateTime, formatTime, isPastIso, relativeDay } from '../lib/format'
+import { useUpdateRoundStatus } from '../hooks/queries'
+import { useToast } from '../store/toast'
 import { AddToCalendarButton } from './AddToCalendarButton'
 import { Badge } from './ui'
-import type { Round } from '../lib/types'
+import type { Round, RoundStatus } from '../lib/types'
 
 /** A single round row, reused on the dashboard and the rounds page. */
 export function RoundListItem({
@@ -20,6 +22,35 @@ export function RoundListItem({
   const isPast = isPastIso(round.scheduledAt)
   const upcoming = round.status === 'SCHEDULED' && !isPast
   const overdue = round.status === 'SCHEDULED' && isPast
+
+  const updateStatus = useUpdateRoundStatus()
+  const showToast = useToast((s) => s.showToast)
+
+  const handleQuickStatus = async (newStatus: RoundStatus) => {
+    const prevStatus = round.status
+    const statusLabel = ROUND_STATUS_META[newStatus]?.label || newStatus
+
+    try {
+      await updateStatus.mutateAsync({ round, status: newStatus })
+      showToast({
+        title: `Round status updated`,
+        message: `Marked ${round.companyName} (${type.label}) as ${statusLabel}.`,
+        type: newStatus === 'CLEARED' ? 'success' : newStatus === 'FAILED' ? 'error' : 'info',
+        action: {
+          label: 'Undo',
+          onClick: () => {
+            updateStatus.mutate({ round, status: prevStatus })
+          },
+        },
+      })
+    } catch {
+      showToast({
+        title: 'Update failed',
+        message: 'Could not update round status. Please retry.',
+        type: 'error',
+      })
+    }
+  }
 
   return (
     <div
@@ -57,7 +88,7 @@ export function RoundListItem({
           {overdue && (
             <Badge className="bg-amber-100 text-amber-800 ring-1 ring-amber-300 font-semibold">
               <TriangleAlert size={12} className="mr-0.5 inline-block text-amber-700" />
-              Ended · Update status
+              Ended · Needs update
             </Badge>
           )}
         </div>
@@ -96,6 +127,41 @@ export function RoundListItem({
           <div className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50/90 px-2.5 py-1 text-xs font-semibold text-rose-700">
             <TriangleAlert size={13} className="shrink-0 text-rose-600" />
             <span>Overlaps with {round.conflicts.map((c) => c.companyName).join(', ')}</span>
+          </div>
+        )}
+
+        {/* ⚡ Inline Quick Status Resolution Actions for Overdue / Scheduled Rounds */}
+        {overdue && (
+          <div className="mt-2.5 flex flex-wrap items-center gap-2 pt-1 border-t border-amber-100/80">
+            <span className="text-[11px] font-bold text-amber-900 uppercase tracking-wider">
+              Quick update:
+            </span>
+            <button
+              type="button"
+              disabled={updateStatus.isPending}
+              onClick={() => handleQuickStatus('CLEARED')}
+              className="inline-flex items-center gap-1 rounded-md bg-emerald-100/90 px-2 py-0.5 text-xs font-bold text-emerald-800 hover:bg-emerald-200 transition-colors shadow-xs"
+            >
+              <Check size={12} className="stroke-[3]" />
+              Cleared
+            </button>
+            <button
+              type="button"
+              disabled={updateStatus.isPending}
+              onClick={() => handleQuickStatus('FAILED')}
+              className="inline-flex items-center gap-1 rounded-md bg-rose-100/90 px-2 py-0.5 text-xs font-bold text-rose-800 hover:bg-rose-200 transition-colors shadow-xs"
+            >
+              <XCircle size={12} />
+              Did not clear
+            </button>
+            <button
+              type="button"
+              disabled={updateStatus.isPending}
+              onClick={() => handleQuickStatus('COMPLETED')}
+              className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition-colors shadow-xs"
+            >
+              Completed
+            </button>
           </div>
         )}
       </div>

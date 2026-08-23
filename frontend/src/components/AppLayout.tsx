@@ -14,6 +14,7 @@ import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '../store/auth'
 import { cn, initials } from '../lib/format'
 import { NotificationBell } from './NotificationBell'
+import { ToastContainer } from './ToastContainer'
 
 interface NavItem {
   to: string
@@ -219,6 +220,9 @@ export function AppLayout() {
           </NavLink>
         ))}
       </nav>
+
+      {/* Toast Notifications */}
+      <ToastContainer />
     </div>
   )
 }

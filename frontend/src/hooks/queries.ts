@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../lib/api'
+import { toDateTimeLocal } from '../lib/format'
 import type {
   AnalyticsOverview,
   Company,
@@ -9,6 +10,7 @@ import type {
   JournalInput,
   Round,
   RoundInput,
+  RoundStatus,
   Stage,
 } from '../lib/types'
 
@@ -168,6 +170,26 @@ export function useSaveRound() {
         ? await api.put<Round>(`/rounds/${roundId}`, input)
         : await api.post<Round>(`/companies/${companyId}/rounds`, input)
       return res.data
+    },
+    onSuccess: () => invalidateRoundData(qc),
+  })
+}
+
+export function useUpdateRoundStatus() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ round, status }: { round: Round; status: RoundStatus }) => {
+      const input: RoundInput = {
+        type: round.type,
+        title: round.title ?? '',
+        scheduledAt: toDateTimeLocal(round.scheduledAt),
+        durationMinutes: round.durationMinutes,
+        mode: round.mode,
+        meetingLink: round.meetingLink ?? '',
+        location: round.location ?? '',
+        status: status,
+      }
+      return (await api.put<Round>(`/rounds/${round.id}`, input)).data
     },
     onSuccess: () => invalidateRoundData(qc),
   })

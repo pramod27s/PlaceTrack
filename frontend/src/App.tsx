@@ -1,6 +1,8 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AppLayout } from './components/AppLayout'
+import { useAuth } from './store/auth'
+import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
@@ -11,14 +13,37 @@ import Journal from './pages/Journal'
 import Analytics from './pages/Analytics'
 
 export default function App() {
+  const isAuthenticated = useAuth((s) => s.isAuthenticated)
+
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
+      {/* Public Landing & Auth */}
+      <Route
+        path="/"
+        element={
+          isAuthenticated ? (
+            <AppLayout />
+          ) : (
+            <Landing />
+          )
+        }
+      >
+        {isAuthenticated && <Route index element={<Dashboard />} />}
+      </Route>
 
+      <Route
+        path="/login"
+        element={isAuthenticated ? <Navigate to="/" replace /> : <Login />}
+      />
+      <Route
+        path="/signup"
+        element={isAuthenticated ? <Navigate to="/" replace /> : <Signup />}
+      />
+
+      {/* Protected In-App Routes */}
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Navigate to="/" replace />} />
           <Route path="/pipeline" element={<Pipeline />} />
           <Route path="/companies/:id" element={<CompanyDetail />} />
           <Route path="/rounds" element={<Rounds />} />
