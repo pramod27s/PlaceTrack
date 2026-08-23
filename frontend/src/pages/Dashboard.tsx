@@ -43,7 +43,7 @@ function StatCard({
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-indigo-200 dark:hover:border-indigo-500/40 hover:shadow-md">
       <div className="flex items-center justify-between">
-        <div className={cn('flex h-11 w-11 items-center justify-center rounded-xl text-white shadow-md', gradientClass)}>
+        <div className={cn('flex h-11 w-11 items-center justify-center rounded-xl text-white shadow-sm ring-1 ring-black/5 dark:ring-white/10', gradientClass)}>
           {icon}
         </div>
         {sublabel && (
@@ -183,28 +183,28 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
           icon={<CalendarCheck2 size={22} />}
-          gradientClass="bg-gradient-to-tr from-indigo-600 to-indigo-500 shadow-indigo-500/25"
+          gradientClass="bg-gradient-to-tr from-indigo-600 to-indigo-500"
           value={todayCount}
           label="Rounds Today"
           sublabel="Active"
         />
         <StatCard
           icon={<ClockAlert size={22} />}
-          gradientClass="bg-gradient-to-tr from-amber-500 to-orange-500 shadow-amber-500/25"
+          gradientClass="bg-gradient-to-tr from-amber-500 to-orange-500"
           value={overdueRounds.length}
           label="Need Update"
           sublabel={overdueRounds.length > 0 ? 'Pending' : 'Done'}
         />
         <StatCard
           icon={<CalendarClock size={22} />}
-          gradientClass="bg-gradient-to-tr from-sky-500 to-blue-600 shadow-sky-500/25"
+          gradientClass="bg-gradient-to-tr from-sky-500 to-blue-600"
           value={rounds.length}
           label="Next 7 Days"
           sublabel="Scheduled"
         />
         <StatCard
           icon={<NotebookPen size={22} />}
-          gradientClass="bg-gradient-to-tr from-violet-600 to-fuchsia-600 shadow-violet-500/25"
+          gradientClass="bg-gradient-to-tr from-violet-600 to-fuchsia-600"
           value={journalFollowUps.length}
           label="Journal Follow-ups"
           sublabel={journalFollowUps.length > 0 ? 'Notes' : 'Logged'}

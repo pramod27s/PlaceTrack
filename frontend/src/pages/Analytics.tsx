@@ -29,7 +29,7 @@ function MetricCard({
   return (
     <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex items-center gap-3.5">
-        <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white shadow-md', gradientClass)}>
+        <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white shadow-sm ring-1 ring-black/5 dark:ring-white/10', gradientClass)}>
           {icon}
         </div>
         <div className="min-w-0">
@@ -95,25 +95,25 @@ export default function Analytics() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <MetricCard
           icon={<Building2 size={22} />}
-          gradientClass="bg-gradient-to-tr from-indigo-600 to-indigo-500 shadow-indigo-500/25"
+          gradientClass="bg-gradient-to-tr from-indigo-600 to-indigo-500"
           value={data.totalCompanies}
           label="Companies Tracked"
         />
         <MetricCard
           icon={<CircleCheckBig size={22} />}
-          gradientClass="bg-gradient-to-tr from-violet-600 to-fuchsia-600 shadow-violet-500/25"
+          gradientClass="bg-gradient-to-tr from-violet-600 to-fuchsia-600"
           value={`${data.shortlistRate}%`}
           label="Shortlist Rate"
         />
         <MetricCard
           icon={<Trophy size={22} />}
-          gradientClass="bg-gradient-to-tr from-emerald-500 to-teal-600 shadow-emerald-500/25"
+          gradientClass="bg-gradient-to-tr from-emerald-500 to-teal-600"
           value={`${data.offerRate}%`}
           label="Offer Rate"
         />
         <MetricCard
           icon={<NotebookPen size={22} />}
-          gradientClass="bg-gradient-to-tr from-sky-500 to-blue-600 shadow-sky-500/25"
+          gradientClass="bg-gradient-to-tr from-sky-500 to-blue-600"
           value={data.journalEntries}
           label="Journal Entries"
         />
