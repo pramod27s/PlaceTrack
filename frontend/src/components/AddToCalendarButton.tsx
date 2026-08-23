@@ -69,7 +69,7 @@ export function AddToCalendarButton({
         <div
           role="menu"
           aria-orientation="vertical"
-          className="absolute right-0 z-30 mt-1.5 w-52 origin-top-right rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 shadow-lg shadow-slate-900/10 dark:shadow-black/50 focus:outline-none animate-in fade-in zoom-in-95 duration-100"
+          className="absolute left-0 z-30 mt-1.5 w-52 origin-top-left rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 shadow-lg shadow-slate-900/10 dark:shadow-black/50 focus:outline-none animate-in fade-in zoom-in-95 duration-100"
         >
           <button
             type="button"
