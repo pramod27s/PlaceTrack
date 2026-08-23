@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { CircleCheckBig, Route as RouteIcon, Sparkles } from 'lucide-react'
+import { CircleCheckBig, Sparkles } from 'lucide-react'
+import { PlaceTrackIcon } from './PlaceTrackLogo'
 
 const HIGHLIGHTS = [
   'Clear visual Kanban pipeline for every applied company',
@@ -16,7 +17,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
       <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-12 xl:p-16 lg:flex border-r border-slate-800">
         <div className="relative flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 shadow-lg shadow-indigo-600/30 ring-1 ring-white/20">
-            <RouteIcon size={22} className="text-white" />
+            <PlaceTrackIcon size={22} className="text-white" />
           </div>
           <div>
             <span className="text-lg font-extrabold text-white tracking-tight">PlaceTrack</span>

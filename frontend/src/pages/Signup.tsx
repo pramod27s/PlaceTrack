@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Route as RouteIcon } from 'lucide-react'
+import { PlaceTrackIcon } from '../components/PlaceTrackLogo'
 import { api, apiError } from '../lib/api'
 import { useAuth } from '../store/auth'
 import { Button, ErrorNote, Field, Input } from '../components/ui'
@@ -50,7 +50,7 @@ export default function Signup() {
     <AuthShell>
       <div className="mb-8 flex items-center gap-2.5 lg:hidden">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600">
-          <RouteIcon size={20} className="text-white" />
+          <PlaceTrackIcon size={20} className="text-white" />
         </div>
         <span className="text-lg font-bold text-slate-900 dark:text-white">PlaceTrack</span>
       </div>

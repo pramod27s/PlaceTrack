@@ -8,9 +8,9 @@ import {
   LogOut,
   NotebookPen,
   Sparkles,
-  Route as RouteIcon,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { PlaceTrackIcon } from './PlaceTrackLogo'
 import { useAuth } from '../store/auth'
 import { cn, initials } from '../lib/format'
 import { NotificationBell } from './NotificationBell'
@@ -64,7 +64,7 @@ export function AppLayout() {
         {/* Logo */}
         <div className="flex items-center gap-3 px-6 py-5.5 border-b border-slate-800/60">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 shadow-lg shadow-indigo-600/30 ring-1 ring-white/20">
-            <RouteIcon size={20} className="text-white" />
+            <PlaceTrackIcon size={20} className="text-white" />
           </div>
           <div className="leading-tight">
             <div className="flex items-center gap-1.5">
@@ -143,7 +143,7 @@ export function AppLayout() {
             <div className="min-w-0 flex items-center gap-3">
               {/* Mobile brand icon */}
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 shadow-md lg:hidden">
-                <RouteIcon size={18} className="text-white" />
+                <PlaceTrackIcon size={18} className="text-white" />
               </div>
               <div>
                 <h1 className="truncate text-base font-bold tracking-tight text-slate-900 dark:text-white sm:text-lg">

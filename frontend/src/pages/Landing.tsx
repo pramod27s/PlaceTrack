@@ -8,12 +8,12 @@ import {
   Code2,
   KanbanSquare,
   NotebookPen,
-  Route as RouteIcon,
   ShieldCheck,
   Sparkles,
   TriangleAlert,
   Zap,
 } from 'lucide-react'
+import { PlaceTrackIcon } from '../components/PlaceTrackLogo'
 import { Button } from '../components/ui'
 
 export default function Landing() {
@@ -24,7 +24,7 @@ export default function Landing() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-8">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 shadow-lg shadow-indigo-600/30 ring-1 ring-white/20">
-              <RouteIcon size={20} className="text-white" />
+              <PlaceTrackIcon size={20} className="text-white" />
             </div>
             <div className="leading-tight">
               <div className="flex items-center gap-1.5">
@@ -452,7 +452,7 @@ export default function Landing() {
         <div className="mx-auto max-w-7xl px-4 sm:px-8 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-500">
           <div className="flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-600 text-white">
-              <RouteIcon size={13} />
+              <PlaceTrackIcon size={13} />
             </div>
             <span className="font-bold text-slate-300">PlaceTrack</span>
             <span>— Placement Command Center</span>
