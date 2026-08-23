@@ -63,7 +63,7 @@ export function AppLayout() {
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-slate-950 border-r border-slate-800/80 shadow-xl shadow-slate-950/20 lg:flex">
         {/* Logo */}
         <div className="flex items-center gap-3 px-6 py-5.5 border-b border-slate-800/60">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 shadow-lg shadow-indigo-600/30 ring-1 ring-white/20">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 shadow-sm shadow-indigo-600/15 ring-1 ring-white/10">
             <PlaceTrackIcon size={20} className="text-white" />
           </div>
           <div className="leading-tight">

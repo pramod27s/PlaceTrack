@@ -60,7 +60,7 @@ export const PlaceTrackBadge: FC<PlaceTrackBadgeProps> = ({
 
   return (
     <div
-      className={`flex items-center justify-center bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 shadow-lg shadow-indigo-600/30 ring-1 ring-white/20 shrink-0 ${sizeClasses} ${className}`}
+      className={`flex items-center justify-center bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 shadow-sm shadow-indigo-600/15 ring-1 ring-white/10 shrink-0 ${sizeClasses} ${className}`}
     >
       <PlaceTrackIcon size={iconSizes} className="text-white" />
     </div>

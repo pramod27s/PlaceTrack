@@ -16,7 +16,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
       {/* Brand / value panel */}
       <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-12 xl:p-16 lg:flex border-r border-slate-800">
         <div className="relative flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 shadow-lg shadow-indigo-600/30 ring-1 ring-white/20">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 shadow-sm shadow-indigo-600/15 ring-1 ring-white/10">
             <PlaceTrackIcon size={22} className="text-white" />
           </div>
           <div>
