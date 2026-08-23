@@ -114,7 +114,10 @@ function RoundForm({
       await save.mutateAsync({
         roundId: round?.id,
         companyId: round?.companyId ?? companyId,
-        input: form,
+        input: {
+          ...form,
+          durationMinutes: Number(form.durationMinutes) || 60,
+        },
       })
       onClose()
     } catch (err) {
@@ -231,9 +234,29 @@ function RoundForm({
                 min={5}
                 max={600}
                 step={5}
-                value={form.durationMinutes}
-                onChange={(e) => set('durationMinutes', Number(e.target.value) || 60)}
+                value={form.durationMinutes === ('' as unknown as number) ? '' : form.durationMinutes}
+                onChange={(e) => {
+                  const val = e.target.value
+                  set('durationMinutes', val === '' ? ('' as unknown as number) : Number(val))
+                }}
               />
+              <div className="mt-1.5 flex flex-wrap gap-1">
+                {[30, 45, 60, 90, 120].map((mins) => (
+                  <button
+                    key={mins}
+                    type="button"
+                    onClick={() => set('durationMinutes', mins)}
+                    className={cn(
+                      'rounded-md px-2 py-0.5 text-[11px] font-semibold transition',
+                      Number(form.durationMinutes) === mins
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700',
+                    )}
+                  >
+                    {mins}m
+                  </button>
+                ))}
+              </div>
             </Field>
           </div>
 
