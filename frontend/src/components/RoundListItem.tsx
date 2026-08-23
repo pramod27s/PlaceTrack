@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ExternalLink, MapPin, TriangleAlert } from 'lucide-react'
 import { ROUND_STATUS_META, ROUND_TYPE_META } from '../lib/constants'
 import { cn, formatDateTime, formatTime, isPastIso, relativeDay } from '../lib/format'
+import { AddToCalendarButton } from './AddToCalendarButton'
 import { Badge } from './ui'
 import type { Round } from '../lib/types'
 
@@ -81,7 +82,8 @@ export function RoundListItem({
       </div>
 
       {/* Actions */}
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="flex flex-wrap shrink-0 items-center gap-2">
+        {round.status === 'SCHEDULED' && <AddToCalendarButton round={round} />}
         {round.meetingLink && (
           <a
             href={round.meetingLink}
