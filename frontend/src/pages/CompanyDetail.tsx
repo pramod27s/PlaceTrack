@@ -15,6 +15,7 @@ import {
   Plus,
   Trash2,
   TriangleAlert,
+  Sparkles,
 } from 'lucide-react'
 import {
   useCompany,
@@ -36,7 +37,7 @@ import {
   LoadingState,
 } from '../components/ui'
 import { STAGE_META } from '../lib/constants'
-import { cn, formatDate } from '../lib/format'
+import { cn, formatDate, initials } from '../lib/format'
 import type { Round } from '../lib/types'
 
 function InfoRow({
@@ -49,11 +50,11 @@ function InfoRow({
   children: ReactNode
 }) {
   return (
-    <div className="flex items-start gap-3">
-      <span className="mt-0.5 text-slate-400">{icon}</span>
-      <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
-        <div className="text-sm text-slate-700">{children}</div>
+    <div className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50/50 p-3.5 transition hover:bg-slate-50">
+      <span className="mt-0.5 text-indigo-500">{icon}</span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
+        <div className="mt-0.5 text-sm font-semibold text-slate-800">{children}</div>
       </div>
     </div>
   )
@@ -76,13 +77,13 @@ export default function CompanyDetail() {
   const [pendingRound, setPendingRound] = useState<Round | null>(null)
   const [confirmCompany, setConfirmCompany] = useState(false)
 
-  if (company.isLoading) return <LoadingState label="Loading company…" />
+  if (company.isLoading) return <LoadingState label="Loading company details…" />
   if (company.isError || !company.data) {
     return (
       <EmptyState
-        icon={<TriangleAlert size={22} />}
+        icon={<TriangleAlert size={24} />}
         title="Company not found"
-        description="This company may have been deleted, or the link is incorrect."
+        description="This company may have been deleted, or the URL is invalid."
         action={
           <Button onClick={() => navigate('/pipeline')}>Back to pipeline</Button>
         }
@@ -109,108 +110,119 @@ export default function CompanyDetail() {
     <div className="space-y-6">
       <Link
         to="/pipeline"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800"
+        className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors uppercase tracking-wider"
       >
-        <ArrowLeft size={16} />
-        Pipeline
+        <ArrowLeft size={14} />
+        Back to pipeline
       </Link>
 
-      {/* Header card */}
-      <Card className="p-6">
+      {/* Hero Header Card */}
+      <div className="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-xl font-bold text-slate-900">{c.name}</h2>
-              <Badge className={stage.badge}>{stage.label}</Badge>
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-lg font-black text-white shadow-md ring-4 ring-indigo-50">
+              {initials(c.name)}
             </div>
-            {c.role && <p className="mt-1 text-sm text-slate-500">{c.role}</p>}
+            <div>
+              <div className="flex flex-wrap items-center gap-3">
+                <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">{c.name}</h2>
+                <Badge className={cn('px-3 py-1 font-bold', stage.badge)}>{stage.label}</Badge>
+              </div>
+              {c.role && <p className="mt-1 text-sm font-semibold text-slate-500">{c.role}</p>}
+            </div>
           </div>
+
           <div className="flex gap-2">
             <Button variant="secondary" size="sm" onClick={() => setEditOpen(true)}>
-              <Pencil size={15} />
-              Edit
+              <Pencil size={14} />
+              Edit details
             </Button>
             <Button
               variant="secondary"
               size="sm"
               onClick={() => setConfirmCompany(true)}
-              className="text-rose-600 hover:bg-rose-50"
+              className="text-rose-600 hover:bg-rose-50 hover:border-rose-200"
             >
-              <Trash2 size={15} />
+              <Trash2 size={14} />
               Delete
             </Button>
           </div>
         </div>
 
-        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          <InfoRow icon={<IndianRupee size={16} />} label="CTC">
-            {c.ctc || '—'}
+        {/* Company Meta Grid */}
+        <div className="mt-6 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+          <InfoRow icon={<IndianRupee size={16} />} label="Compensation (CTC)">
+            {c.ctc || 'Not specified'}
           </InfoRow>
           <InfoRow icon={<MapPin size={16} />} label="Location">
-            {c.location || '—'}
+            {c.location || 'Flexible / Remote'}
           </InfoRow>
-          <InfoRow icon={<CalendarDays size={16} />} label="Applied on">
+          <InfoRow icon={<CalendarDays size={16} />} label="Applied On">
             {formatDate(c.appliedOn)}
           </InfoRow>
-          <InfoRow icon={<FileText size={16} />} label="Resume used">
-            {c.resumeVersion || '—'}
+          <InfoRow icon={<FileText size={16} />} label="Resume Version">
+            {c.resumeVersion || 'Default Resume'}
           </InfoRow>
-          <InfoRow icon={<Briefcase size={16} />} label="Job description">
+          <InfoRow icon={<Briefcase size={16} />} label="Job Description">
             {c.jdLink ? (
               <a
                 href={c.jdLink}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-700"
+                className="inline-flex items-center gap-1 text-indigo-600 hover:underline"
               >
-                View JD <ExternalLink size={13} />
+                View JD Link <ExternalLink size={12} />
               </a>
             ) : (
-              '—'
+              'Not attached'
             )}
           </InfoRow>
-          <InfoRow icon={<CircleCheckBig size={16} />} label="Superset">
+          <InfoRow icon={<CircleCheckBig size={16} />} label="College Portal (Superset)">
             <span
               className={cn(
-                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
+                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold',
                 c.registeredOnSuperset
                   ? 'bg-emerald-100 text-emerald-700'
                   : 'bg-amber-100 text-amber-700',
               )}
             >
-              {c.registeredOnSuperset ? 'Registered' : 'Not registered'}
+              {c.registeredOnSuperset ? 'Registered' : 'Action Needed'}
             </span>
           </InfoRow>
         </div>
-      </Card>
+      </div>
 
       {/* Research notes */}
-      <div>
-        <h3 className="mb-2 text-sm font-semibold text-slate-900">Research notes</h3>
-        <Card className="p-5">
+      <div className="space-y-2">
+        <h3 className="text-sm font-bold tracking-tight text-slate-900 px-1">Research Notes &amp; Prep</h3>
+        <Card className="p-5 sm:p-6 shadow-sm">
           {c.researchNotes?.trim() ? (
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-600">
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700 font-medium">
               {c.researchNotes}
             </p>
           ) : (
-            <p className="text-sm text-slate-400">
-              No notes yet — use “Edit” to capture culture, tech stack, interviewer names, and
-              why you want to work here.
-            </p>
+            <div className="flex items-center gap-3 text-slate-400">
+              <Sparkles size={18} className="text-indigo-400" />
+              <p className="text-xs font-medium">
+                No notes captured yet. Click "Edit details" above to jot down culture, tech stack, interviewer names, and why you want to work here.
+              </p>
+            </div>
           )}
         </Card>
       </div>
 
       {/* Rounds */}
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-slate-900">
-            Rounds{' '}
-            <span className="font-normal text-slate-400">({roundList.length})</span>
-          </h3>
+      <div className="space-y-3.5">
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-bold text-slate-900 tracking-tight">Interview Rounds</h3>
+            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600">
+              {roundList.length}
+            </span>
+          </div>
           <Button size="sm" onClick={() => setAddRoundOpen(true)}>
             <Plus size={15} />
-            Add round
+            Schedule round
           </Button>
         </div>
 
@@ -218,13 +230,13 @@ export default function CompanyDetail() {
           <LoadingState label="Loading rounds…" />
         ) : roundList.length === 0 ? (
           <EmptyState
-            icon={<CalendarDays size={22} />}
-            title="No rounds yet"
-            description="Schedule the first round for this company — an OA, interview, or PPT."
+            icon={<CalendarDays size={24} />}
+            title="No interview rounds added yet"
+            description="Schedule the first round for this company — an OA, technical interview, GD, or PPT."
             action={
               <Button onClick={() => setAddRoundOpen(true)}>
                 <Plus size={16} />
-                Add round
+                Schedule first round
               </Button>
             }
           />
@@ -239,7 +251,7 @@ export default function CompanyDetail() {
                     <IconButton
                       title={round.hasJournal ? 'View journal' : 'Add journal'}
                       onClick={() => setJournalRound(round)}
-                      className={cn(round.hasJournal && 'text-indigo-600')}
+                      className={cn(round.hasJournal && 'text-indigo-600 bg-indigo-50')}
                     >
                       <NotebookPen size={16} />
                     </IconButton>

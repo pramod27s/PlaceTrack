@@ -12,10 +12,10 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import type { CollisionDetection, DragEndEvent, DragStartEvent } from '@dnd-kit/core'
-import { CircleCheckBig, MapPin, MoveRight } from 'lucide-react'
+import { CircleCheckBig, IndianRupee, MapPin, MoveRight, Layers } from 'lucide-react'
 import { useUpdateCompanyStage } from '../hooks/queries'
 import { STAGE_META, STAGE_ORDER } from '../lib/constants'
-import { cn, formatDate } from '../lib/format'
+import { cn, formatDate, initials } from '../lib/format'
 import type { Company, Stage } from '../lib/types'
 
 interface KanbanBoardProps {
@@ -37,28 +37,47 @@ const columnCollisionDetection: CollisionDetection = (args) => {
 const CardBody = memo(function CardBody({ company }: { company: Company }) {
   return (
     <>
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-sm font-semibold text-slate-800">{company.name}</p>
+      <div className="flex items-start justify-between gap-2.5">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500/10 to-violet-500/20 text-xs font-bold text-indigo-700 ring-1 ring-indigo-500/20">
+            {initials(company.name)}
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-bold text-slate-900 tracking-tight">{company.name}</p>
+            {company.role && (
+              <p className="truncate text-xs text-slate-500 font-medium">{company.role}</p>
+            )}
+          </div>
+        </div>
         {company.registeredOnSuperset && (
-          <span title="Registered on Superset">
-            <CircleCheckBig size={15} className="shrink-0 text-emerald-500" />
+          <span
+            title="Registered on Superset"
+            className="flex items-center gap-1 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-emerald-600/20"
+          >
+            <CircleCheckBig size={12} className="text-emerald-600" />
+            <span className="hidden xl:inline">Superset</span>
           </span>
         )}
       </div>
-      {company.role && (
-        <p className="mt-0.5 truncate text-xs text-slate-500">{company.role}</p>
-      )}
-      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-400">
-        {company.ctc && <span className="font-medium text-slate-500">{company.ctc}</span>}
+
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-slate-500 font-medium">
+        {company.ctc && (
+          <span className="inline-flex items-center gap-0.5 font-semibold text-slate-800 bg-slate-100/80 px-2 py-0.5 rounded-md">
+            <IndianRupee size={11} className="text-slate-500" />
+            {company.ctc}
+          </span>
+        )}
         {company.location && (
-          <span className="flex items-center gap-1">
-            <MapPin size={12} />
+          <span className="flex items-center gap-1 text-slate-500 text-[11px]">
+            <MapPin size={12} className="text-slate-400" />
             {company.location}
           </span>
         )}
       </div>
-      <div className="mt-2.5 flex items-center justify-between border-t border-slate-100 pt-2 text-xs text-slate-400">
-        <span>
+
+      <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2.5 text-[11px] font-medium text-slate-400">
+        <span className="inline-flex items-center gap-1">
+          <Layers size={12} />
           {company.roundCount} {company.roundCount === 1 ? 'round' : 'rounds'}
         </span>
         {company.stage === 'PPT' ? (
@@ -83,9 +102,7 @@ const KanbanCard = memo(function KanbanCard({
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: String(company.id),
   })
-  // Only animate color/border on hover — leaving `transition` (all properties)
-  // here causes dnd-kit's per-frame transform updates to fight a CSS transition
-  // and produces visible drag lag.
+
   return (
     <div
       ref={setNodeRef}
@@ -96,9 +113,9 @@ const KanbanCard = memo(function KanbanCard({
         if (event.key === 'Enter') onSelect(company)
       }}
       className={cn(
-        'cursor-grab rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition-colors',
-        'hover:border-indigo-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:cursor-grabbing',
-        isDragging && 'opacity-40',
+        'group cursor-grab rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-sm transition-all duration-150',
+        'hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:cursor-grabbing',
+        isDragging && 'opacity-30 scale-95',
       )}
     >
       <CardBody company={company} />
@@ -142,19 +159,24 @@ const KanbanColumn = memo(function KanbanColumn({
 
   return (
     <div ref={setNodeRef} className="flex min-w-0 flex-col">
-      <div className="mb-2 flex items-center gap-2 px-1">
-        <span className={cn('h-2 w-2 rounded-full', meta.dot)} />
-        <span className="text-sm font-semibold text-slate-700">{meta.label}</span>
-        <span className="ml-auto rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600">
+      {/* Column Header */}
+      <div className="mb-2.5 flex items-center justify-between px-1">
+        <div className="flex items-center gap-2">
+          <span className={cn('h-2.5 w-2.5 rounded-full ring-2 ring-white shadow-sm', meta.dot)} />
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-700">{meta.label}</span>
+        </div>
+        <span className="rounded-full bg-slate-200/80 px-2 py-0.5 text-[11px] font-bold text-slate-600">
           {companies.length}
         </span>
       </div>
+
+      {/* Droppable Container */}
       <div
         className={cn(
-          'min-h-[11rem] space-y-2 rounded-lg border-2 border-dashed p-2 transition-colors',
+          'min-h-[14rem] space-y-2.5 rounded-2xl p-2.5 transition-all duration-200',
           isOver
-            ? 'border-indigo-400 bg-indigo-50'
-            : 'border-transparent bg-slate-100/70',
+            ? 'border-2 border-dashed border-indigo-400 bg-indigo-50/80 ring-4 ring-indigo-500/10'
+            : 'border border-slate-200/60 bg-slate-100/60',
         )}
       >
         {companies.map((company) => (
@@ -166,8 +188,8 @@ const KanbanColumn = memo(function KanbanColumn({
           />
         ))}
         {companies.length === 0 && (
-          <div className="flex min-h-[9rem] items-center justify-center rounded-md border border-dashed border-slate-200 bg-white/45 px-4 text-center text-xs font-medium text-slate-400">
-            Drag cards here
+          <div className="flex min-h-[10rem] flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white/40 px-4 text-center text-xs font-medium text-slate-400">
+            <span>Drop company here</span>
           </div>
         )}
       </div>
@@ -179,8 +201,6 @@ export function KanbanBoard({ companies, onCardClick }: KanbanBoardProps) {
   const updateStage = useUpdateCompanyStage()
   const [activeId, setActiveId] = useState<number | null>(null)
 
-  // A small drag threshold lets a plain click still open the company.
-  // On touch screens, a short hold distinguishes dragging from page scrolling.
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, {
@@ -259,7 +279,7 @@ export function KanbanBoard({ companies, onCardClick }: KanbanBoardProps) {
 
       <DragOverlay dropAnimation={null}>
         {activeCompany && (
-          <div className="w-80 rotate-2 cursor-grabbing rounded-lg border border-indigo-300 bg-white p-3 shadow-xl">
+          <div className="w-80 rotate-2 cursor-grabbing rounded-xl border border-indigo-400 bg-white p-3.5 shadow-2xl shadow-indigo-950/20 ring-2 ring-indigo-500/20">
             <CardBody company={activeCompany} />
           </div>
         )}

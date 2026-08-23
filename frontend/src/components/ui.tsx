@@ -16,14 +16,18 @@ type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
-  size?: 'sm' | 'md'
+  size?: 'sm' | 'md' | 'lg'
 }
 
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
-  primary: 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20 hover:bg-indigo-700',
-  secondary: 'bg-white text-slate-700 ring-1 ring-inset ring-slate-300 hover:bg-slate-50',
-  ghost: 'text-slate-600 hover:bg-slate-100',
-  danger: 'bg-rose-600 text-white shadow-sm shadow-rose-600/20 hover:bg-rose-700',
+  primary:
+    'bg-gradient-to-r from-indigo-600 to-indigo-600 hover:from-indigo-500 hover:to-indigo-500 active:from-indigo-700 active:to-indigo-700 text-white shadow-sm shadow-indigo-600/30 border border-indigo-500/30',
+  secondary:
+    'bg-white text-slate-700 border border-slate-200/90 shadow-sm hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300',
+  ghost:
+    'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+  danger:
+    'bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-600 text-white shadow-sm shadow-rose-600/25 border border-rose-500/30',
 }
 
 export function Button({
@@ -35,10 +39,12 @@ export function Button({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition',
-        'focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1',
-        'disabled:pointer-events-none disabled:opacity-50',
-        size === 'sm' ? 'min-h-8 px-3 py-1.5 text-sm' : 'min-h-10 px-4 py-2 text-sm',
+        'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-150',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2',
+        'active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50',
+        size === 'sm' && 'min-h-8 px-3 py-1.5 text-xs',
+        size === 'md' && 'min-h-9 px-4 py-2 text-sm',
+        size === 'lg' && 'min-h-11 px-5 py-2.5 text-base font-semibold',
         BUTTON_VARIANTS[variant],
         className,
       )}
@@ -58,8 +64,8 @@ export function IconButton({
     <button
       ref={ref}
       className={cn(
-        'inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition',
-        'hover:bg-slate-100 hover:text-slate-700',
+        'inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition-all duration-150',
+        'hover:bg-slate-100 hover:text-slate-800 active:scale-95',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500',
         className,
       )}
@@ -71,9 +77,9 @@ export function IconButton({
 // -------------------------------------------------------------------- Inputs
 
 const FIELD_BASE =
-  'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm shadow-slate-200/40 ' +
-  'placeholder:text-slate-400 transition focus:border-indigo-500 focus:outline-none ' +
-  'focus:ring-2 focus:ring-indigo-500/20 disabled:bg-slate-50'
+  'w-full rounded-lg border border-slate-200/90 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-sm ' +
+  'placeholder:text-slate-400 transition-all duration-150 focus:border-indigo-500 focus:outline-none ' +
+  'focus:ring-4 focus:ring-indigo-500/10 disabled:bg-slate-50 disabled:text-slate-400'
 
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return <input className={cn(FIELD_BASE, className)} {...props} />
@@ -109,7 +115,7 @@ interface FieldProps {
 export function Field({ label, htmlFor, hint, required, children }: FieldProps) {
   return (
     <div className="space-y-1.5">
-      <label htmlFor={htmlFor} className="block text-sm font-medium text-slate-700">
+      <label htmlFor={htmlFor} className="block text-xs font-semibold uppercase tracking-wider text-slate-600">
         {label}
         {required && <span className="ml-0.5 text-rose-500">*</span>}
       </label>
@@ -131,7 +137,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium',
+        'inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-semibold tracking-tight transition-colors',
         className,
       )}
     >
@@ -152,7 +158,7 @@ export function Card({
   return (
     <div
       className={cn(
-        'rounded-lg border border-slate-200 bg-white shadow-sm shadow-slate-200/50',
+        'rounded-xl border border-slate-200/80 bg-white shadow-sm transition-all',
         className,
       )}
     >
@@ -177,8 +183,8 @@ export function Spinner({ className }: { className?: string }) {
 export function LoadingState({ label = 'Loading…' }: { label?: string }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-20 text-slate-400">
-      <Spinner className="h-7 w-7" />
-      <p className="text-sm">{label}</p>
+      <Spinner className="h-8 w-8 text-indigo-600" />
+      <p className="text-sm font-medium text-slate-500">{label}</p>
     </div>
   )
 }
@@ -197,13 +203,13 @@ export function EmptyState({
   action?: ReactNode
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white px-6 py-14 text-center shadow-sm shadow-slate-200/40">
-      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300/80 bg-white/60 p-8 text-center sm:p-12 shadow-sm backdrop-blur-sm">
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100/80 text-indigo-600 shadow-inner ring-1 ring-indigo-500/10">
         {icon}
       </div>
-      <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
-      <p className="mt-1 max-w-sm text-sm text-slate-500">{description}</p>
-      {action && <div className="mt-5">{action}</div>}
+      <h3 className="text-base font-bold text-slate-900 tracking-tight">{title}</h3>
+      <p className="mt-1.5 max-w-sm text-sm text-slate-500 leading-relaxed">{description}</p>
+      {action && <div className="mt-6">{action}</div>}
     </div>
   )
 }
@@ -269,7 +275,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/55 p-4 backdrop-blur-[2px] sm:p-8"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/60 p-4 backdrop-blur-sm sm:p-6 md:p-10"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
@@ -281,23 +287,23 @@ export function Modal({
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
         className={cn(
-          'animate-pop my-auto w-full overflow-hidden rounded-xl bg-white shadow-2xl shadow-slate-950/20',
+          'animate-pop my-auto w-full overflow-hidden rounded-2xl bg-white shadow-2xl shadow-slate-950/20 border border-slate-100',
           size === 'lg' ? 'max-w-2xl' : 'max-w-lg',
         )}
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-4 py-4 sm:px-6">
+        <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">
           <div className="min-w-0">
-            <h2 id={titleId} className="text-base font-semibold text-slate-900">{title}</h2>
-            {description && <p id={descriptionId} className="mt-0.5 text-sm text-slate-500">{description}</p>}
+            <h2 id={titleId} className="text-lg font-bold text-slate-900 tracking-tight">{title}</h2>
+            {description && <p id={descriptionId} className="mt-0.5 text-xs text-slate-500">{description}</p>}
           </div>
           <IconButton ref={closeRef} onClick={onClose} aria-label="Close dialog" type="button">
             <X size={18} />
           </IconButton>
         </div>
-        <div className="px-4 py-5 sm:px-6">{children}</div>
+        <div className="px-5 py-5 sm:px-6">{children}</div>
         {footer && (
-          <div className="flex flex-wrap justify-end gap-2 border-t border-slate-200 bg-slate-50 px-4 py-4 sm:px-6">
+          <div className="flex flex-wrap justify-end gap-2 border-t border-slate-100 bg-slate-50/80 px-5 py-3.5 sm:px-6">
             {footer}
           </div>
         )}
@@ -310,7 +316,7 @@ export function Modal({
 
 export function ErrorNote({ message }: { message: string }) {
   return (
-    <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+    <div className="rounded-lg border border-rose-200/80 bg-rose-50/90 px-3.5 py-2.5 text-xs font-medium text-rose-800 shadow-sm">
       {message}
     </div>
   )
@@ -351,7 +357,7 @@ export function ConfirmDialog({
         </>
       }
     >
-      <p className="text-sm text-slate-600">{message}</p>
+      <p className="text-sm text-slate-600 leading-relaxed">{message}</p>
     </Modal>
   )
 }

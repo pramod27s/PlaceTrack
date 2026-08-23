@@ -20,13 +20,18 @@ export default function Pipeline() {
   if (isError || !companies) return <ErrorNote message="Couldn't load your pipeline. Please retry." />
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+    <div className="space-y-6">
+      {/* Top action bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-sm">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">Your pipeline</h2>
-          <p className="text-sm text-slate-500">
-            {companies.length} {companies.length === 1 ? 'company' : 'companies'} · drag a card
-            to move it between stages
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-bold tracking-tight text-slate-900">Placement Pipeline</h2>
+            <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-bold text-indigo-700 ring-1 ring-indigo-200">
+              {companies.length} {companies.length === 1 ? 'company' : 'companies'}
+            </span>
+          </div>
+          <p className="mt-0.5 text-xs font-medium text-slate-500">
+            Drag cards across stages to update your application progress in real-time.
           </p>
         </div>
         <Button onClick={() => setModalOpen(true)}>
@@ -37,9 +42,9 @@ export default function Pipeline() {
 
       {companies.length === 0 ? (
         <EmptyState
-          icon={<Building2 size={22} />}
-          title="No companies yet"
-          description="Add the first company you've applied to and start building your placement pipeline."
+          icon={<Building2 size={24} />}
+          title="No companies in your pipeline"
+          description="Add the first company you've applied to and start organizing your placement season."
           action={
             <Button onClick={() => setModalOpen(true)}>
               <Plus size={16} />

@@ -10,10 +10,25 @@ import type { Round } from '../lib/types'
 
 type Bucket = 'overdue' | 'upcoming' | 'completed'
 
-const SECTIONS: { key: Bucket; title: string; description: string }[] = [
-  { key: 'overdue', title: 'Needs an update', description: 'Scheduled rounds whose time has passed' },
-  { key: 'upcoming', title: 'Upcoming', description: 'Rounds still ahead of you' },
-  { key: 'completed', title: 'Completed', description: 'Rounds you have already been through' },
+const SECTIONS: { key: Bucket; title: string; description: string; badge: string }[] = [
+  {
+    key: 'overdue',
+    title: 'Needs an update',
+    description: 'Scheduled rounds whose timing has passed',
+    badge: 'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
+  },
+  {
+    key: 'upcoming',
+    title: 'Upcoming schedule',
+    description: 'Rounds ahead of you',
+    badge: 'bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200',
+  },
+  {
+    key: 'completed',
+    title: 'Completed rounds',
+    description: 'Rounds you have already completed',
+    badge: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+  },
 ]
 
 function bucketOf(round: Round): Bucket {
@@ -38,7 +53,7 @@ export default function Rounds() {
     return groups
   }, [rounds])
 
-  if (isLoading) return <LoadingState label="Loading your rounds…" />
+  if (isLoading) return <LoadingState label="Loading your schedule…" />
   if (isError || !rounds) return <ErrorNote message="Couldn't load your rounds. Please retry." />
 
   const confirmDelete = async () => {
@@ -48,29 +63,42 @@ export default function Rounds() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-semibold text-slate-900">Rounds &amp; schedule</h2>
-        <p className="text-sm text-slate-500">
-          Every round across all your companies, with overlap detection.
-        </p>
+    <div className="space-y-7">
+      {/* Header bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-sm">
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-bold tracking-tight text-slate-900">Rounds &amp; Schedule</h2>
+            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-700">
+              {rounds.length} {rounds.length === 1 ? 'total round' : 'total rounds'}
+            </span>
+          </div>
+          <p className="mt-0.5 text-xs font-medium text-slate-500">
+            Timeline of all interviews, assessments, and pre-placement talks with conflict alerts.
+          </p>
+        </div>
       </div>
 
       {rounds.length === 0 ? (
         <EmptyState
-          icon={<CalendarClock size={22} />}
-          title="No rounds scheduled"
-          description="Open a company from your pipeline and add its first round to see it here."
+          icon={<CalendarClock size={24} />}
+          title="No interview rounds scheduled"
+          description="Open any company from your pipeline to add technical, HR, OA, or GD rounds."
         />
       ) : (
-        SECTIONS.map(({ key, title, description }) => {
+        SECTIONS.map(({ key, title, description, badge }) => {
           const list = grouped[key]
           if (list.length === 0) return null
           return (
-            <section key={key}>
-              <div className="mb-3 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-                <span className="text-xs text-slate-400">· {description}</span>
+            <section key={key} className="space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-2.5">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800">{title}</h3>
+                  <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold', badge)}>
+                    {list.length}
+                  </span>
+                </div>
+                <span className="text-xs font-medium text-slate-400">{description}</span>
               </div>
               <div className="space-y-3">
                 {list.map((round) => (
@@ -82,7 +110,7 @@ export default function Rounds() {
                         <IconButton
                           title={round.hasJournal ? 'View journal' : 'Add journal'}
                           onClick={() => setJournalRound(round)}
-                          className={cn(round.hasJournal && 'text-indigo-600')}
+                          className={cn(round.hasJournal && 'text-indigo-600 bg-indigo-50')}
                         >
                           <NotebookPen size={16} />
                         </IconButton>
@@ -123,7 +151,7 @@ export default function Rounds() {
         title="Delete this round?"
         message={
           pendingDelete
-            ? `The ${pendingDelete.companyName} round and any journal entry attached to it will be permanently removed.`
+            ? `The ${pendingDelete.companyName} round and any attached journal entries will be permanently deleted.`
             : ''
         }
       />
