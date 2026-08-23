@@ -102,9 +102,9 @@ export default function Landing() {
             </Link>
             <Link to="/login">
               <Button
-                variant="secondary"
+                variant="outline"
                 size="lg"
-                className="bg-slate-900/90 text-white border-slate-700 hover:bg-slate-800 hover:text-white px-7"
+                className="px-7"
               >
                 Sign In to Pipeline
               </Button>

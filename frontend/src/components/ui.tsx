@@ -12,7 +12,7 @@ import { cn } from '../lib/format'
 
 // ------------------------------------------------------------------- Button
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
@@ -28,6 +28,8 @@ const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
     'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
   danger:
     'bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-600 text-white shadow-sm shadow-rose-600/25 border border-rose-500/30',
+  outline:
+    'bg-slate-900/90 text-slate-200 border border-slate-700/90 shadow-sm hover:bg-slate-800 hover:text-white hover:border-slate-600',
 }
 
 export function Button({

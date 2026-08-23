@@ -15,6 +15,7 @@ import { useAuth } from '../store/auth'
 import { cn, initials } from '../lib/format'
 import { NotificationBell } from './NotificationBell'
 import { ToastContainer } from './ToastContainer'
+import { ThemeToggle } from './ThemeToggle'
 
 interface NavItem {
   to: string
@@ -137,7 +138,7 @@ export function AppLayout() {
       {/* Main Content Column */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top Header */}
-        <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/80 px-4 backdrop-blur-md sm:px-8">
+        <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/80 dark:bg-slate-950/80 dark:border-slate-800/80 px-4 backdrop-blur-md sm:px-8">
           <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between">
             <div className="min-w-0 flex items-center gap-3">
               {/* Mobile brand icon */}
@@ -145,11 +146,11 @@ export function AppLayout() {
                 <RouteIcon size={18} className="text-white" />
               </div>
               <div>
-                <h1 className="truncate text-base font-bold tracking-tight text-slate-900 sm:text-lg">
+                <h1 className="truncate text-base font-bold tracking-tight text-slate-900 dark:text-white sm:text-lg">
                   {currentSection.title}
                 </h1>
                 {currentSection.subtitle && (
-                  <p className="hidden text-[11px] font-medium text-slate-400 sm:block">
+                  <p className="hidden text-[11px] font-medium text-slate-400 dark:text-slate-500 sm:block">
                     {currentSection.subtitle}
                   </p>
                 )}
@@ -157,6 +158,7 @@ export function AppLayout() {
             </div>
 
             <div className="relative flex items-center gap-2">
+              <ThemeToggle />
               <NotificationBell />
 
               {/* Mobile user profile button */}
@@ -170,15 +172,15 @@ export function AppLayout() {
               </button>
 
               {accountOpen && (
-                <div className="animate-pop absolute right-0 top-12 z-40 w-[min(calc(100vw-2rem),18rem)] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10 lg:hidden">
-                  <div className="border-b border-slate-100 px-4 py-3 bg-slate-50/50">
-                    <p className="truncate text-sm font-bold text-slate-900">{user?.fullName}</p>
+                <div className="animate-pop absolute right-0 top-12 z-40 w-[min(calc(100vw-2rem),18rem)] overflow-hidden rounded-xl border border-slate-200 bg-white dark:bg-slate-900 dark:border-slate-800 shadow-2xl shadow-slate-900/10 lg:hidden">
+                  <div className="border-b border-slate-100 dark:border-slate-800 px-4 py-3 bg-slate-50/50 dark:bg-slate-950/50">
+                    <p className="truncate text-sm font-bold text-slate-900 dark:text-white">{user?.fullName}</p>
                     <p className="truncate text-xs text-slate-500">{user?.email}</p>
                   </div>
                   <button
                     type="button"
                     onClick={handleSignOut}
-                    className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium text-rose-600 transition hover:bg-rose-50"
+                    className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium text-rose-600 transition hover:bg-rose-50 dark:hover:bg-rose-950/30"
                   >
                     <LogOut size={16} />
                     Sign out
@@ -198,7 +200,7 @@ export function AppLayout() {
       {/* Mobile Bottom Navigation */}
       <nav
         aria-label="Primary navigation"
-        className="mobile-safe-bottom fixed inset-x-0 bottom-0 z-30 flex border-t border-slate-200/80 bg-white/90 px-2 pt-1.5 pb-1 shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur-md lg:hidden"
+        className="mobile-safe-bottom fixed inset-x-0 bottom-0 z-30 flex border-t border-slate-200/80 bg-white/90 dark:bg-slate-950/90 dark:border-slate-800/80 px-2 pt-1.5 pb-1 shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur-md lg:hidden"
       >
         {NAV.map(({ to, mobileLabel, icon: Icon, end }) => (
           <NavLink
@@ -210,8 +212,8 @@ export function AppLayout() {
                 'min-w-0 flex-1 rounded-xl px-1 py-1.5 text-[10px] font-semibold transition-all',
                 'flex flex-col items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500',
                 isActive
-                  ? 'text-indigo-600 bg-indigo-50/80'
-                  : 'text-slate-400 hover:text-slate-700',
+                  ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/40'
+                  : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200',
               )
             }
           >
