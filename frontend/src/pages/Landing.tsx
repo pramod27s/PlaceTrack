@@ -21,19 +21,20 @@ export default function Landing() {
     <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
       {/* ---------------- Navbar ---------------- */}
       <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-8">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 shadow-sm shadow-indigo-600/15 ring-1 ring-white/10">
-              <PlaceTrackIcon size={20} className="text-white" />
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-3.5 sm:px-8">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 shadow-sm shadow-indigo-600/15 ring-1 ring-white/10">
+              <PlaceTrackIcon size={18} className="text-white sm:hidden" />
+              <PlaceTrackIcon size={20} className="text-white hidden sm:block" />
             </div>
-            <div className="leading-tight">
+            <div className="leading-tight min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-base font-extrabold tracking-tight text-white">PlaceTrack</span>
-                <span className="rounded-full bg-indigo-500/20 px-2 py-0.5 text-[10px] font-bold text-indigo-300 ring-1 ring-indigo-400/30">
+                <span className="text-base font-extrabold tracking-tight text-white truncate">PlaceTrack</span>
+                <span className="hidden sm:inline-flex rounded-full bg-indigo-500/20 px-2 py-0.5 text-[10px] font-bold text-indigo-300 ring-1 ring-indigo-400/30">
                   v1.0
                 </span>
               </div>
-              <p className="text-[11px] font-medium text-slate-400">Command Center</p>
+              <p className="hidden sm:block text-[11px] font-medium text-slate-400">Command Center</p>
             </div>
           </div>
 
@@ -49,17 +50,17 @@ export default function Landing() {
             </a>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <Link
               to="/login"
-              className="text-sm font-semibold text-slate-300 hover:text-white transition-colors px-3 py-1.5"
+              className="text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition-colors px-2.5 py-1.5 whitespace-nowrap"
             >
               Sign in
             </Link>
-            <Link to="/signup">
-              <Button size="sm" className="font-bold shadow-md shadow-indigo-500/25">
+            <Link to="/signup" className="shrink-0">
+              <Button size="sm" className="font-bold shadow-md shadow-indigo-500/25 text-xs sm:text-sm px-3 py-1.5 sm:px-4 sm:py-2 whitespace-nowrap">
                 Get Started
-                <ArrowRight size={14} />
+                <ArrowRight size={13} />
               </Button>
             </Link>
           </div>
