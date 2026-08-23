@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { useAuth } from '../store/auth'
 
 export const TOKEN_KEY = 'placetrack.token'
 export const USER_KEY = 'placetrack.user'
@@ -22,8 +23,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem(TOKEN_KEY)
-      localStorage.removeItem(USER_KEY)
+      useAuth.getState().signOut()
       if (!window.location.pathname.startsWith('/login')) {
         window.location.assign('/login')
       }

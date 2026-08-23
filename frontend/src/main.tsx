@@ -7,7 +7,14 @@ import App from './App.tsx'
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: { retry: 1, refetchOnWindowFocus: false, staleTime: 20_000 },
+    queries: {
+      retry: (failureCount, error: any) => {
+        if (error?.response?.status === 401) return false
+        return failureCount < 1
+      },
+      refetchOnWindowFocus: false,
+      staleTime: 20_000,
+    },
   },
 })
 
