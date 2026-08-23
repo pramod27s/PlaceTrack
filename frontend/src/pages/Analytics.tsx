@@ -27,14 +27,14 @@ function MetricCard({
   label: string
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex items-center gap-3.5">
         <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white shadow-md', gradientClass)}>
           {icon}
         </div>
         <div className="min-w-0">
-          <p className="text-2xl font-extrabold tracking-tight text-slate-900">{value}</p>
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</p>
+          <p className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{value}</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</p>
         </div>
       </div>
     </div>
@@ -77,15 +77,15 @@ export default function Analytics() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-sm">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold tracking-tight text-slate-900">Placement Analytics</h2>
-            <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
+            <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">Placement Analytics</h2>
+            <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-800">
               Live Insights
             </span>
           </div>
-          <p className="mt-0.5 text-xs font-medium text-slate-500">
+          <p className="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">
             Conversion funnel, stage-wise drop-offs, and hiring statistics.
           </p>
         </div>
@@ -123,16 +123,16 @@ export default function Analytics() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Funnel */}
         <div className="lg:col-span-2 space-y-3">
-          <h3 className="text-sm font-bold tracking-tight text-slate-900 px-1">Conversion Funnel</h3>
-          <Card className="p-5 sm:p-6 shadow-sm border-slate-200/80">
-            <div className="mb-5 flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-4">
+          <h3 className="text-sm font-bold tracking-tight text-slate-900 dark:text-slate-100 px-1">Conversion Funnel</h3>
+          <Card className="p-5 sm:p-6 shadow-sm border-slate-200/80 dark:border-slate-800">
+            <div className="mb-5 flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
-                <p className="text-sm font-bold text-slate-900">Stage-by-Stage Funnel</p>
-                <p className="mt-0.5 text-xs text-slate-500 font-medium">
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">Stage-by-Stage Funnel</p>
+                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
                   Count of applications progressing past each milestone.
                 </p>
               </div>
-              <span className="rounded-xl bg-indigo-50 px-3 py-1 text-xs font-extrabold text-indigo-700 ring-1 ring-indigo-200">
+              <span className="rounded-xl bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1 text-xs font-extrabold text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200 dark:ring-indigo-700/50">
                 {endToEndRate}% end-to-end
               </span>
             </div>
@@ -146,30 +146,30 @@ export default function Analytics() {
                 return (
                   <div
                     key={step.label}
-                    className="grid gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-3.5 sm:grid-cols-[11rem_1fr_6rem] sm:items-center"
+                    className="grid gap-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 p-3.5 sm:grid-cols-[11rem_1fr_6rem] sm:items-center"
                   >
                     <div className="min-w-0">
-                      <p className="truncate text-xs font-bold text-slate-800 uppercase tracking-wider">
+                      <p className="truncate text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
                         {step.label}
                       </p>
-                      <p className="text-[11px] font-medium text-slate-400">Step {i + 1}</p>
+                      <p className="text-[11px] font-medium text-slate-400 dark:text-slate-500">Step {i + 1}</p>
                     </div>
                     <div>
                       <div className="mb-1 flex items-center justify-between text-xs font-semibold">
-                        <span className="text-slate-600">{step.count} reached</span>
-                        <span className="text-slate-400">
+                        <span className="text-slate-600 dark:text-slate-300">{step.count} reached</span>
+                        <span className="text-slate-400 dark:text-slate-500">
                           {i === 0 ? 'Baseline' : `${conv}% pass`}
                         </span>
                       </div>
-                      <div className="h-2.5 overflow-hidden rounded-full bg-white ring-1 ring-slate-200/80">
+                      <div className="h-2.5 overflow-hidden rounded-full bg-white dark:bg-slate-900 ring-1 ring-slate-200/80 dark:ring-slate-700">
                         <div
                           className={cn('h-full rounded-full transition-all duration-300', tone)}
                           style={{ width: `${Math.max(width, step.count > 0 ? 8 : 0)}%` }}
                         />
                       </div>
                     </div>
-                    <div className="flex items-center justify-between rounded-lg bg-white px-3 py-1.5 ring-1 ring-slate-200/80 sm:justify-center">
-                      <span className="text-xs font-medium text-slate-400 sm:hidden">Count</span>
+                    <div className="flex items-center justify-between rounded-lg bg-white dark:bg-slate-900 px-3 py-1.5 ring-1 ring-slate-200/80 dark:ring-slate-700 sm:justify-center">
+                      <span className="text-xs font-medium text-slate-400 dark:text-slate-500 sm:hidden">Count</span>
                       <div
                         className={cn(
                           'flex h-6 min-w-6 items-center justify-center rounded-md px-2 text-xs font-bold text-white',
@@ -185,9 +185,9 @@ export default function Analytics() {
             </div>
 
             {biggestDrop.lost > 0 && (
-              <div className="mt-5 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/90 p-3.5">
-                <TrendingDown size={18} className="mt-0.5 shrink-0 text-amber-600" />
-                <p className="text-xs font-medium text-amber-900 leading-relaxed">
+              <div className="mt-5 flex items-start gap-3 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/90 dark:bg-amber-950/40 p-3.5">
+                <TrendingDown size={18} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                <p className="text-xs font-medium text-amber-900 dark:text-amber-200 leading-relaxed">
                   Your biggest drop-off is between{' '}
                   <span className="font-bold">{biggestDrop.from}</span> and{' '}
                   <span className="font-bold">{biggestDrop.to}</span> ({biggestDrop.lost}{' '}
@@ -201,16 +201,16 @@ export default function Analytics() {
         {/* Outcomes & Summary */}
         <div className="space-y-6">
           <div className="space-y-3">
-            <h3 className="text-sm font-bold tracking-tight text-slate-900 px-1">Pipeline Outcomes</h3>
-            <Card className="space-y-3.5 p-5 shadow-sm border-slate-200/80">
+            <h3 className="text-sm font-bold tracking-tight text-slate-900 dark:text-slate-100 px-1">Pipeline Outcomes</h3>
+            <Card className="space-y-3.5 p-5 shadow-sm border-slate-200/80 dark:border-slate-800">
               <Outcome label="Active in pipeline" value={data.activeCompanies} tone="indigo" />
               <Outcome label="Offers secured" value={data.offers} tone="emerald" />
               <Outcome label="Rejections" value={data.rejections} tone="rose" />
             </Card>
           </div>
           <div className="space-y-3">
-            <h3 className="text-sm font-bold tracking-tight text-slate-900 px-1">Rounds Summary</h3>
-            <Card className="space-y-3.5 p-5 shadow-sm border-slate-200/80">
+            <h3 className="text-sm font-bold tracking-tight text-slate-900 dark:text-slate-100 px-1">Rounds Summary</h3>
+            <Card className="space-y-3.5 p-5 shadow-sm border-slate-200/80 dark:border-slate-800">
               <Outcome label="Total rounds scheduled" value={data.totalRounds} tone="slate" />
               <Outcome label="Completed & cleared" value={data.completedRounds} tone="emerald" />
               <Outcome label="Upcoming scheduled" value={data.upcomingRounds} tone="indigo" />
@@ -221,21 +221,21 @@ export default function Analytics() {
 
       {/* Stage Breakdown Bar */}
       <div className="space-y-3">
-        <h3 className="text-sm font-bold tracking-tight text-slate-900 px-1">Stage-Wise Distribution</h3>
-        <Card className="grid gap-4.5 p-5 sm:grid-cols-2 lg:grid-cols-4 shadow-sm border-slate-200/80">
+        <h3 className="text-sm font-bold tracking-tight text-slate-900 dark:text-slate-100 px-1">Stage-Wise Distribution</h3>
+        <Card className="grid gap-4.5 p-5 sm:grid-cols-2 lg:grid-cols-4 shadow-sm border-slate-200/80 dark:border-slate-800">
           {STAGE_ORDER.map((stage) => {
             const count = data.stageCounts[stage] ?? 0
             const meta = STAGE_META[stage]
             return (
-              <div key={stage} className="rounded-xl border border-slate-100 bg-slate-50/50 p-3">
+              <div key={stage} className="rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 p-3">
                 <div className="mb-2 flex items-center justify-between text-xs font-semibold">
-                  <span className="flex items-center gap-1.5 text-slate-700">
+                  <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
                     <span className={cn('h-2 w-2 rounded-full', meta.dot)} />
                     {meta.label}
                   </span>
-                  <span className="font-bold text-slate-900">{count}</span>
+                  <span className="font-bold text-slate-900 dark:text-slate-100">{count}</span>
                 </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-slate-200/80">
+                <div className="h-1.5 overflow-hidden rounded-full bg-slate-200/80 dark:bg-slate-700">
                   <div
                     className={cn('h-full rounded-full transition-all duration-300', meta.bar)}
                     style={{ width: `${(count / maxStage) * 100}%` }}
@@ -260,14 +260,14 @@ function Outcome({
   tone: 'indigo' | 'emerald' | 'rose' | 'slate'
 }) {
   const tones: Record<typeof tone, string> = {
-    indigo: 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200',
-    emerald: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
-    rose: 'bg-rose-50 text-rose-700 ring-1 ring-rose-200',
-    slate: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+    indigo: 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200 dark:ring-indigo-800',
+    emerald: 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-800',
+    rose: 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 ring-1 ring-rose-200 dark:ring-rose-800',
+    slate: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-700',
   }
   return (
     <div className="flex items-center justify-between">
-      <span className="text-xs font-semibold text-slate-600">{label}</span>
+      <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">{label}</span>
       <span
         className={cn(
           'min-w-9 rounded-lg px-2.5 py-0.5 text-center text-xs font-bold',

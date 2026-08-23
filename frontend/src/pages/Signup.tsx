@@ -47,11 +47,11 @@ export default function Signup() {
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600">
           <RouteIcon size={20} className="text-white" />
         </div>
-        <span className="text-lg font-bold text-slate-900">PlaceTrack</span>
+        <span className="text-lg font-bold text-slate-900 dark:text-white">PlaceTrack</span>
       </div>
 
-      <h2 className="text-2xl font-bold text-slate-900">Create your account</h2>
-      <p className="mt-1 text-sm text-slate-500">
+      <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Create your account</h2>
+      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
         Start tracking your placement season in one place.
       </p>
 
@@ -99,9 +99,9 @@ export default function Signup() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-500">
+      <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
         Already have an account?{' '}
-        <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-700">
+        <Link to="/login" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">
           Sign in
         </Link>
       </p>

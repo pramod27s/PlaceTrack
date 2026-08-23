@@ -58,7 +58,7 @@ export function AppLayout() {
   const currentSection = sectionTitle(location.pathname)
 
   return (
-    <div className="min-h-screen bg-slate-50/60 lg:pl-64">
+    <div className="min-h-screen bg-slate-50/60 dark:bg-[#090d16] lg:pl-64">
       {/* Sidebar */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-slate-950 border-r border-slate-800/80 shadow-xl shadow-slate-950/20 lg:flex">
         {/* Logo */}
@@ -166,7 +166,7 @@ export function AppLayout() {
                 type="button"
                 aria-label="Account menu"
                 onClick={() => setAccountOpen((open) => !open)}
-                className="ml-1 flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-xs font-bold text-indigo-700 ring-1 ring-indigo-300/60 transition hover:bg-indigo-200 lg:hidden"
+                className="ml-1 flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-950/60 text-xs font-bold text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-300/60 dark:ring-indigo-700/50 transition hover:bg-indigo-200 dark:hover:bg-indigo-900/60 lg:hidden"
               >
                 {user ? initials(user.fullName) : '?'}
               </button>

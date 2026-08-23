@@ -64,15 +64,15 @@ export default function Pipeline() {
   return (
     <div className="space-y-6">
       {/* Top Header Card */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-sm">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold tracking-tight text-slate-900">Placement Pipeline</h2>
-            <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-bold text-indigo-700 ring-1 ring-indigo-200">
+            <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">Placement Pipeline</h2>
+            <span className="rounded-full bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-0.5 text-xs font-bold text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200 dark:ring-indigo-700/50">
               {filteredCompanies.length} of {totalCount} {totalCount === 1 ? 'company' : 'companies'}
             </span>
           </div>
-          <p className="mt-0.5 text-xs font-medium text-slate-500">
+          <p className="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">
             Drag cards across stages or search &amp; filter applications below.
           </p>
         </div>
@@ -94,8 +94,8 @@ export default function Pipeline() {
               className={cn(
                 'rounded-xl px-3 py-1.5 text-xs font-bold transition-all',
                 activeFilter === 'all'
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50',
+                  ? 'bg-slate-900 dark:bg-slate-800 text-white shadow-sm'
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800',
               )}
             >
               All ({totalCount})
@@ -107,7 +107,7 @@ export default function Pipeline() {
                 'rounded-xl px-3 py-1.5 text-xs font-bold transition-all',
                 activeFilter === 'active'
                   ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
-                  : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50',
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800',
               )}
             >
               Active Only ({activeCount})
@@ -119,7 +119,7 @@ export default function Pipeline() {
                 'inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all',
                 activeFilter === 'superset'
                   ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/20'
-                  : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50',
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800',
               )}
             >
               <CircleCheckBig size={13} className={activeFilter === 'superset' ? 'text-white' : 'text-emerald-500'} />
@@ -132,7 +132,7 @@ export default function Pipeline() {
                 'rounded-xl px-3 py-1.5 text-xs font-bold transition-all',
                 activeFilter === 'interview'
                   ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/20'
-                  : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50',
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800',
               )}
             >
               In Interviews ({interviewCount})
@@ -145,7 +145,7 @@ export default function Pipeline() {
                   'inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all',
                   activeFilter === 'offer'
                     ? 'bg-amber-600 text-white shadow-sm'
-                    : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50',
+                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800',
                 )}
               >
                 <Trophy size={13} className={activeFilter === 'offer' ? 'text-white' : 'text-amber-500'} />
@@ -158,7 +158,7 @@ export default function Pipeline() {
           <div className="relative w-full sm:w-64">
             <Search
               size={15}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
             />
             <Input
               className="pl-9 pr-8 text-xs font-medium"
@@ -170,7 +170,7 @@ export default function Pipeline() {
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               >
                 <X size={14} />
               </button>

@@ -88,18 +88,18 @@ export function NotificationBell() {
       </IconButton>
 
       {open && (
-        <div className="animate-pop absolute right-0 z-40 mt-2 w-[min(calc(100vw-2rem),20rem)] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl shadow-slate-200">
-          <div className="border-b border-slate-100 px-4 py-3">
-            <p className="text-sm font-semibold text-slate-800">Notifications</p>
-            <p className="text-xs text-slate-400">Conflicts and rounds in the next 24 hours</p>
+        <div className="animate-pop absolute right-0 z-40 mt-2 w-[min(calc(100vw-2rem),20rem)] overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl shadow-slate-900/15 dark:shadow-black/50">
+          <div className="border-b border-slate-100 dark:border-slate-800 px-4 py-3 bg-slate-50/50 dark:bg-slate-950/50">
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Notifications</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500">Conflicts and rounds in the next 24 hours</p>
           </div>
 
           {alerts.length === 0 ? (
-            <div className="px-4 py-8 text-center text-sm text-slate-400">
+            <div className="px-4 py-8 text-center text-sm text-slate-400 dark:text-slate-500">
               You're all caught up.
             </div>
           ) : (
-            <ul className="max-h-96 overflow-y-auto">
+            <ul className="max-h-96 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
               {alerts.map((alert) => (
                 <li key={alert.id}>
                   <button
@@ -108,14 +108,14 @@ export function NotificationBell() {
                       setOpen(false)
                       navigate('/rounds')
                     }}
-                    className="flex w-full gap-3 px-4 py-3 text-left transition hover:bg-slate-50"
+                    className="flex w-full gap-3 px-4 py-3 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800/60"
                   >
                     <span
                       className={cn(
                         'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
                         alert.kind === 'conflict'
-                          ? 'bg-rose-100 text-rose-600'
-                          : 'bg-indigo-100 text-indigo-600',
+                          ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400'
+                          : 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400',
                       )}
                     >
                       {alert.kind === 'conflict' ? (
@@ -125,10 +125,10 @@ export function NotificationBell() {
                       )}
                     </span>
                     <span className="min-w-0">
-                      <span className="block text-sm font-medium text-slate-800">
+                      <span className="block text-sm font-medium text-slate-800 dark:text-slate-200">
                         {alert.title}
                       </span>
-                      <span className="block truncate text-xs text-slate-500">
+                      <span className="block truncate text-xs text-slate-500 dark:text-slate-400">
                         {alert.detail}
                       </span>
                     </span>

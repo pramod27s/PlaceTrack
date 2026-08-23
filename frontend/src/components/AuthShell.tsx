@@ -11,7 +11,7 @@ const HIGHLIGHTS = [
 /** Two-pane shell shared by the login and signup screens. */
 export function AuthShell({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50 dark:bg-[#090d16]">
       {/* Brand / value panel */}
       <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-12 xl:p-16 lg:flex border-r border-slate-800">
         <div className="relative flex items-center gap-3">
@@ -53,7 +53,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
       </div>
 
       {/* Form panel */}
-      <div className="flex w-full flex-col items-center justify-center px-6 py-12 lg:w-1/2">
+      <div className="flex w-full flex-col items-center justify-center px-6 py-12 lg:w-1/2 dark:bg-[#090d16]">
         <div className="w-full max-w-sm">{children}</div>
       </div>
     </div>

@@ -23,25 +23,25 @@ function ToastItem({ toast }: { toast: Toast }) {
   }
 
   const borderStyles = {
-    success: 'border-emerald-200/80 bg-white/95 text-slate-900',
-    error: 'border-rose-200/80 bg-white/95 text-slate-900',
-    warning: 'border-amber-200/80 bg-white/95 text-slate-900',
-    info: 'border-indigo-200/80 bg-white/95 text-slate-900',
+    success: 'border-emerald-200/80 dark:border-emerald-900/60 bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-slate-100',
+    error: 'border-rose-200/80 dark:border-rose-900/60 bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-slate-100',
+    warning: 'border-amber-200/80 dark:border-amber-900/60 bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-slate-100',
+    info: 'border-indigo-200/80 dark:border-indigo-900/60 bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-slate-100',
   }
 
   return (
     <div
       role="alert"
       className={cn(
-        'pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-2xl border p-4 shadow-xl shadow-slate-950/10 backdrop-blur-md transition-all duration-200 animate-in fade-in slide-in-from-bottom-5',
+        'pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-2xl border p-4 shadow-xl shadow-slate-950/10 dark:shadow-black/50 backdrop-blur-md transition-all duration-200 animate-in fade-in slide-in-from-bottom-5',
         borderStyles[toast.type],
       )}
     >
       <div className="mt-0.5">{icons[toast.type]}</div>
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-bold tracking-tight text-slate-900">{toast.title}</p>
+        <p className="text-xs font-bold tracking-tight text-slate-900 dark:text-slate-100">{toast.title}</p>
         {toast.message && (
-          <p className="mt-0.5 text-xs font-medium text-slate-500 leading-relaxed">
+          <p className="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
             {toast.message}
           </p>
         )}
@@ -54,7 +54,7 @@ function ToastItem({ toast }: { toast: Toast }) {
             toast.action?.onClick()
             dismissToast(toast.id)
           }}
-          className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 ring-1 ring-indigo-200/60 hover:bg-indigo-100 transition-colors"
+          className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-1 text-xs font-bold text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200/60 dark:ring-indigo-700/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
         >
           <Undo2 size={12} />
           {toast.action.label}
@@ -64,7 +64,7 @@ function ToastItem({ toast }: { toast: Toast }) {
       <button
         type="button"
         onClick={() => dismissToast(toast.id)}
-        className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+        className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
       >
         <X size={14} />
       </button>

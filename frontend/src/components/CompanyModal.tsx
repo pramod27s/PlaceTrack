@@ -210,16 +210,16 @@ function CompanyForm({
         />
       </Field>
 
-      <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 transition hover:border-indigo-200 hover:bg-indigo-50/40">
+      <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 px-3.5 py-3 transition hover:border-indigo-200 dark:hover:border-indigo-500/40 hover:bg-indigo-50/40 dark:hover:bg-indigo-950/40">
         <input
           type="checkbox"
-          className="mt-0.5 h-4 w-4 accent-indigo-600"
+          className="mt-0.5 h-4 w-4 accent-indigo-600 rounded"
           checked={form.registeredOnSuperset}
           onChange={(e) => set('registeredOnSuperset', e.target.checked)}
         />
         <span className="text-sm">
-          <span className="font-medium text-slate-800">Registered on Superset</span>
-          <span className="block text-xs text-slate-500">
+          <span className="font-medium text-slate-800 dark:text-slate-200">Registered on Superset</span>
+          <span className="block text-xs text-slate-500 dark:text-slate-400">
             Confirms the TPO-portal registration step is complete.
           </span>
         </span>

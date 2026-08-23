@@ -173,12 +173,12 @@ export function JournalModal({ round, entry, onClose }: JournalModalProps) {
                   className={cn(
                     form.rating && value <= form.rating
                       ? 'fill-amber-400 text-amber-400'
-                      : 'text-slate-300',
+                      : 'text-slate-300 dark:text-slate-700',
                   )}
                 />
               </button>
             ))}
-            <span className="ml-2 text-sm text-slate-500">
+            <span className="ml-2 text-sm text-slate-500 dark:text-slate-400">
               {form.rating ? `${form.rating} / 5` : 'Not rated'}
             </span>
           </div>

@@ -41,19 +41,19 @@ function StatCard({
   sublabel?: string
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-md">
+    <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-indigo-200 dark:hover:border-indigo-500/40 hover:shadow-md">
       <div className="flex items-center justify-between">
         <div className={cn('flex h-11 w-11 items-center justify-center rounded-xl text-white shadow-md', gradientClass)}>
           {icon}
         </div>
         {sublabel && (
-          <span className="text-[11px] font-semibold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">
+          <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-100 dark:border-slate-700">
             {sublabel}
           </span>
         )}
       </div>
-      <p className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900">{value}</p>
-      <p className="mt-0.5 text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</p>
+      <p className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{value}</p>
+      <p className="mt-0.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</p>
     </div>
   )
 }
@@ -74,7 +74,7 @@ function AttentionItem({
   return (
     <Link
       to="/rounds"
-      className="group flex items-start gap-3.5 p-4 transition-colors hover:bg-slate-50/90"
+      className="group flex items-start gap-3.5 p-4 transition-colors hover:bg-slate-50/90 dark:hover:bg-slate-800/60"
     >
       <span
         className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm', iconClass)}
@@ -83,14 +83,14 @@ function AttentionItem({
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex items-center justify-between gap-2">
-          <span className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors tracking-tight">
+          <span className="text-sm font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors tracking-tight">
             {title}
           </span>
-          <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-700 ring-1 ring-slate-200/70">
+          <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-bold text-slate-700 dark:text-slate-300 ring-1 ring-slate-200/70 dark:ring-slate-700">
             {count}
           </span>
         </span>
-        <span className="mt-1 block text-xs leading-relaxed text-slate-500 font-medium">{description}</span>
+        <span className="mt-1 block text-xs leading-relaxed text-slate-500 dark:text-slate-400 font-medium">{description}</span>
       </span>
     </Link>
   )
@@ -160,11 +160,11 @@ export default function Dashboard() {
 
       {/* Conflict Alert Banner */}
       {conflictCount > 0 && (
-        <div className="flex flex-wrap items-center gap-x-3.5 gap-y-2 rounded-2xl border border-rose-200/90 bg-rose-50/90 p-4 shadow-sm">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-100 text-rose-700">
+        <div className="flex flex-wrap items-center gap-x-3.5 gap-y-2 rounded-2xl border border-rose-200/90 dark:border-rose-900/60 bg-rose-50/90 dark:bg-rose-950/40 p-4 shadow-sm">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300">
             <TriangleAlert size={20} />
           </div>
-          <p className="min-w-0 flex-1 text-sm font-medium text-rose-900">
+          <p className="min-w-0 flex-1 text-sm font-medium text-rose-900 dark:text-rose-200">
             <span className="font-bold">
               {conflictCount} scheduling {conflictCount === 1 ? 'conflict' : 'conflicts'}
             </span>{' '}
@@ -172,7 +172,7 @@ export default function Dashboard() {
           </p>
           <Link
             to="/rounds"
-            className="inline-flex items-center gap-1 text-sm font-bold text-rose-700 hover:text-rose-900 transition-colors"
+            className="inline-flex items-center gap-1 text-sm font-bold text-rose-700 dark:text-rose-400 hover:text-rose-900 dark:hover:text-rose-300 transition-colors"
           >
             Review schedule <ArrowRight size={14} />
           </Link>
@@ -216,10 +216,10 @@ export default function Dashboard() {
         {/* Upcoming List */}
         <div className="lg:col-span-2 space-y-3.5">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-base font-bold text-slate-900 tracking-tight">Upcoming Rounds</h3>
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 tracking-tight">Upcoming Rounds</h3>
             <Link
               to="/rounds"
-              className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-700"
+              className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
             >
               View all schedule <ArrowRight size={13} />
             </Link>
@@ -242,12 +242,12 @@ export default function Dashboard() {
 
         {/* Action Center / Needs Attention */}
         <div className="space-y-3.5">
-          <h3 className="text-base font-bold text-slate-900 tracking-tight px-1">Action Center</h3>
-          <Card className="divide-y divide-slate-100 overflow-hidden shadow-sm">
+          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 tracking-tight px-1">Action Center</h3>
+          <Card className="divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden shadow-sm">
             {overdueRounds.length > 0 && (
               <AttentionItem
-                icon={<ClockAlert size={18} className="text-amber-600" />}
-                iconClass="bg-amber-100/80"
+                icon={<ClockAlert size={18} className="text-amber-600 dark:text-amber-400" />}
+                iconClass="bg-amber-100/80 dark:bg-amber-950/60"
                 count={overdueRounds.length}
                 title="Update Round Status"
                 description="These scheduled interview rounds have already ended."
@@ -255,8 +255,8 @@ export default function Dashboard() {
             )}
             {conflictCount > 0 && (
               <AttentionItem
-                icon={<TriangleAlert size={18} className="text-rose-600" />}
-                iconClass="bg-rose-100/80"
+                icon={<TriangleAlert size={18} className="text-rose-600 dark:text-rose-400" />}
+                iconClass="bg-rose-100/80 dark:bg-rose-950/60"
                 count={conflictCount}
                 title="Resolve Conflicts"
                 description="Two or more interview slots overlap in time."
@@ -264,8 +264,8 @@ export default function Dashboard() {
             )}
             {journalFollowUps.length > 0 && (
               <AttentionItem
-                icon={<NotebookPen size={18} className="text-violet-600" />}
-                iconClass="bg-violet-100/80"
+                icon={<NotebookPen size={18} className="text-violet-600 dark:text-violet-400" />}
+                iconClass="bg-violet-100/80 dark:bg-violet-950/60"
                 count={journalFollowUps.length}
                 title="Log Interview Journals"
                 description="Record questions asked and reflections while fresh."
@@ -273,11 +273,11 @@ export default function Dashboard() {
             )}
             {overdueRounds.length === 0 && journalFollowUps.length === 0 && conflictCount === 0 && (
               <div className="flex flex-col items-center px-6 py-12 text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-500/20 shadow-sm">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20 dark:ring-emerald-500/40 shadow-sm">
                   <CircleCheckBig size={24} />
                 </div>
-                <p className="mt-3.5 text-sm font-bold text-slate-900 tracking-tight">You're all caught up!</p>
-                <p className="mt-1 text-xs leading-relaxed text-slate-500 max-w-xs font-medium">
+                <p className="mt-3.5 text-sm font-bold text-slate-900 dark:text-slate-100 tracking-tight">You're all caught up!</p>
+                <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400 max-w-xs font-medium">
                   No scheduling conflicts, overdue updates, or missing journal entries right now.
                 </p>
               </div>

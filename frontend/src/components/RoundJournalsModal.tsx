@@ -29,7 +29,7 @@ function Rating({ value }: { value: number | null }) {
         <Star
           key={n}
           size={12}
-          className={cn(n <= value ? 'fill-amber-400 text-amber-400' : 'text-slate-200')}
+          className={cn(n <= value ? 'fill-amber-400 text-amber-400' : 'text-slate-200 dark:text-slate-700')}
         />
       ))}
     </span>
@@ -59,13 +59,13 @@ function EntryRow({
     'No notes yet — open to add details.'
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-3">
+    <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-3.5 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-slate-800">
+          <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
             {entry.title?.trim() || 'Untitled entry'}
           </p>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-400 dark:text-slate-500">
             Logged {formatDateTime(entry.createdAt)}
             {entry.updatedAt !== entry.createdAt && (
               <> · edited {formatDateTime(entry.updatedAt)}</>
@@ -80,13 +80,13 @@ function EntryRow({
           <IconButton
             title="Delete entry"
             onClick={onDelete}
-            className="hover:bg-rose-50 hover:text-rose-600"
+            className="hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 dark:hover:text-rose-400"
           >
             <Trash2 size={14} />
           </IconButton>
         </div>
       </div>
-      <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-slate-600">{preview}</p>
+      <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">{preview}</p>
     </div>
   )
 }
