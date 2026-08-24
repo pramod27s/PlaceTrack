@@ -9,6 +9,7 @@ import {
   Star,
   Trash2,
   Sparkles,
+  Users,
 } from 'lucide-react'
 import { apiError } from '../lib/api'
 import { useAllJournal, useDeleteJournal } from '../hooks/queries'
@@ -28,6 +29,7 @@ import {
 import { ROUND_TYPE_META } from '../lib/constants'
 import { cn, formatDate } from '../lib/format'
 import type { JournalEntry } from '../lib/types'
+
 
 /** All entries that belong to the same round, plus the round context. */
 interface RoundGroup {
@@ -318,21 +320,31 @@ export default function Journal() {
           </p>
         </div>
 
-        {entries.length > 0 && (
-          <div className="relative w-full sm:w-80">
-            <Search
-              size={16}
-              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
-            />
-            <Input
-              className="pl-9.5"
-              placeholder="Search questions, DBMS, DSA, TCS…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </div>
-        )}
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          {entries.length > 0 && (
+            <div className="relative flex-1 sm:w-72">
+              <Search
+                size={16}
+                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+              />
+              <Input
+                className="pl-9.5"
+                placeholder="Search questions, DBMS, DSA, TCS…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
+          )}
+
+          <Link to="/experiences" className="shrink-0">
+            <Button variant="secondary" size="md" className="gap-1.5 text-xs font-semibold">
+              <Users size={14} className="text-indigo-600 dark:text-indigo-400" />
+              <span>Peer Vault ➔</span>
+            </Button>
+          </Link>
+        </div>
       </div>
+
 
       {error && <ErrorNote message={error} />}
 

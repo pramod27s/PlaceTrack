@@ -6,8 +6,9 @@ const HIGHLIGHTS = [
   'Clear visual Kanban pipeline for every applied company',
   'Round scheduler with instant time-overlap conflict detection',
   'Personal interview journal that compounds in value',
-  'Honest conversion funnel & drop-off analytics',
+  'Shared community vault for peer interview experiences & questions',
 ]
+
 
 /** Two-pane shell shared by the login and signup screens. */
 export function AuthShell({ children }: { children: ReactNode }) {

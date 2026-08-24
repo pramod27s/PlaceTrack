@@ -10,7 +10,7 @@ import Pipeline from './pages/Pipeline'
 import CompanyDetail from './pages/CompanyDetail'
 import Rounds from './pages/Rounds'
 import Journal from './pages/Journal'
-import Analytics from './pages/Analytics'
+import Experiences from './pages/Experiences'
 
 export default function App() {
   const isAuthenticated = useAuth((s) => s.isAuthenticated)
@@ -48,7 +48,7 @@ export default function App() {
           <Route path="/companies/:id" element={<CompanyDetail />} />
           <Route path="/rounds" element={<Rounds />} />
           <Route path="/journal" element={<Journal />} />
-          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/experiences" element={<Experiences />} />
         </Route>
       </Route>
 
@@ -56,3 +56,4 @@ export default function App() {
     </Routes>
   )
 }
+

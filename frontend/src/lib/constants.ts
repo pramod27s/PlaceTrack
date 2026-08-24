@@ -1,4 +1,4 @@
-import type { RoundStatus, RoundType, Stage } from './types'
+import type { Difficulty, DriveType, RoundStatus, RoundType, Stage, Verdict } from './types'
 
 /**
  * Visual metadata for each pipeline stage. Tailwind class strings are written
@@ -107,6 +107,26 @@ export const ROUND_STATUS_META: Record<RoundStatus, { label: string; badge: stri
   CANCELLED: { label: 'Cancelled', badge: 'bg-slate-100 text-slate-500 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:ring-slate-700' },
 }
 
+export const DRIVE_TYPE_META: Record<DriveType, { label: string; badge: string }> = {
+  ON_CAMPUS: { label: 'On-Campus', badge: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:ring-emerald-800' },
+  OFF_CAMPUS: { label: 'Off-Campus', badge: 'bg-blue-50 text-blue-700 ring-1 ring-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:ring-blue-800' },
+  POOL_CAMPUS: { label: 'Pool Campus', badge: 'bg-purple-50 text-purple-700 ring-1 ring-purple-200 dark:bg-purple-950/50 dark:text-purple-300 dark:ring-purple-800' },
+  REFERRAL: { label: 'Referral', badge: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:ring-amber-800' },
+}
+
+export const VERDICT_META: Record<Verdict, { label: string; badge: string; iconLabel: string }> = {
+  SELECTED: { label: 'Selected / Offer 🎉', badge: 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300/80 dark:bg-emerald-950/60 dark:text-emerald-300 dark:ring-emerald-800', iconLabel: 'Selected' },
+  REJECTED: { label: 'Not Selected', badge: 'bg-rose-100 text-rose-700 ring-1 ring-rose-300/80 dark:bg-rose-950/60 dark:text-rose-300 dark:ring-rose-800', iconLabel: 'Rejected' },
+  WAITLISTED: { label: 'Waitlisted', badge: 'bg-amber-100 text-amber-700 ring-1 ring-amber-300/80 dark:bg-amber-950/60 dark:text-amber-300 dark:ring-amber-800', iconLabel: 'Waitlisted' },
+  IN_PROGRESS: { label: 'In Progress', badge: 'bg-sky-100 text-sky-700 ring-1 ring-sky-300/80 dark:bg-sky-950/60 dark:text-sky-300 dark:ring-sky-800', iconLabel: 'In Progress' },
+}
+
+export const DIFFICULTY_META: Record<Difficulty, { label: string; badge: string; stars: number }> = {
+  EASY: { label: 'Easy', badge: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:ring-emerald-900', stars: 1 },
+  MEDIUM: { label: 'Medium', badge: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:ring-amber-900', stars: 2 },
+  HARD: { label: 'Hard', badge: 'bg-rose-50 text-rose-700 ring-1 ring-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:ring-rose-900', stars: 3 },
+}
+
 export const ROUND_TYPES: RoundType[] = ['PPT', 'OA', 'GD', 'TECHNICAL', 'HR', 'OTHER']
 export const ROUND_MODES = ['ONLINE', 'OFFLINE'] as const
 export const ROUND_STATUSES: RoundStatus[] = [
@@ -116,3 +136,7 @@ export const ROUND_STATUSES: RoundStatus[] = [
   'FAILED',
   'CANCELLED',
 ]
+export const DRIVE_TYPES: DriveType[] = ['ON_CAMPUS', 'OFF_CAMPUS', 'POOL_CAMPUS', 'REFERRAL']
+export const VERDICTS: Verdict[] = ['SELECTED', 'REJECTED', 'WAITLISTED', 'IN_PROGRESS']
+export const DIFFICULTIES: Difficulty[] = ['EASY', 'MEDIUM', 'HARD']
+

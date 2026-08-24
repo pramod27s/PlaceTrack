@@ -1,13 +1,13 @@
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import {
-  BarChart3,
   CalendarClock,
   KanbanSquare,
   LayoutDashboard,
   LogOut,
   NotebookPen,
   Sparkles,
+  Users,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { PlaceTrackIcon } from './PlaceTrackLogo'
@@ -30,7 +30,7 @@ const NAV: NavItem[] = [
   { to: '/pipeline', label: 'Pipeline', mobileLabel: 'Pipeline', icon: KanbanSquare },
   { to: '/rounds', label: 'Rounds', mobileLabel: 'Rounds', icon: CalendarClock },
   { to: '/journal', label: 'Journal', mobileLabel: 'Journal', icon: NotebookPen },
-  { to: '/analytics', label: 'Analytics', mobileLabel: 'Insights', icon: BarChart3 },
+  { to: '/experiences', label: 'Experiences', mobileLabel: 'Vault', icon: Users },
 ]
 
 /** Maps the current path to the heading shown in the top bar. */
@@ -39,9 +39,10 @@ function sectionTitle(pathname: string): { title: string; subtitle?: string } {
   if (pathname.startsWith('/companies/')) return { title: 'Company Details', subtitle: 'Overview & Rounds' }
   if (pathname.startsWith('/rounds')) return { title: 'Rounds & Schedule', subtitle: 'Timeline & Conflicts' }
   if (pathname.startsWith('/journal')) return { title: 'Interview Journal', subtitle: 'Reflections & Questions' }
-  if (pathname.startsWith('/analytics')) return { title: 'Analytics & Insights', subtitle: 'Funnel & Conversion' }
+  if (pathname.startsWith('/experiences')) return { title: 'Interview Vault', subtitle: 'Peer Experiences & Questions' }
   return { title: 'Dashboard', subtitle: 'Overview' }
 }
+
 
 export function AppLayout() {
   const { user, signOut } = useAuth()

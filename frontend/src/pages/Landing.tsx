@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import {
   ArrowRight,
-  BarChart3,
   CalendarClock,
   CalendarPlus,
   CheckCircle2,
@@ -11,8 +10,10 @@ import {
   ShieldCheck,
   Sparkles,
   TriangleAlert,
+  Users,
   Zap,
 } from 'lucide-react'
+
 import { PlaceTrackIcon } from '../components/PlaceTrackLogo'
 import { Button } from '../components/ui'
 
@@ -285,7 +286,7 @@ export default function Landing() {
                 </li>
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 size={18} className="text-emerald-400 shrink-0 mt-0.5" />
-                  <span>Conversion funnel analytics pinpoint your exact stage-wise drop-offs.</span>
+                  <span>Shared peer interview vault to learn real questions from past drives.</span>
                 </li>
               </ul>
             </div>
@@ -340,13 +341,14 @@ export default function Landing() {
             {/* Bento Card 4 */}
             <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-7 sm:p-8 space-y-4 hover:border-slate-700 transition-colors">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/20 text-sky-400 ring-1 ring-sky-500/30">
-                <BarChart3 size={24} />
+                <Users size={24} />
               </div>
-              <h3 className="text-lg font-bold text-white">Funnel &amp; Drop-off Analytics</h3>
+              <h3 className="text-lg font-bold text-white">Peer Interview Vault &amp; Archives</h3>
               <p className="text-sm text-slate-400 leading-relaxed">
-                Visual funnel highlighting your steepest drop-offs, shortlist rates, and active pipeline health so you can adjust prep mid-season.
+                Discover real campus interview questions, tips, and drive breakdowns shared by peers with full anonymity options.
               </p>
             </div>
+
 
             {/* Bento Card 5 */}
             <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-7 sm:p-8 space-y-4 hover:border-slate-700 transition-colors">

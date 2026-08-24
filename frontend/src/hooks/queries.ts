@@ -3,9 +3,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../lib/api'
 import { toDateTimeLocal } from '../lib/format'
 import type {
-  AnalyticsOverview,
   Company,
   CompanyInput,
+  Experience,
+  ExperienceFilters,
+  ExperienceInput,
   JournalEntry,
   JournalInput,
   Round,
@@ -23,8 +25,10 @@ export const qk = {
   upcoming: ['rounds', 'upcoming'] as const,
   roundJournals: (roundId: number) => ['journal', 'round', roundId] as const,
   journalAll: ['journal-all'] as const,
-  analytics: ['analytics'] as const,
+  experiences: (filters?: ExperienceFilters) => ['experiences', filters] as const,
+  experience: (id: number) => ['experience', id] as const,
 }
+
 
 // ---------------------------------------------------------------- Companies
 
@@ -56,7 +60,6 @@ export function useSaveCompany() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.companies })
       qc.invalidateQueries({ queryKey: ['company'] })
-      qc.invalidateQueries({ queryKey: qk.analytics })
     },
   })
 }
@@ -98,10 +101,6 @@ export function useUpdateCompanyStage() {
       if (latestStageByCompany.current.get(id) === stage) {
         latestStageByCompany.current.delete(id)
       }
-      // Only refresh analytics. The companies cache is already up-to-date via
-      // onMutate's optimistic update and onSuccess's authoritative replace,
-      // so re-fetching here would just create the snap-back race.
-      qc.invalidateQueries({ queryKey: qk.analytics })
     },
   })
 }
@@ -116,7 +115,6 @@ export function useDeleteCompany() {
       qc.invalidateQueries({ queryKey: qk.companies })
       qc.invalidateQueries({ queryKey: qk.rounds })
       qc.invalidateQueries({ queryKey: qk.upcoming })
-      qc.invalidateQueries({ queryKey: qk.analytics })
     },
   })
 }
@@ -150,9 +148,9 @@ function invalidateRoundData(qc: ReturnType<typeof useQueryClient>) {
   qc.invalidateQueries({ queryKey: ['company-rounds'] })
   qc.invalidateQueries({ queryKey: qk.rounds })
   qc.invalidateQueries({ queryKey: qk.upcoming })
-  qc.invalidateQueries({ queryKey: qk.analytics })
   qc.invalidateQueries({ queryKey: qk.companies })
 }
+
 
 export function useSaveRound() {
   const qc = useQueryClient()
@@ -233,7 +231,6 @@ function invalidateJournalData(qc: ReturnType<typeof useQueryClient>, roundId?: 
   qc.invalidateQueries({ queryKey: ['company-rounds'] })
   qc.invalidateQueries({ queryKey: qk.rounds })
   qc.invalidateQueries({ queryKey: qk.upcoming })
-  qc.invalidateQueries({ queryKey: qk.analytics })
 }
 
 export function useCreateJournal() {
@@ -270,12 +267,66 @@ export function useDeleteJournal() {
   })
 }
 
-// ---------------------------------------------------------------- Analytics
+// ------------------------------------------------------------- Experiences
 
-export function useAnalytics() {
+export function useExperiences(filters?: ExperienceFilters) {
   return useQuery({
-    queryKey: qk.analytics,
-    queryFn: async () =>
-      (await api.get<AnalyticsOverview>('/analytics/overview')).data,
+    queryKey: qk.experiences(filters),
+    queryFn: async () => {
+      const res = await api.get<Experience[]>('/experiences', {
+        params: {
+          query: filters?.query || undefined,
+          company: filters?.company || undefined,
+          driveType: filters?.driveType || undefined,
+          verdict: filters?.verdict || undefined,
+          difficulty: filters?.difficulty || undefined,
+          sortBy: filters?.sortBy || 'latest',
+        },
+      })
+      return res.data
+    },
+  })
+}
+
+export function useExperience(id: number) {
+  return useQuery({
+    queryKey: qk.experience(id),
+    queryFn: async () => (await api.get<Experience>(`/experiences/${id}`)).data,
+    enabled: Number.isFinite(id),
+  })
+}
+
+export function useCreateExperience() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: ExperienceInput) =>
+      (await api.post<Experience>('/experiences', input)).data,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['experiences'] })
+    },
+  })
+}
+
+export function useDeleteExperience() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: number) => {
+      await api.delete(`/experiences/${id}`)
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['experiences'] })
+    },
+  })
+}
+
+export function useHelpfulExperience() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: number) =>
+      (await api.post<Experience>(`/experiences/${id}/helpful`)).data,
+    onSuccess: (data) => {
+      qc.setQueryData(qk.experience(data.id), data)
+      qc.invalidateQueries({ queryKey: ['experiences'] })
+    },
   })
 }

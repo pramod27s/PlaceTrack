@@ -182,11 +182,18 @@ export function Spinner({ className }: { className?: string }) {
   )
 }
 
-export function LoadingState({ label = 'Loading…' }: { label?: string }) {
+export function LoadingState({
+  label,
+  message,
+}: {
+  label?: string
+  message?: string
+}) {
+  const text = message || label || 'Loading…'
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-20 text-slate-400 dark:text-slate-500">
       <Spinner className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
-      <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{label}</p>
+      <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{text}</p>
     </div>
   )
 }
@@ -219,20 +226,22 @@ export function EmptyState({
 // --------------------------------------------------------------------- Modal
 
 interface ModalProps {
-  open: boolean
+  open?: boolean
   onClose: () => void
   title: string
   description?: string
+  subtitle?: string
   children: ReactNode
   footer?: ReactNode
-  size?: 'md' | 'lg'
+  size?: 'md' | 'lg' | 'xl'
 }
 
 export function Modal({
-  open,
+  open = true,
   onClose,
   title,
   description,
+  subtitle,
   children,
   footer,
   size = 'md',
@@ -241,6 +250,7 @@ export function Modal({
   const descriptionId = useId()
   const closeRef = useRef<HTMLButtonElement>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
+  const displaySubtitle = subtitle || description
 
   useEffect(() => {
     if (!open) return
@@ -287,17 +297,17 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        aria-describedby={description ? descriptionId : undefined}
+        aria-describedby={displaySubtitle ? descriptionId : undefined}
         className={cn(
           'animate-pop my-auto w-full overflow-hidden rounded-2xl bg-white dark:bg-slate-900 shadow-2xl shadow-slate-950/20 dark:shadow-black/50 border border-slate-100 dark:border-slate-800',
-          size === 'lg' ? 'max-w-2xl' : 'max-w-lg',
+          size === 'xl' ? 'max-w-4xl' : size === 'lg' ? 'max-w-2xl' : 'max-w-lg',
         )}
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 dark:border-slate-800 px-5 py-4 sm:px-6">
           <div className="min-w-0">
             <h2 id={titleId} className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight">{title}</h2>
-            {description && <p id={descriptionId} className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{description}</p>}
+            {displaySubtitle && <p id={descriptionId} className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{displaySubtitle}</p>}
           </div>
           <IconButton ref={closeRef} onClick={onClose} aria-label="Close dialog" type="button">
             <X size={18} />
@@ -316,10 +326,18 @@ export function Modal({
 
 // ------------------------------------------------------------------- Alert
 
-export function ErrorNote({ message }: { message: string }) {
+export function ErrorNote({
+  message,
+  children,
+}: {
+  message?: string
+  children?: ReactNode
+}) {
+  const content = children || message
+  if (!content) return null
   return (
     <div className="rounded-lg border border-rose-200/80 dark:border-rose-900/50 bg-rose-50/90 dark:bg-rose-950/40 px-3.5 py-2.5 text-xs font-medium text-rose-800 dark:text-rose-300 shadow-sm">
-      {message}
+      {content}
     </div>
   )
 }
@@ -327,30 +345,33 @@ export function ErrorNote({ message }: { message: string }) {
 // ----------------------------------------------------------- ConfirmDialog
 
 export function ConfirmDialog({
-  open,
+  open = true,
   onClose,
+  onCancel,
   onConfirm,
   title,
   message,
   confirmLabel = 'Delete',
   loading,
 }: {
-  open: boolean
-  onClose: () => void
+  open?: boolean
+  onClose?: () => void
+  onCancel?: () => void
   onConfirm: () => void
   title: string
   message: string
   confirmLabel?: string
   loading?: boolean
 }) {
+  const handleClose = onCancel || onClose || (() => {})
   return (
     <Modal
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       title={title}
       footer={
         <>
-          <Button type="button" variant="secondary" onClick={onClose}>
+          <Button type="button" variant="secondary" onClick={handleClose}>
             Cancel
           </Button>
           <Button type="button" variant="danger" onClick={onConfirm} disabled={loading}>
@@ -359,7 +380,7 @@ export function ConfirmDialog({
         </>
       }
     >
-      <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{message}</p>
+      <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">{message}</p>
     </Modal>
   )
 }

@@ -85,24 +85,41 @@ export interface JournalEntry {
   updatedAt: string
 }
 
-export interface FunnelStep {
-  label: string
-  count: number
+export type DriveType = 'ON_CAMPUS' | 'OFF_CAMPUS' | 'POOL_CAMPUS' | 'REFERRAL'
+export type Verdict = 'SELECTED' | 'REJECTED' | 'WAITLISTED' | 'IN_PROGRESS'
+export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD'
+
+export interface Experience {
+  id: number
+  authorName: string
+  authorBatch: string | null
+  isAnonymous: boolean
+  isAuthor: boolean
+  companyName: string
+  role: string
+  ctc: string | null
+  location: string | null
+  driveType: DriveType
+  verdict: Verdict
+  difficulty: Difficulty
+  title: string
+  summary: string | null
+  roundsDetails: string | null
+  questionsAsked: string | null
+  topics: string | null
+  tips: string | null
+  helpfulCount: number
+  createdAt: string
+  updatedAt: string
 }
 
-export interface AnalyticsOverview {
-  totalCompanies: number
-  activeCompanies: number
-  offers: number
-  rejections: number
-  shortlistRate: number
-  offerRate: number
-  stageCounts: Record<Stage, number>
-  funnel: FunnelStep[]
-  totalRounds: number
-  completedRounds: number
-  upcomingRounds: number
-  journalEntries: number
+export interface ExperienceFilters {
+  query?: string
+  company?: string
+  driveType?: DriveType
+  verdict?: Verdict
+  difficulty?: Difficulty
+  sortBy?: 'latest' | 'helpful'
 }
 
 // ---- Request payloads -----------------------------------------------------
@@ -140,3 +157,22 @@ export interface JournalInput {
   resources: string
   rating: number | null
 }
+
+export interface ExperienceInput {
+  companyName: string
+  role: string
+  ctc?: string
+  location?: string
+  driveType: DriveType
+  verdict: Verdict
+  difficulty: Difficulty
+  title: string
+  summary?: string
+  roundsDetails?: string
+  questionsAsked?: string
+  topics?: string
+  tips?: string
+  authorBatch?: string
+  anonymous: boolean
+}
+
