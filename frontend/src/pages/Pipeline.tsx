@@ -4,9 +4,12 @@ import { Building2, CircleCheckBig, Plus, Search, Trophy, X } from 'lucide-react
 import { useCompanies } from '../hooks/queries'
 import { KanbanBoard } from '../components/KanbanBoard'
 import { CompanyModal } from '../components/CompanyModal'
+import { ExperienceModal } from '../components/ExperienceModal'
 import { Button, EmptyState, ErrorNote, Input, LoadingState } from '../components/ui'
 import { cn } from '../lib/format'
-import type { Company } from '../lib/types'
+import type { Company, Verdict } from '../lib/types'
+
+
 
 type FilterType = 'all' | 'active' | 'superset' | 'interview' | 'offer'
 
@@ -14,6 +17,7 @@ export default function Pipeline() {
   const navigate = useNavigate()
   const { data: companies, isLoading, isError } = useCompanies()
   const [modalOpen, setModalOpen] = useState(false)
+  const [shareCompany, setShareCompany] = useState<Company | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<FilterType>('all')
 
@@ -21,6 +25,7 @@ export default function Pipeline() {
     (company: { id: number }) => navigate(`/companies/${company.id}`),
     [navigate],
   )
+
 
   const filteredCompanies = useMemo(() => {
     if (!companies) return []
@@ -210,10 +215,42 @@ export default function Pipeline() {
           }
         />
       ) : (
-        <KanbanBoard companies={filteredCompanies} onCardClick={handleCardClick} />
+        <KanbanBoard
+          companies={filteredCompanies}
+          onCardClick={handleCardClick}
+          onShareExperience={setShareCompany}
+        />
       )}
 
       <CompanyModal open={modalOpen} onClose={() => setModalOpen(false)} />
+
+      {shareCompany && (
+        <ExperienceModal
+          initialData={{
+            companyName: shareCompany.name,
+            role: shareCompany.role || 'Software Engineer',
+            ctc: shareCompany.ctc || '',
+            location: shareCompany.location || '',
+            verdict:
+              shareCompany.stage === 'OFFER'
+                ? ('SELECTED' as Verdict)
+                : shareCompany.stage === 'REJECTED'
+                  ? ('REJECTED' as Verdict)
+                  : ('IN_PROGRESS' as Verdict),
+            title: `${shareCompany.name} ${shareCompany.role || 'Interview'} Experience`,
+            summary:
+              shareCompany.stage === 'OFFER'
+                ? `Cleared offer from ${shareCompany.name}!`
+                : `Interview experience and learnings from ${shareCompany.name}.`,
+            tips: shareCompany.researchNotes
+              ? `Prep Notes: ${shareCompany.researchNotes}`
+              : '',
+            anonymous: true,
+          }}
+          onClose={() => setShareCompany(null)}
+        />
+      )}
     </div>
   )
 }
+

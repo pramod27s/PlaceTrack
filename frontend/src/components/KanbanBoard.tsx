@@ -12,7 +12,7 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import type { CollisionDetection, DragEndEvent, DragStartEvent } from '@dnd-kit/core'
-import { CircleCheckBig, IndianRupee, MapPin, MoveRight, Layers } from 'lucide-react'
+import { CircleCheckBig, IndianRupee, MapPin, MoveRight, Layers, Sparkles } from 'lucide-react'
 import { useUpdateCompanyStage } from '../hooks/queries'
 import { useToast } from '../store/toast'
 import { STAGE_META, STAGE_ORDER } from '../lib/constants'
@@ -22,6 +22,7 @@ import type { Company, Stage } from '../lib/types'
 interface KanbanBoardProps {
   companies: Company[]
   onCardClick: (company: Company) => void
+  onShareExperience?: (company: Company) => void
 }
 
 const stageSet = new Set<Stage>(STAGE_ORDER)
@@ -95,10 +96,12 @@ const KanbanCard = memo(function KanbanCard({
   company,
   onSelect,
   onMove,
+  onShareExperience,
 }: {
   company: Company
   onSelect: (company: Company) => void
   onMove: (company: Company, stage: Stage) => void
+  onShareExperience?: (company: Company) => void
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: String(company.id),
@@ -120,6 +123,31 @@ const KanbanCard = memo(function KanbanCard({
       )}
     >
       <CardBody company={company} />
+
+      {/* 🚀 Quick Share Experience Button on Card */}
+      {(company.stage === 'OFFER' || company.stage === 'REJECTED') && (
+        <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/80">
+          <button
+            type="button"
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation()
+              onShareExperience?.(company)
+            }}
+            className={cn(
+              'w-full flex items-center justify-center gap-1.5 rounded-lg py-1.5 px-2 text-xs font-bold transition-all shadow-xs',
+              company.stage === 'OFFER'
+                ? 'bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-300 dark:ring-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/60'
+                : 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-300 dark:ring-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/60',
+            )}
+            title="Publish interview experience to Community Vault"
+          >
+            <Sparkles size={12} className={company.stage === 'OFFER' ? 'text-emerald-600 dark:text-emerald-400' : 'text-indigo-600 dark:text-indigo-400'} />
+            <span>{company.stage === 'OFFER' ? 'Share Offer Story' : 'Share Interview Experience'}</span>
+          </button>
+        </div>
+      )}
+
       <label
         className="mt-3 flex items-center gap-2 border-t border-slate-100 dark:border-slate-800/80 pt-2 text-xs font-medium text-slate-500 dark:text-slate-400 sm:hidden"
         onPointerDown={(event) => event.stopPropagation()}
@@ -144,16 +172,19 @@ const KanbanCard = memo(function KanbanCard({
   )
 })
 
+
 const KanbanColumn = memo(function KanbanColumn({
   stage,
   companies,
   onCardClick,
   onMove,
+  onShareExperience,
 }: {
   stage: Stage
   companies: Company[]
   onCardClick: (company: Company) => void
   onMove: (company: Company, stage: Stage) => void
+  onShareExperience?: (company: Company) => void
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: stage })
   const meta = STAGE_META[stage]
@@ -186,6 +217,7 @@ const KanbanColumn = memo(function KanbanColumn({
             company={company}
             onSelect={onCardClick}
             onMove={onMove}
+            onShareExperience={onShareExperience}
           />
         ))}
         {companies.length === 0 && (
@@ -198,7 +230,7 @@ const KanbanColumn = memo(function KanbanColumn({
   )
 })
 
-export function KanbanBoard({ companies, onCardClick }: KanbanBoardProps) {
+export function KanbanBoard({ companies, onCardClick, onShareExperience }: KanbanBoardProps) {
   const updateStage = useUpdateCompanyStage()
   const [activeId, setActiveId] = useState<number | null>(null)
 
@@ -298,6 +330,7 @@ export function KanbanBoard({ companies, onCardClick }: KanbanBoardProps) {
             companies={byStage[stage]}
             onCardClick={onCardClick}
             onMove={handleMove}
+            onShareExperience={onShareExperience}
           />
         ))}
       </div>
@@ -312,3 +345,4 @@ export function KanbanBoard({ companies, onCardClick }: KanbanBoardProps) {
     </DndContext>
   )
 }
+
