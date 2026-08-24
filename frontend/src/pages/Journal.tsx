@@ -300,14 +300,17 @@ export default function Journal() {
     setShareExperienceData({
       companyName: entry.companyName,
       role: 'Software Engineer',
-      title: `${entry.companyName} ${entry.roundType || 'Interview'} Experience`,
+      verdict: 'IN_PROGRESS',
+      title: `${entry.companyName} — ${entry.roundType || 'Interview'} Round Experience`,
+      summary: `Questions and reflection from the ${entry.roundType || 'recent'} round (Drive is currently in progress).`,
       questionsAsked: entry.questionsAsked ?? '',
       topics: entry.topics ?? '',
-      roundsDetails: `• ${entry.roundType || 'Round'}: ${entry.title || 'Interview'}\nWhat went well: ${entry.whatWentWell || 'N/A'}\nWhat flopped: ${entry.whatFlopped || 'N/A'}`,
+      roundsDetails: `• ${entry.roundType || 'Round'}: ${entry.title || 'Discussion'}\n- What went well: ${entry.whatWentWell || 'N/A'}\n- What flopped: ${entry.whatFlopped || 'N/A'}`,
       tips: entry.resources ? `Resources: ${entry.resources}` : (entry.whatWentWell ? `Focus on: ${entry.whatWentWell}` : ''),
       anonymous: true,
     })
   }
+
 
   const handleShareGroup = (group: RoundGroup) => {
     const combinedQuestions = group.entries
