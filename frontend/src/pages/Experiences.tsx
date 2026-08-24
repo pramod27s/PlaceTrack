@@ -21,8 +21,9 @@ import {
   VERDICTS,
   VERDICT_META,
 } from '../lib/constants'
-import { formatDate } from '../lib/format'
+import { cn, formatDate } from '../lib/format'
 import { useExperiences, useHelpfulExperience } from '../hooks/queries'
+
 import { ExperienceDetailModal } from '../components/ExperienceDetailModal'
 import { ExperienceModal } from '../components/ExperienceModal'
 import { Button, EmptyState, ErrorNote, Input, LoadingState, Select } from '../components/ui'
@@ -453,12 +454,25 @@ export default function Experiences() {
                         e.stopPropagation()
                         helpfulMutation.mutate(exp.id)
                       }}
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                      title="Mark as helpful"
+                      className={cn(
+                        'inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-semibold transition-all',
+                        exp.hasLiked
+                          ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/80 dark:text-indigo-300 ring-1 ring-indigo-300 dark:ring-indigo-700'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800',
+                      )}
+                      title={exp.hasLiked ? 'You liked this (Click to undo)' : 'Mark as helpful'}
                     >
-                      <ThumbsUp size={13} className="text-indigo-500" />
+                      <ThumbsUp
+                        size={13}
+                        className={cn(
+                          exp.hasLiked
+                            ? 'fill-indigo-600 text-indigo-600 dark:fill-indigo-400 dark:text-indigo-400'
+                            : 'text-indigo-500',
+                        )}
+                      />
                       <span>{exp.helpfulCount}</span>
                     </button>
+
 
                     <span className="inline-flex items-center text-xs font-bold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform">
                       Read full <ChevronRight size={14} />

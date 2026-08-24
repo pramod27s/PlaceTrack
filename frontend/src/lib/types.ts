@@ -97,7 +97,9 @@ export interface Experience {
   authorBatch: string | null
   isAnonymous: boolean
   isAuthor: boolean
+  hasLiked: boolean
   companyName: string
+
   role: string
   ctc: string | null
   location: string | null

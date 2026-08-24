@@ -104,11 +104,22 @@ public class ExperienceService {
     }
 
     @Transactional
-    public ExperienceResponse incrementHelpful(User currentUser, Long id) {
+    public ExperienceResponse toggleHelpful(User currentUser, Long id) {
         Experience experience = experienceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Experience post not found with id " + id));
 
-        experience.setHelpfulCount(experience.getHelpfulCount() + 1);
+        if (currentUser != null) {
+            if (experience.getHelpfulUserIds() == null) {
+                experience.setHelpfulUserIds(new java.util.HashSet<>());
+            }
+            if (experience.getHelpfulUserIds().contains(currentUser.getId())) {
+                experience.getHelpfulUserIds().remove(currentUser.getId());
+            } else {
+                experience.getHelpfulUserIds().add(currentUser.getId());
+            }
+            experience.setHelpfulCount(experience.getHelpfulUserIds().size());
+        }
+
         Experience saved = experienceRepository.save(experience);
         return toResponse(saved, currentUser);
     }
@@ -117,6 +128,10 @@ public class ExperienceService {
         boolean isAuthor = currentUser != null &&
                 experience.getUser() != null &&
                 currentUser.getId().equals(experience.getUser().getId());
+
+        boolean hasLiked = currentUser != null &&
+                experience.getHelpfulUserIds() != null &&
+                experience.getHelpfulUserIds().contains(currentUser.getId());
 
         String displayAuthor = experience.isAnonymous()
                 ? (isAuthor ? experience.getAuthorName() + " (You - Anonymous)" : "Anonymous Student")
@@ -132,6 +147,7 @@ public class ExperienceService {
                 displayBatch,
                 experience.isAnonymous(),
                 isAuthor,
+                hasLiked,
                 experience.getCompanyName(),
                 experience.getRole(),
                 experience.getCtc(),
@@ -151,3 +167,4 @@ public class ExperienceService {
         );
     }
 }
+

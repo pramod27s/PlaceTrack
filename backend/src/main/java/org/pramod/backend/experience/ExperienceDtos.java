@@ -58,6 +58,7 @@ public final class ExperienceDtos {
             String authorBatch,
             boolean isAnonymous,
             boolean isAuthor,
+            boolean hasLiked,
             String companyName,
             String role,
             String ctc,
@@ -76,3 +77,4 @@ public final class ExperienceDtos {
             Instant updatedAt
     ) {}
 }
+

@@ -58,10 +58,11 @@ public class ExperienceController {
     }
 
     @PostMapping("/{id}/helpful")
-    public ExperienceResponse incrementHelpful(
+    public ExperienceResponse toggleHelpful(
             @AuthenticationPrincipal User user,
             @PathVariable Long id
     ) {
-        return experienceService.incrementHelpful(user, id);
+        return experienceService.toggleHelpful(user, id);
     }
 }
+

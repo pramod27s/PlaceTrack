@@ -17,8 +17,9 @@ import {
   DRIVE_TYPE_META,
   VERDICT_META,
 } from '../lib/constants'
-import { formatDate } from '../lib/format'
+import { cn, formatDate } from '../lib/format'
 import { useDeleteExperience, useHelpfulExperience } from '../hooks/queries'
+
 import { Button, ConfirmDialog, Modal } from './ui'
 import type { Experience } from '../lib/types'
 
@@ -138,11 +139,25 @@ export function ExperienceDetailModal({
                 size="sm"
                 onClick={handleHelpful}
                 disabled={helpfulMutation.isPending}
-                className="gap-1.5 text-xs font-semibold hover:border-indigo-300 dark:hover:border-indigo-600"
+                className={cn(
+                  'gap-1.5 text-xs font-semibold transition-all',
+                  experience.hasLiked
+                    ? 'bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-600 dark:text-white dark:hover:bg-indigo-500 shadow-sm'
+                    : 'hover:border-indigo-300 dark:hover:border-indigo-600',
+                )}
+                title={experience.hasLiked ? 'You found this helpful (Click to undo)' : 'Mark as helpful'}
               >
-                <ThumbsUp size={13} className="text-indigo-600 dark:text-indigo-400" />
+                <ThumbsUp
+                  size={13}
+                  className={cn(
+                    experience.hasLiked
+                      ? 'fill-white text-white'
+                      : 'text-indigo-600 dark:text-indigo-400',
+                  )}
+                />
                 <span>Helpful ({experience.helpfulCount})</span>
               </Button>
+
 
               <Button
                 variant="ghost"

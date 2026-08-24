@@ -78,8 +78,18 @@ public class Experience {
     @Builder.Default
     private int helpfulCount = 0;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "experience_helpful_users",
+            joinColumns = @JoinColumn(name = "experience_id")
+    )
+    @Column(name = "user_id")
+    @Builder.Default
+    private java.util.Set<Long> helpfulUserIds = new java.util.HashSet<>();
+
     @Column(nullable = false)
     private Instant createdAt;
+
 
     @Column(nullable = false)
     private Instant updatedAt;
