@@ -27,6 +27,7 @@ import { CompanyModal } from '../components/CompanyModal'
 import { RoundModal } from '../components/RoundModal'
 import { RoundJournalsModal } from '../components/RoundJournalsModal'
 import { RoundListItem } from '../components/RoundListItem'
+import { ExperienceModal } from '../components/ExperienceModal'
 import {
   Badge,
   Button,
@@ -38,7 +39,8 @@ import {
 } from '../components/ui'
 import { STAGE_META } from '../lib/constants'
 import { cn, formatDate, initials } from '../lib/format'
-import type { Round } from '../lib/types'
+import type { ExperienceInput, Round, Verdict } from '../lib/types'
+
 
 function InfoRow({
   icon,
@@ -76,6 +78,7 @@ export default function CompanyDetail() {
   const [journalRound, setJournalRound] = useState<Round | null>(null)
   const [pendingRound, setPendingRound] = useState<Round | null>(null)
   const [confirmCompany, setConfirmCompany] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
 
   if (company.isLoading) return <LoadingState label="Loading company details…" />
   if (company.isError || !company.data) {
@@ -94,6 +97,40 @@ export default function CompanyDetail() {
   const c = company.data
   const stage = STAGE_META[c.stage]
   const roundList = rounds.data ?? []
+
+  const verdict: Verdict =
+    c.stage === 'OFFER'
+      ? 'SELECTED'
+      : c.stage === 'REJECTED'
+        ? 'REJECTED'
+        : 'IN_PROGRESS'
+
+  const shareInitialData: Partial<ExperienceInput> = {
+    companyName: c.name,
+    role: c.role || 'Software Engineer',
+    ctc: c.ctc || '',
+    location: c.location || '',
+    verdict,
+    title: `${c.name} ${c.role || 'Interview'} Experience`,
+    summary:
+      c.stage === 'OFFER'
+        ? `Received full-time offer from ${c.name}! Here is my interview journey and round breakdown.`
+        : c.stage === 'REJECTED'
+          ? `Interview experience & learnings from ${c.name}.`
+          : `Interview notes and questions for ${c.name} (Drive in progress).`,
+    roundsDetails:
+      roundList.length > 0
+        ? roundList
+            .map(
+              (r, i) =>
+                `• Round ${i + 1} (${r.type}): ${r.title || r.type} — Status: ${r.status}`,
+            )
+            .join('\n\n')
+        : '',
+    tips: c.researchNotes ? `Prep Notes: ${c.researchNotes}` : '',
+
+    anonymous: true,
+  }
 
   const handleDeleteCompany = async () => {
     await deleteCompany.mutateAsync(c.id)
@@ -116,6 +153,59 @@ export default function CompanyDetail() {
         Back to pipeline
       </Link>
 
+      {/* 🚀 Offer / Cleared Callout */}
+      {c.stage === 'OFFER' && (
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-emerald-300 dark:border-emerald-700/60 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-transparent dark:from-emerald-950/40 dark:via-teal-950/30 p-5 sm:p-6 shadow-sm">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 ring-2 ring-emerald-500/30">
+              <Sparkles size={24} />
+            </div>
+            <div>
+              <p className="text-base font-extrabold text-slate-900 dark:text-slate-100">
+                Offer Cleared from {c.name}! 🎉
+              </p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                Help fellow students by publishing your complete interview journey, questions asked, and preparation advice.
+              </p>
+            </div>
+          </div>
+          <Button
+            onClick={() => setShareOpen(true)}
+            className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md shadow-emerald-600/20"
+          >
+            <Sparkles size={14} />
+            Share Selected Experience 🚀
+          </Button>
+        </div>
+      )}
+
+      {/* 💡 Rejected / Learning Callout */}
+      {c.stage === 'REJECTED' && (
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 p-5 sm:p-6 shadow-sm">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 ring-2 ring-indigo-500/20">
+              <Sparkles size={24} />
+            </div>
+            <div>
+              <p className="text-base font-extrabold text-slate-900 dark:text-slate-100">
+                Share your learnings from {c.name} 💪
+              </p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                Every interview is valuable data. Help peers by documenting the questions asked and technical concepts tested.
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="secondary"
+            onClick={() => setShareOpen(true)}
+            className="gap-2 font-bold hover:border-indigo-300 dark:hover:border-indigo-700"
+          >
+            <Sparkles size={14} className="text-indigo-600 dark:text-indigo-400" />
+            Share Learnings to Vault
+          </Button>
+        </div>
+      )}
+
       {/* Hero Header Card */}
       <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -132,7 +222,16 @@ export default function CompanyDetail() {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setShareOpen(true)}
+              className="gap-1.5 font-semibold text-indigo-600 dark:text-indigo-400 hover:border-indigo-300 dark:hover:border-indigo-700"
+            >
+              <Sparkles size={14} />
+              Share Experience
+            </Button>
             <Button variant="secondary" size="sm" onClick={() => setEditOpen(true)}>
               <Pencil size={14} />
               Edit details
@@ -148,6 +247,7 @@ export default function CompanyDetail() {
             </Button>
           </div>
         </div>
+
 
         {/* Company Meta Grid */}
         <div className="mt-6 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
@@ -275,11 +375,18 @@ export default function CompanyDetail() {
 
       {/* Modals */}
       <CompanyModal open={editOpen} onClose={() => setEditOpen(false)} company={c} />
+      {shareOpen && (
+        <ExperienceModal
+          initialData={shareInitialData}
+          onClose={() => setShareOpen(false)}
+        />
+      )}
       <RoundModal
         open={addRoundOpen}
         onClose={() => setAddRoundOpen(false)}
         companyId={c.id}
       />
+
       {editRound && (
         <RoundModal open onClose={() => setEditRound(null)} round={editRound} />
       )}
