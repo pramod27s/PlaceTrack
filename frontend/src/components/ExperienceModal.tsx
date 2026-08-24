@@ -19,6 +19,7 @@ interface ExperienceModalProps {
   onClose: () => void
   initialCompany?: string
   initialRole?: string
+  initialData?: Partial<ExperienceInput>
 }
 
 const EMPTY: ExperienceInput = {
@@ -43,17 +44,20 @@ export function ExperienceModal({
   onClose,
   initialCompany,
   initialRole,
+  initialData,
 }: ExperienceModalProps) {
   const create = useCreateExperience()
   const [form, setForm] = useState<ExperienceInput>(() => ({
     ...EMPTY,
-    companyName: initialCompany ?? '',
-    role: initialRole ?? '',
-    title: initialCompany
-      ? `${initialCompany} ${initialRole || 'Interview'} Experience`
-      : '',
+    companyName: initialCompany || initialData?.companyName || '',
+    role: initialRole || initialData?.role || '',
+    title:
+      initialData?.title ||
+      (initialCompany ? `${initialCompany} Interview Experience` : ''),
+    ...initialData,
   }))
   const [error, setError] = useState('')
+
 
   const set = <K extends keyof ExperienceInput>(key: K, value: ExperienceInput[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }))

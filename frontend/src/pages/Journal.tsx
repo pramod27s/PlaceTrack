@@ -14,6 +14,7 @@ import {
 import { apiError } from '../lib/api'
 import { useAllJournal, useDeleteJournal } from '../hooks/queries'
 import { JournalModal } from '../components/JournalModal'
+import { ExperienceModal } from '../components/ExperienceModal'
 import type { JournalRoundContext } from '../components/JournalModal'
 import {
   Badge,
@@ -28,8 +29,7 @@ import {
 } from '../components/ui'
 import { ROUND_TYPE_META } from '../lib/constants'
 import { cn, formatDate } from '../lib/format'
-import type { JournalEntry } from '../lib/types'
-
+import type { ExperienceInput, JournalEntry } from '../lib/types'
 
 /** All entries that belong to the same round, plus the round context. */
 interface RoundGroup {
@@ -68,10 +68,12 @@ function EntryCard({
   entry,
   onEdit,
   onDelete,
+  onShare,
 }: {
   entry: JournalEntry
   onEdit: () => void
   onDelete: () => void
+  onShare: () => void
 }) {
   const hasContent =
     entry.questionsAsked ||
@@ -98,6 +100,16 @@ function EntryCard({
         </div>
         <div className="flex items-center gap-2">
           <Rating value={entry.rating} />
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={onShare}
+            className="gap-1.5 text-xs font-semibold hover:border-indigo-300 dark:hover:border-indigo-700"
+            title="Publish this interview note to Community Vault"
+          >
+            <Sparkles size={12} className="text-indigo-600 dark:text-indigo-400" />
+            <span>Share to Vault</span>
+          </Button>
           <IconButton title="Edit entry" onClick={onEdit}>
             <Pencil size={14} />
           </IconButton>
@@ -129,11 +141,15 @@ function RoundGroupCard({
   onAddEntry,
   onEditEntry,
   onDeleteEntry,
+  onShareEntry,
+  onShareGroup,
 }: {
   group: RoundGroup
   onAddEntry: (round: JournalRoundContext) => void
   onEditEntry: (entry: JournalEntry) => void
   onDeleteEntry: (entry: JournalEntry) => void
+  onShareEntry: (entry: JournalEntry) => void
+  onShareGroup: (group: RoundGroup) => void
 }) {
   const type = ROUND_TYPE_META[group.round.type]
   return (
@@ -154,10 +170,21 @@ function RoundGroupCard({
             {group.entries.length} {group.entries.length === 1 ? 'entry logged' : 'entries logged'}
           </p>
         </div>
-        <Button variant="secondary" size="sm" onClick={() => onAddEntry(group.round)}>
-          <Plus size={14} />
-          Add note
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => onShareGroup(group)}
+            className="gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400"
+          >
+            <Sparkles size={13} />
+            <span>Share Full Experience</span>
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => onAddEntry(group.round)}>
+            <Plus size={14} />
+            Add note
+          </Button>
+        </div>
       </div>
 
       <div className="mt-4 space-y-3">
@@ -167,12 +194,14 @@ function RoundGroupCard({
             entry={entry}
             onEdit={() => onEditEntry(entry)}
             onDelete={() => onDeleteEntry(entry)}
+            onShare={() => onShareEntry(entry)}
           />
         ))}
       </div>
     </Card>
   )
 }
+
 
 function JournalStarter() {
   return (
@@ -264,7 +293,56 @@ export default function Journal() {
   const [editEntry, setEditEntry] = useState<JournalEntry | null>(null)
   const [addRound, setAddRound] = useState<JournalRoundContext | null>(null)
   const [pendingDelete, setPendingDelete] = useState<JournalEntry | null>(null)
+  const [shareExperienceData, setShareExperienceData] = useState<Partial<ExperienceInput> | null>(null)
   const [error, setError] = useState('')
+
+  const handleShareEntry = (entry: JournalEntry) => {
+    setShareExperienceData({
+      companyName: entry.companyName,
+      role: 'Software Engineer',
+      title: `${entry.companyName} ${entry.roundType || 'Interview'} Experience`,
+      questionsAsked: entry.questionsAsked ?? '',
+      topics: entry.topics ?? '',
+      roundsDetails: `• ${entry.roundType || 'Round'}: ${entry.title || 'Interview'}\nWhat went well: ${entry.whatWentWell || 'N/A'}\nWhat flopped: ${entry.whatFlopped || 'N/A'}`,
+      tips: entry.resources ? `Resources: ${entry.resources}` : (entry.whatWentWell ? `Focus on: ${entry.whatWentWell}` : ''),
+      anonymous: true,
+    })
+  }
+
+  const handleShareGroup = (group: RoundGroup) => {
+    const combinedQuestions = group.entries
+      .map((e) => e.questionsAsked)
+      .filter(Boolean)
+      .join('\n')
+    const combinedTopics = Array.from(
+      new Set(
+        group.entries
+          .map((e) => e.topics)
+          .filter(Boolean)
+          .join(',')
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean),
+      ),
+    ).join(', ')
+
+    const roundsText = group.entries
+      .map(
+        (e, idx) =>
+          `Round ${idx + 1} (${group.round.type}): ${e.title || 'Discussion'}\n- What went well: ${e.whatWentWell || 'N/A'}\n- What flopped: ${e.whatFlopped || 'N/A'}`,
+      )
+      .join('\n\n')
+
+    setShareExperienceData({
+      companyName: group.round.companyName,
+      role: 'Software Engineer',
+      title: `${group.round.companyName} Interview Experience`,
+      questionsAsked: combinedQuestions,
+      topics: combinedTopics,
+      roundsDetails: roundsText,
+      anonymous: true,
+    })
+  }
 
   const groups = useMemo(() => {
     if (!entries) return []
@@ -365,6 +443,8 @@ export default function Journal() {
               onAddEntry={setAddRound}
               onEditEntry={setEditEntry}
               onDeleteEntry={setPendingDelete}
+              onShareEntry={handleShareEntry}
+              onShareGroup={handleShareGroup}
             />
           ))}
         </div>
@@ -385,6 +465,12 @@ export default function Journal() {
       {addRound && (
         <JournalModal round={addRound} onClose={() => setAddRound(null)} />
       )}
+      {shareExperienceData && (
+        <ExperienceModal
+          initialData={shareExperienceData}
+          onClose={() => setShareExperienceData(null)}
+        />
+      )}
       <ConfirmDialog
         open={pendingDelete !== null}
         onClose={() => setPendingDelete(null)}
@@ -393,7 +479,7 @@ export default function Journal() {
         title="Delete this entry?"
         message={
           pendingDelete
-            ? `"${pendingDelete.title?.trim() || 'Untitled entry'}" for ${pendingDelete.companyName} will be permanently removed.`
+            ? `Delete the note for "${pendingDelete.companyName}" (${formatDate(pendingDelete.roundScheduledAt)})?`
             : ''
         }
       />
