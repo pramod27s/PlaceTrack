@@ -47,8 +47,10 @@ public final class ExperienceDtos {
             @Size(max = 50, message = "Batch cannot exceed 50 characters")
             String authorBatch,
 
-            boolean anonymous
+            boolean anonymous,
+            Long journalEntryId
     ) {}
+
 
     public record ExperienceResponse(
             Long id,

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   CalendarClock,
+  CheckCircle2,
   NotebookPen,
   Pencil,
   Plus,
@@ -30,6 +31,7 @@ import {
 import { ROUND_TYPE_META } from '../lib/constants'
 import { cn, formatDate } from '../lib/format'
 import type { ExperienceInput, JournalEntry } from '../lib/types'
+
 
 /** All entries that belong to the same round, plus the round context. */
 interface RoundGroup {
@@ -100,16 +102,26 @@ function EntryCard({
         </div>
         <div className="flex items-center gap-2">
           <Rating value={entry.rating} />
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={onShare}
-            className="gap-1.5 text-xs font-semibold hover:border-indigo-300 dark:hover:border-indigo-700"
-            title="Publish this interview note to Community Vault"
-          >
-            <Sparkles size={12} className="text-indigo-600 dark:text-indigo-400" />
-            <span>Share to Vault</span>
-          </Button>
+          {entry.isShared ? (
+            <span
+              className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-300 dark:ring-emerald-800"
+              title="This reflection has been published to the Community Vault"
+            >
+              <CheckCircle2 size={12} className="text-emerald-600 dark:text-emerald-400" />
+              <span>Shared to Vault</span>
+            </span>
+          ) : (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={onShare}
+              className="gap-1.5 text-xs font-semibold hover:border-indigo-300 dark:hover:border-indigo-700"
+              title="Publish this interview note to Community Vault"
+            >
+              <Sparkles size={12} className="text-indigo-600 dark:text-indigo-400" />
+              <span>Share to Vault</span>
+            </Button>
+          )}
           <IconButton title="Edit entry" onClick={onEdit}>
             <Pencil size={14} />
           </IconButton>
@@ -121,6 +133,7 @@ function EntryCard({
             <Trash2 size={14} />
           </IconButton>
         </div>
+
       </div>
 
       {hasContent && (
@@ -308,8 +321,10 @@ export default function Journal() {
       roundsDetails: `• ${entry.roundType || 'Round'}: ${entry.title || 'Discussion'}\n- What went well: ${entry.whatWentWell || 'N/A'}\n- What flopped: ${entry.whatFlopped || 'N/A'}`,
       tips: entry.resources ? `Resources: ${entry.resources}` : (entry.whatWentWell ? `Focus on: ${entry.whatWentWell}` : ''),
       anonymous: true,
+      journalEntryId: entry.id,
     })
   }
+
 
 
   const handleShareGroup = (group: RoundGroup) => {

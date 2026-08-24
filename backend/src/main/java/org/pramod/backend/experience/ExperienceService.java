@@ -5,6 +5,8 @@ import org.pramod.backend.exception.BadRequestException;
 import org.pramod.backend.exception.ResourceNotFoundException;
 import org.pramod.backend.experience.ExperienceDtos.ExperienceRequest;
 import org.pramod.backend.experience.ExperienceDtos.ExperienceResponse;
+import org.pramod.backend.journal.JournalEntry;
+import org.pramod.backend.journal.JournalRepository;
 import org.pramod.backend.user.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,7 @@ import java.util.List;
 public class ExperienceService {
 
     private final ExperienceRepository experienceRepository;
+    private final JournalRepository journalRepository;
 
     @Transactional(readOnly = true)
     public List<ExperienceResponse> search(User currentUser,
@@ -73,8 +76,20 @@ public class ExperienceService {
                 .helpfulCount(0)
                 .build();
 
-        return toResponse(experienceRepository.save(experience), user);
+        Experience saved = experienceRepository.save(experience);
+
+        if (request.journalEntryId() != null) {
+            journalRepository.findById(request.journalEntryId()).ifPresent(j -> {
+                if (j.getRound().getCompany().getUser().getId().equals(user.getId())) {
+                    j.setShared(true);
+                    journalRepository.save(j);
+                }
+            });
+        }
+
+        return toResponse(saved, user);
     }
+
 
     @Transactional
     public void delete(User user, Long id) {

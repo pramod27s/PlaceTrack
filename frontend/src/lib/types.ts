@@ -81,9 +81,11 @@ export interface JournalEntry {
   whatFlopped: string | null
   resources: string | null
   rating: number | null
+  isShared: boolean
   createdAt: string
   updatedAt: string
 }
+
 
 export type DriveType = 'ON_CAMPUS' | 'OFF_CAMPUS' | 'POOL_CAMPUS' | 'REFERRAL'
 export type Verdict = 'SELECTED' | 'REJECTED' | 'WAITLISTED' | 'IN_PROGRESS'
@@ -174,5 +176,7 @@ export interface ExperienceInput {
   tips?: string
   authorBatch?: string
   anonymous: boolean
+  journalEntryId?: number
 }
+
 

@@ -303,9 +303,12 @@ export function useCreateExperience() {
       (await api.post<Experience>('/experiences', input)).data,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['experiences'] })
+      qc.invalidateQueries({ queryKey: qk.journalAll })
+      qc.invalidateQueries({ queryKey: ['journal'] })
     },
   })
 }
+
 
 export function useDeleteExperience() {
   const qc = useQueryClient()

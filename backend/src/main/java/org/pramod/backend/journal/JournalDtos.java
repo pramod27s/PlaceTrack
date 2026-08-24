@@ -38,7 +38,9 @@ public final class JournalDtos {
             String whatFlopped,
             String resources,
             Integer rating,
+            boolean isShared,
             Instant createdAt,
             Instant updatedAt) {
     }
 }
+

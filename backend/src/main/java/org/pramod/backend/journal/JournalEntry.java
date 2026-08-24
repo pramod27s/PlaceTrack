@@ -51,7 +51,12 @@ public class JournalEntry {
     private Integer rating;
 
     @Column(nullable = false)
+    @Builder.Default
+    private boolean isShared = false;
+
+    @Column(nullable = false)
     private Instant createdAt;
+
 
     @Column(nullable = false)
     private Instant updatedAt;

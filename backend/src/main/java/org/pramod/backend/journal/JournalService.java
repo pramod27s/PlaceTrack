@@ -93,9 +93,11 @@ public class JournalService {
                 e.getWhatFlopped(),
                 e.getResources(),
                 e.getRating(),
+                e.isShared(),
                 e.getCreatedAt(),
                 e.getUpdatedAt());
     }
+
 
     private static String blankToNull(String value) {
         if (value == null) {
