@@ -47,6 +47,7 @@ public final class RoundDtos {
             String location,
             RoundStatus status,
             boolean hasJournal,
+            boolean addedToCalendar,
             List<ConflictDto> conflicts,
             Instant createdAt) {
     }

@@ -78,6 +78,14 @@ public class RoundService {
         roundRepository.delete(round);
     }
 
+    @Transactional
+    public RoundResponse markCalendarAdded(User user, Long roundId) {
+        Round round = require(user, roundId);
+        round.setAddedToCalendar(true);
+        round = roundRepository.save(round);
+        return toResponse(round, roundRepository.findByCompany_UserOrderByScheduledAtAsc(user));
+    }
+
     /** Loads a round, enforcing that it belongs to the calling user. */
     public Round require(User user, Long roundId) {
         Round round = roundRepository.findById(roundId)
@@ -117,6 +125,7 @@ public class RoundService {
                 round.getLocation(),
                 round.getStatus(),
                 journalRepository.existsByRound(round),
+                round.isAddedToCalendar(),
                 conflicts,
                 round.getCreatedAt());
     }

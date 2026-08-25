@@ -55,6 +55,10 @@ public class Round {
     private RoundStatus status;
 
     @Column(nullable = false)
+    @Builder.Default
+    private boolean addedToCalendar = false;
+
+    @Column(nullable = false)
     private Instant createdAt;
 
     @PrePersist

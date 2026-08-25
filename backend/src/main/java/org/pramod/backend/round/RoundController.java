@@ -51,6 +51,11 @@ public class RoundController {
         return roundService.update(user, id, request);
     }
 
+    @PatchMapping("/rounds/{id}/calendar")
+    public RoundResponse markCalendarAdded(@AuthenticationPrincipal User user, @PathVariable Long id) {
+        return roundService.markCalendarAdded(user, id);
+    }
+
     @DeleteMapping("/rounds/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@AuthenticationPrincipal User user, @PathVariable Long id) {

@@ -63,6 +63,7 @@ export interface Round {
   location: string | null
   status: RoundStatus
   hasJournal: boolean
+  addedToCalendar: boolean
   conflicts: RoundConflict[]
   createdAt: string
 }

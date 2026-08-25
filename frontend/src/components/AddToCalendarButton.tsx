@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { CalendarPlus, Download, ExternalLink } from 'lucide-react'
+import { CalendarPlus, Check, Download, ExternalLink } from 'lucide-react'
 import { downloadIcsFile, getGoogleCalendarUrl } from '../lib/calendar'
-import { cn } from '../lib/format'
+import { cn, isPastIso } from '../lib/format'
+import { useMarkRoundCalendarAdded } from '../hooks/queries'
 import type { Round } from '../lib/types'
 
 interface AddToCalendarButtonProps {
@@ -15,8 +16,16 @@ export function AddToCalendarButton({
   size = 'sm',
   className,
 }: AddToCalendarButtonProps) {
+  // 1. If round time is in the past (before current time), do not show the button
+  if (isPastIso(round.scheduledAt)) {
+    return null
+  }
+
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const markCalendarAdded = useMarkRoundCalendarAdded()
+
+  const isAdded = Boolean(round.addedToCalendar)
 
   useEffect(() => {
     if (!isOpen) return
@@ -39,12 +48,18 @@ export function AddToCalendarButton({
 
   const handleGoogleCalendar = () => {
     setIsOpen(false)
+    if (!isAdded) {
+      markCalendarAdded.mutate(round.id)
+    }
     const url = getGoogleCalendarUrl(round)
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 
   const handleDownloadIcs = () => {
     setIsOpen(false)
+    if (!isAdded) {
+      markCalendarAdded.mutate(round.id)
+    }
     downloadIcsFile(round)
   }
 
@@ -55,14 +70,23 @@ export function AddToCalendarButton({
         onClick={() => setIsOpen((prev) => !prev)}
         aria-haspopup="true"
         aria-expanded={isOpen}
-        title="Add to calendar"
+        title={isAdded ? 'Added to calendar (click to re-sync)' : 'Add to calendar'}
         className={cn(
-          'inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 font-medium text-slate-700 dark:text-slate-200 shadow-sm transition hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500',
+          'inline-flex items-center gap-1.5 rounded-lg border font-medium shadow-xs transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500',
+          isAdded
+            ? 'border-emerald-300 dark:border-emerald-800 bg-emerald-50/90 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-100 dark:hover:bg-emerald-900/60'
+            : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white',
           size === 'sm' ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-sm',
         )}
       >
-        <CalendarPlus size={size === 'sm' ? 14 : 16} className="text-indigo-600 dark:text-indigo-400" />
-        <span>Add to Calendar</span>
+        {isAdded ? (
+          <Check size={size === 'sm' ? 14 : 16} className="text-emerald-600 dark:text-emerald-400 stroke-[3]" />
+        ) : (
+          <CalendarPlus size={size === 'sm' ? 14 : 16} className="text-indigo-600 dark:text-indigo-400" />
+        )}
+        <span className={cn(isAdded && 'font-semibold')}>
+          {isAdded ? 'Added to Calendar' : 'Add to Calendar'}
+        </span>
       </button>
 
       {isOpen && (

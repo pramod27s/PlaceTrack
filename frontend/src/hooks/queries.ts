@@ -193,6 +193,16 @@ export function useUpdateRoundStatus() {
   })
 }
 
+export function useMarkRoundCalendarAdded() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (roundId: number) => {
+      return (await api.patch<Round>(`/rounds/${roundId}/calendar`)).data
+    },
+    onSuccess: () => invalidateRoundData(qc),
+  })
+}
+
 export function useDeleteRound() {
   const qc = useQueryClient()
   return useMutation({
