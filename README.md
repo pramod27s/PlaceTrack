@@ -16,8 +16,8 @@ PlaceTrack gives every student a clear visual pipeline of every company they've 
 | ⚠️ **Conflict Detection** | **Real-Time Collision Engine** | Automatically checks time intervals (`startA < endB && startB < endA`) and surfaces warning banners when tests or interview slots overlap. |
 | 📖 **Interview Journal** | **Compounding Prep Dataset** | Structured 60-second reflection logs after every round (*Questions asked, Topics covered, What went well, What flopped*). Searchable across all past drives. |
 | 🔍 **Pipeline Search & Filter** | **Instant Multi-Tag Filtering** | Real-time search across company name, role, CTC, and location. Quick filter pills for `Active Only`, `Superset Registered`, `In Interviews`, and `Offers`. |
-| 📊 **Conversion Analytics** | **Visual Hiring Funnel** | Pinpoints exact stage-wise drop-off hotspots, shortlist rates, and offer conversion percentages. |
-| 🌟 **Public Landing Page** | **Modern SaaS Showcase** | Responsive landing page featuring an interactive live product mockup, problem vs. solution comparison, and technical architecture deep dive. |
+| 🌟 **Community Vault** | **Peer Interview Intelligence** | Campus-shared interview rounds, questions asked, difficulty ratings, pro-tips, and helpful upvoting with anonymous posting options. |
+| 🚀 **Public Landing Page** | **Modern SaaS Showcase** | Responsive landing page featuring an interactive live product mockup, problem vs. solution comparison, Community spotlight, and technical architecture deep dive. |
 | 🔒 **Security & Isolation** | **Stateless JWT + Tenant Isolation** | Secured Spring Boot backend with BCrypt password hashing and user-isolated JPA queries. |
 
 ---
@@ -45,12 +45,12 @@ PLACETRACK/
 │   │   ├── company/          # Company entity, service, controller & stages
 │   │   ├── round/            # Round scheduler & ConflictDetectionService
 │   │   ├── journal/          # Interview journal notes & question bank
-│   │   ├── analytics/        # Funnel calculations & drop-off metrics
+│   │   ├── experience/       # Community experiences, filters & helpful upvotes
 │   │   └── security/         # JwtAuthFilter & SecurityConfig
 ├── frontend/                 # React 19 + Vite Single Page Application
 │   ├── src/
-│   │   ├── components/       # KanbanBoard, RoundListItem, ToastContainer, etc.
-│   │   ├── pages/            # Landing, Dashboard, Pipeline, Rounds, Journal, Analytics
+│   │   ├── components/       # KanbanBoard, ExperienceModal, ExperienceDetailModal, etc.
+│   │   ├── pages/            # Landing, Dashboard, Pipeline, Rounds, Journal, Experiences
 │   │   ├── lib/              # Calendar generator, constants, formatters, API client
 │   │   ├── hooks/            # TanStack Query mutations and optimistic queries
 │   │   └── store/            # Auth & Toast Zustand stores
