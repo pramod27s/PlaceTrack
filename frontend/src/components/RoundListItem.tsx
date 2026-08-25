@@ -168,7 +168,7 @@ export function RoundListItem({
 
       {/* Actions */}
       <div className="flex flex-wrap shrink-0 items-center gap-2">
-        {round.status === 'SCHEDULED' && <AddToCalendarButton round={round} />}
+        <AddToCalendarButton round={round} />
         {round.meetingLink && (
           <a
             href={round.meetingLink}
