@@ -229,7 +229,27 @@ export default function Dashboard() {
             <EmptyState
               icon={<CalendarDays size={24} />}
               title="No upcoming rounds scheduled"
-              description="You have no rounds in the next 7 days. Open a company from your pipeline to add a round."
+              description="You have no rounds in the next 7 days. Open a company from your pipeline to schedule your next round."
+              action={
+                <div className="flex flex-wrap items-center justify-center gap-2.5">
+                  <Link
+                    to="/pipeline"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-indigo-600/25 transition-all duration-150 hover:from-indigo-500 hover:to-indigo-600 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
+                  >
+                    <span>Go to Pipeline</span>
+                    <ArrowRight size={14} />
+                  </Link>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setAddOpen(true)}
+                    className="rounded-xl border-slate-200 dark:border-slate-700 text-xs font-semibold hover:-translate-y-0.5 transition-transform"
+                  >
+                    <Plus size={14} />
+                    Add company
+                  </Button>
+                </div>
+              }
             />
           ) : (
             <div className="space-y-3">
