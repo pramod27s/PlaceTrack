@@ -80,7 +80,7 @@ export default function Landing() {
         <div className="mx-auto max-w-7xl px-4 sm:px-8 text-center relative">
           {/* Tag Pill */}
           <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-gradient-to-r from-violet-500/10 via-indigo-500/10 to-fuchsia-500/10 px-4 py-1.5 text-xs font-semibold text-violet-300 backdrop-blur-md animate-slide-up shadow-sm hover:border-violet-400/50 transition-colors">
-            <Sparkles size={14} className="text-violet-400 animate-pulse" />
+            <Sparkles size={14} className="text-violet-400 animate-soft-pulse" />
             <span>New: 1-Click AI Notice &amp; Superset Auto-Fill • Powered by Gemini 3.6</span>
           </div>
 
@@ -100,16 +100,19 @@ export default function Landing() {
           {/* Action CTAs */}
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4 animate-slide-up-delay-3">
             <Link to="/signup">
-              <Button size="lg" className="px-8 py-3 text-sm font-bold shadow-lg shadow-indigo-600/30 hover:scale-[1.02] active:scale-[0.98] transition-transform">
+              <Button
+                size="lg"
+                className="group px-8 py-3 text-sm font-bold shadow-md shadow-indigo-600/30 hover:shadow-indigo-600/45 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+              >
                 Start Tracking Free
-                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
               </Button>
             </Link>
             <Link to="/login">
               <Button
                 variant="outline"
                 size="lg"
-                className="px-7 hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                className="px-7 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
               >
                 Sign In to Pipeline
               </Button>
