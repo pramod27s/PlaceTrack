@@ -182,4 +182,24 @@ export interface ExperienceInput {
   journalEntryId?: number
 }
 
+export interface ParsedCompanyData {
+  name: string | null
+  role: string | null
+  ctc: string | null
+  location: string | null
+  jdLink: string | null
+  registeredOnSuperset: boolean | null
+  researchNotes: string | null
+}
+
+export interface ParsedRoundData {
+  type: RoundType | null
+  title: string | null
+  scheduledAt: string | null
+  durationMinutes: number | null
+  mode: RoundMode | null
+  meetingLink: string | null
+  location: string | null
+}
+
 

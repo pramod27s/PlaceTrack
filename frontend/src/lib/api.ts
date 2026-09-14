@@ -40,3 +40,15 @@ export function apiError(error: unknown): string {
   }
   return 'Something went wrong. Please try again.'
 }
+
+import type { ParsedCompanyData, ParsedRoundData } from './types'
+
+export async function parseCompanyNotice(rawText: string): Promise<ParsedCompanyData> {
+  const { data } = await api.post<ParsedCompanyData>('/ai/parse-company-notice', { rawText })
+  return data
+}
+
+export async function parseRoundNotice(rawText: string): Promise<ParsedRoundData> {
+  const { data } = await api.post<ParsedRoundData>('/ai/parse-round-notice', { rawText })
+  return data
+}

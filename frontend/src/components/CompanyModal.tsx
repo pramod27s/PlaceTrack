@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { ChevronDown, ChevronUp, Zap } from 'lucide-react'
-import { apiError } from '../lib/api'
+import { Check, ChevronDown, ChevronUp, Loader2, Sparkles, Zap } from 'lucide-react'
+import { apiError, parseCompanyNotice } from '../lib/api'
 import { useSaveCompany } from '../hooks/queries'
 import { STAGE_META, STAGE_ORDER } from '../lib/constants'
 import { cn } from '../lib/format'
@@ -106,8 +106,43 @@ function CompanyForm({
     ),
   )
 
+  const [aiOpen, setAiOpen] = useState(false)
+  const [rawNotice, setRawNotice] = useState('')
+  const [isExtracting, setIsExtracting] = useState(false)
+  const [aiError, setAiError] = useState('')
+  const [aiSuccess, setAiSuccess] = useState('')
+
   const set = <K extends keyof CompanyInput>(key: K, value: CompanyInput[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }))
+
+  const handleExtractNotice = async () => {
+    if (!rawNotice.trim()) return
+    setIsExtracting(true)
+    setAiError('')
+    setAiSuccess('')
+    try {
+      const data = await parseCompanyNotice(rawNotice)
+      setForm((prev) => ({
+        ...prev,
+        name: data.name || prev.name,
+        role: data.role || prev.role,
+        ctc: data.ctc || prev.ctc,
+        location: data.location || prev.location,
+        jdLink: data.jdLink || prev.jdLink,
+        registeredOnSuperset:
+          data.registeredOnSuperset !== null ? data.registeredOnSuperset : prev.registeredOnSuperset,
+        researchNotes: data.researchNotes || prev.researchNotes,
+      }))
+      if (data.location || data.jdLink || data.researchNotes || data.registeredOnSuperset) {
+        setShowMore(true)
+      }
+      setAiSuccess('Extracted details populated into form below! Review or edit anything you need.')
+    } catch (err) {
+      setAiError(apiError(err))
+    } finally {
+      setIsExtracting(false)
+    }
+  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -127,7 +162,104 @@ function CompanyForm({
     <form id="company-form" onSubmit={handleSubmit} className="space-y-4">
       {error && <ErrorNote message={error} />}
 
-      {!company && (
+      {/* AI Auto-Fill Card */}
+      <div className="overflow-hidden rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-50/70 via-indigo-50/40 to-fuchsia-50/30 dark:border-violet-900/60 dark:from-violet-950/30 dark:via-indigo-950/20 dark:to-purple-950/10 p-3.5 shadow-sm transition-all duration-200">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-violet-600 text-white shadow-sm shadow-violet-500/20">
+              <Sparkles size={16} />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-violet-950 dark:text-violet-200">
+                AI Auto-Fill from Notice
+              </p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Paste raw text from WhatsApp, Superset, or email
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setAiOpen((prev) => !prev)}
+            className="inline-flex items-center gap-1 rounded-lg border border-violet-200 bg-white/80 px-2.5 py-1 text-xs font-semibold text-violet-700 hover:bg-violet-50 dark:border-violet-800 dark:bg-violet-900/40 dark:text-violet-300 dark:hover:bg-violet-900/60 transition-colors"
+          >
+            {aiOpen ? (
+              <>
+                Hide <ChevronUp size={14} />
+              </>
+            ) : (
+              <>
+                Paste notice <ChevronDown size={14} />
+              </>
+            )}
+          </button>
+        </div>
+
+        {aiOpen && (
+          <div className="mt-3 space-y-2.5 pt-2.5 border-t border-violet-200/60 dark:border-violet-900/40">
+            <Textarea
+              value={rawNotice}
+              onChange={(e) => setRawNotice(e.target.value)}
+              placeholder="Paste raw announcement here (e.g. Drive: Deloitte USI, Role: Analyst, CTC: 7.6 LPA, Superset link...)"
+              rows={3}
+              className="text-xs font-mono bg-white/90 dark:bg-slate-900/90"
+            />
+
+            {aiError && <ErrorNote message={aiError} />}
+
+            {aiSuccess && (
+              <div className="flex items-center gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 p-2 text-xs font-medium text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
+                <Check size={14} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+                <span>{aiSuccess}</span>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                Unmentioned fields will remain blank.
+              </span>
+              <div className="flex items-center gap-1.5">
+                {rawNotice && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setRawNotice('')
+                      setAiSuccess('')
+                      setAiError('')
+                    }}
+                    className="text-xs"
+                  >
+                    Clear
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleExtractNotice}
+                  disabled={isExtracting || !rawNotice.trim()}
+                  className="bg-violet-600 hover:bg-violet-700 text-white font-semibold text-xs shadow-sm shadow-violet-500/20"
+                >
+                  {isExtracting ? (
+                    <>
+                      <Loader2 size={13} className="animate-spin mr-1" />
+                      Extracting…
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={13} className="mr-1" />
+                      Extract & Auto-Fill
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {!company && !aiOpen && (
         <div className="flex items-center gap-2 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 p-2.5 text-xs text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200/60 dark:ring-indigo-800/60">
           <Zap size={14} className="shrink-0 text-indigo-600 dark:text-indigo-400" />
           <span className="font-medium">
