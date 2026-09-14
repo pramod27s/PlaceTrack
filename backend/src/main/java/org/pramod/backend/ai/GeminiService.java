@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -37,9 +38,11 @@ public class GeminiService {
     }
 
     public ParsedCompanyResponse parseCompanyNotice(String rawText) {
+        LocalDate today = LocalDate.now();
         String prompt = """
                 You are an AI assistant for a campus placement tracker called PlaceTrack.
                 Your task is to extract structured placement information from raw WhatsApp messages, Superset announcements, emails, or job postings.
+                Today's date is: %s (%s).
                 Extract the following fields. If a field is not found or not mentioned in the text, return null for that field. DO NOT make up information.
                 
                 Fields:
@@ -57,7 +60,7 @@ public class GeminiService {
                 \"\"\"
 
                 Return strictly a JSON object with keys: name, role, ctc, location, jdLink, registeredOnSuperset, researchNotes.
-                """.formatted(rawText);
+                """.formatted(today, today.getDayOfWeek(), rawText);
 
         try {
             String jsonOutput = callGemini(prompt);
@@ -81,15 +84,20 @@ public class GeminiService {
     }
 
     public ParsedRoundResponse parseRoundNotice(String rawText) {
+        LocalDate today = LocalDate.now();
         String prompt = """
                 You are an AI assistant for a campus placement tracker called PlaceTrack.
                 Your task is to extract interview round and scheduling details from an interview invitation, email, or announcement.
                 Extract the following fields. If a field is not found or not mentioned, return null for that field. DO NOT make up information.
                 
+                Calendar Reference:
+                - Today is: %s (%s).
+                - Resolve any relative date expressions like 'tomorrow', 'today', 'day after tomorrow', 'tonight', or weekday names like 'this Friday', 'next Monday' into the exact calendar date based on today (%s).
+                
                 Fields:
                 - type: string or null (Must be one of: 'PPT', 'OA', 'GD', 'TECHNICAL', 'HR', 'OTHER'. PPT = Pre-placement talk, OA = Online Assessment/coding test, GD = Group Discussion, TECHNICAL = Technical/coding round, HR = HR/Managerial/Behavioral round, OTHER = other)
                 - title: string or null (Short title for the round, e.g. 'Round 1 - Technical Interview', 'Online Assessment', 'HR Interview')
-                - scheduledAt: string or null (Date and time formatted strictly as ISO-8601 'yyyy-MM-ddTHH:mm', e.g. '2026-10-18T14:30'. Assume current year 2026 if not specified. If either date or time is missing, return null)
+                - scheduledAt: string or null (Date and time formatted strictly as ISO-8601 'yyyy-MM-ddTHH:mm', e.g. '2026-09-15T16:00'. If time is 4 PM, convert to 24-hour time 16:00. If either date or time is missing, return null)
                 - durationMinutes: integer or null (Duration in minutes, e.g. 45, 60, 90. Null if unspecified)
                 - mode: string or null ('ONLINE' if Google Meet, Zoom, Teams, Chime, virtual; 'OFFLINE' if on-campus, auditorium, lab, or office)
                 - meetingLink: string or null (Virtual meeting link such as meet.google.com, zoom.us, teams.microsoft.com, etc.)
@@ -101,7 +109,7 @@ public class GeminiService {
                 \"\"\"
 
                 Return strictly a JSON object with keys: type, title, scheduledAt, durationMinutes, mode, meetingLink, location.
-                """.formatted(rawText);
+                """.formatted(today, today.getDayOfWeek(), today, rawText);
 
         try {
             String jsonOutput = callGemini(prompt);
