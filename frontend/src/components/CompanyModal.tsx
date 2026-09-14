@@ -165,10 +165,8 @@ function CompanyForm({
       {/* AI Auto-Fill Card */}
       <div className="overflow-hidden rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-50/70 via-indigo-50/40 to-fuchsia-50/30 dark:border-violet-900/60 dark:from-violet-950/30 dark:via-indigo-950/20 dark:to-purple-950/10 p-3.5 shadow-sm transition-all duration-200">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-violet-600 text-white shadow-sm shadow-violet-500/20">
-              <Sparkles size={16} />
-            </div>
+          <div className="flex items-center gap-2">
+            <Sparkles size={16} className="text-violet-600 dark:text-violet-400 shrink-0" />
             <div>
               <p className="text-xs font-bold text-violet-950 dark:text-violet-200">
                 AI Auto-Fill from Notice
