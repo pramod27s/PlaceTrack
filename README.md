@@ -2,7 +2,7 @@
 
 > **Turn the chaos of WhatsApp forwards, college portal notices, and overlapping calendar invites into one structured command center.** Built for final-year students navigating 20–40 campus hiring drives simultaneously.
 
-PlaceTrack gives every student a clear visual pipeline of every company they've applied to, round scheduling with automatic collision detection, 1-click calendar sync, and an interview journal that compounds in prep value with each company.
+PlaceTrack gives every student a clear visual pipeline of every company they've applied to, AI-powered 1-click notice parsing, round scheduling with automatic collision detection, 1-click calendar sync, and an interview journal that compounds in prep value with each company.
 
 ---
 
@@ -10,6 +10,7 @@ PlaceTrack gives every student a clear visual pipeline of every company they've 
 
 | Area | Feature | Why It Matters |
 | :--- | :--- | :--- |
+| ✨ **AI Smart Autofill** | **1-Click Notice & Invite Parser** *(Google Gemini 3.6 Flash)* | Paste unstructured text from WhatsApp placement groups, Superset announcements, or email invites. AI automatically parses company name, role, CTC, location, Superset links, round types, dates, durations, and Google Meet/Zoom links with zero manual typing. |
 | 🗂️ **Kanban Pipeline** | **8-Stage Drag-and-Drop Pipeline** with **Superset tracking** | Move companies smoothly across `Applied → OA → Shortlisted → GD → Tech → HR → Offer / Rejected`. Includes a dedicated checkbox to verify college TPO portal registration. |
 | ⚡ **Quick Actions & Undo** | **1-Click Inline Status Actions** + **Undo Toasts** | Mark overdue rounds as `Cleared`, `Did not clear`, or `Completed` directly on cards. Instant bottom-right toast with 5-second `Undo` on all stage and status changes. |
 | 📅 **Calendar Sync** | **1-Click Google Calendar & `.ics` Export** | Automatically generates pre-filled Google Calendar links and RFC-5545 `.ics` event files (for Apple Calendar & Outlook) with meeting URLs and locations. |
@@ -33,6 +34,7 @@ PlaceTrack gives every student a clear visual pipeline of every company they've 
 
 ### Backend
 - **Framework:** Spring Boot 3.x · Java 21
+- **AI Integration:** Google Gemini 3.6 Flash via Spring `RestClient` (Structured JSON Mode)
 - **Database & ORM:** PostgreSQL (Supabase) + Spring Data JPA + Hibernate
 - **Security:** Spring Security + Stateless JWT Filter + BCrypt
 - **Architecture:** Layered Monolith (Controller → Service → Repository → DTOs via Java Records)
@@ -41,6 +43,7 @@ PlaceTrack gives every student a clear visual pipeline of every company they've 
 PLACETRACK/
 ├── backend/                  # Spring Boot 3 REST API (org.pramod.backend)
 │   ├── src/main/java/org/pramod/backend/
+│   │   ├── ai/               # GeminiService, AiController & DTOs for notice parsing
 │   │   ├── auth/             # Login, Signup, AuthController & DTOs
 │   │   ├── company/          # Company entity, service, controller & stages
 │   │   ├── round/            # Round scheduler & ConflictDetectionService
@@ -49,7 +52,7 @@ PLACETRACK/
 │   │   └── security/         # JwtAuthFilter & SecurityConfig
 ├── frontend/                 # React 19 + Vite Single Page Application
 │   ├── src/
-│   │   ├── components/       # KanbanBoard, ExperienceModal, ExperienceDetailModal, etc.
+│   │   ├── components/       # KanbanBoard, CompanyModal, RoundModal, ExperienceModal, etc.
 │   │   ├── pages/            # Landing, Dashboard, Pipeline, Rounds, Journal, Experiences
 │   │   ├── lib/              # Calendar generator, constants, formatters, API client
 │   │   ├── hooks/            # TanStack Query mutations and optimistic queries
@@ -65,18 +68,22 @@ PLACETRACK/
 
 PlaceTrack uses **PostgreSQL via Supabase** as its database.
 
-### 1. Database Configuration
-In `backend/src/main/resources/application.properties`, configure your Supabase or local PostgreSQL credentials:
+### 1. Database & AI Configuration
+In `backend/src/main/resources/application.properties`, configure your database and AI settings:
 
 ```properties
 spring.datasource.url=jdbc:postgresql://<your-supabase-host>:5432/postgres
 spring.datasource.username=postgres
 spring.datasource.password=${DB_PASSWORD}
+
+gemini.api.key=${GEMINI_API_KEY:}
+gemini.api.model=${GEMINI_MODEL:gemini-3.6-flash}
 ```
 
 Create `backend/src/main/resources/application-secrets.properties` (git-ignored) with:
 ```properties
 DB_PASSWORD=<your-database-password>
+GEMINI_API_KEY=<your-google-gemini-api-key>
 ```
 
 ### 2. Run the Backend (Port 8080)
@@ -106,6 +113,8 @@ All backend endpoints are under `/api` and require an `Authorization: Bearer <jw
 | :--- | :--- | :--- |
 | `POST` | `/api/auth/signup` · `/api/auth/login` | Register or authenticate user & obtain JWT token |
 | `GET` | `/api/auth/me` | Retrieve currently authenticated user profile |
+| `POST` | `/api/ai/parse-company-notice` | Parse raw placement notices (WhatsApp/Superset) into company fields |
+| `POST` | `/api/ai/parse-round-notice` | Parse interview invitations into round types, times & meeting links |
 | `GET` `POST` | `/api/companies` | List all companies for user / Create new company |
 | `GET` `PUT` `DELETE`| `/api/companies/{id}` | Retrieve, update details, or delete company |
 | `PATCH` | `/api/companies/{id}/stage` | Update company stage (powers Kanban drag-and-drop) |
@@ -121,6 +130,7 @@ All backend endpoints are under `/api` and require an `Authorization: Bearer <jw
 
 ## 💡 Key Architectural Highlights (Interview Defense)
 
+* **Google Gemini AI Notice Extraction:** Employs Google Gemini 3.6 Flash via Spring `RestClient` with JSON Schema constraint enforcement (`responseMimeType: application/json`), guaranteeing structured, deterministic parsing with zero-hallucination null fallbacks for unmentioned fields.
 * **Interval Overlap Collision Engine:** Pure mathematical interval comparison (`startA < endB && startB < endA`) executing on scheduled rounds to guarantee zero missed clashes.
 * **Optimistic Updates & Undo Queues:** Stage drag events mutate local cache immediately via React Query while firing optimistic API patches and creating reversible Undo toast actions.
 * **Strict Tenant Scoping:** Every query enforces user ownership (e.g. `companyRepository.findByIdAndUser(id, user)`), eliminating IDOR (Insecure Direct Object Reference) vulnerabilities.

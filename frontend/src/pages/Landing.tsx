@@ -83,9 +83,9 @@ export default function Landing() {
 
         <div className="mx-auto max-w-7xl px-4 sm:px-8 text-center relative">
           {/* Tag Pill */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-1.5 text-xs font-semibold text-indigo-300 backdrop-blur-md animate-slide-up shadow-sm hover:border-indigo-400/50 transition-colors">
-            <Sparkles size={14} className="text-indigo-400 animate-pulse" />
-            <span>Built for Final-Year Students Navigating Campus Placements</span>
+          <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-gradient-to-r from-violet-500/10 via-indigo-500/10 to-fuchsia-500/10 px-4 py-1.5 text-xs font-semibold text-violet-300 backdrop-blur-md animate-slide-up shadow-sm hover:border-violet-400/50 transition-colors">
+            <Sparkles size={14} className="text-violet-400 animate-pulse" />
+            <span>New: 1-Click AI Notice &amp; Superset Auto-Fill • Powered by Gemini 3.6</span>
           </div>
 
           {/* Main Headline */}
@@ -98,7 +98,7 @@ export default function Landing() {
 
           {/* Subtitle */}
           <p className="mt-6 max-w-2xl mx-auto text-base sm:text-lg text-slate-300 font-normal leading-relaxed animate-slide-up-delay-2">
-            Turn WhatsApp forwards, portal notices, and overlapping interview rounds into one structured command center. Track your pipeline, detect schedule clashes, log reflections, and explore peer interview intel.
+            Turn WhatsApp forwards, portal notices, and overlapping interview rounds into one structured command center. Paste raw announcements with AI auto-fill, track your pipeline, detect schedule clashes, log reflections, and explore peer interview intel.
           </p>
 
           {/* Action CTAs */}
@@ -147,6 +147,13 @@ export default function Landing() {
               <span>48 Senior Reviews in Vault</span>
             </div>
 
+            {/* Floating Live Badge 4: Left-Side AI Auto-Fill */}
+            <div className="hidden xl:flex items-center gap-2 absolute top-1/4 -left-12 z-20 -translate-y-1/2 rounded-2xl border border-violet-500/30 bg-slate-900/90 px-3.5 py-2 text-xs font-medium text-slate-200 shadow-xl shadow-violet-950/40 backdrop-blur-xl animate-float">
+              <Sparkles size={14} className="text-violet-400" />
+              <span className="font-semibold text-violet-300">AI Notice Parser:</span>
+              <span className="text-slate-300">Deloitte parsed in 1s</span>
+            </div>
+
             {/* Main Preview Container */}
             <div className="rounded-3xl border border-slate-800/80 bg-slate-900/90 p-3 sm:p-5 shadow-2xl shadow-indigo-950/40 ring-1 ring-white/10 backdrop-blur-2xl text-left transition-all duration-300 hover:border-slate-700">
               {/* Window bar */}
@@ -167,6 +174,19 @@ export default function Landing() {
 
               {/* Simulated Live UI inside Hero */}
               <div className="p-3 sm:p-5 space-y-4">
+                {/* Simulated AI Notice Auto-Fill Banner */}
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-violet-500/30 bg-gradient-to-r from-violet-950/40 via-indigo-950/30 to-purple-950/20 p-2.5 text-xs text-violet-200">
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={14} className="text-violet-400 shrink-0 animate-pulse" />
+                    <span>
+                      <strong>AI Auto-Fill Active:</strong> Paste raw WhatsApp text → auto-populates Company, Role, CTC, Superset links &amp; rounds
+                    </span>
+                  </div>
+                  <span className="rounded-md bg-violet-500/20 px-2 py-0.5 text-[10px] font-bold text-violet-300 ring-1 ring-violet-500/30">
+                    Google Gemini 3.6
+                  </span>
+                </div>
+
                 {/* Conflict Alert Banner with Live Radar Ping */}
                 <div className="flex flex-wrap items-center gap-2.5 rounded-xl border border-rose-500/30 bg-rose-950/40 p-3 text-xs text-rose-200 shadow-inner">
                   <span className="relative flex h-2.5 w-2.5 shrink-0">
@@ -290,6 +310,10 @@ export default function Landing() {
               <ul className="space-y-3 text-sm text-slate-400">
                 <li className="flex items-start gap-2.5">
                   <span className="text-rose-400 font-bold">✕</span>
+                  <span>Wasting hours copying company names, eligibility, and CTCs from messy WhatsApp forwards.</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="text-rose-400 font-bold">✕</span>
                   <span>Double-booked interview slots without any collision warning.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
@@ -316,6 +340,10 @@ export default function Landing() {
               <ul className="space-y-3 text-sm text-slate-300 font-medium">
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 size={18} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>1-Click AI Auto-Fill:</strong> Paste raw WhatsApp and Superset notices to populate details instantly.</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <CheckCircle2 size={18} className="text-emerald-400 shrink-0 mt-0.5" />
                   <span>Real-time overlap conflict detection flags overlapping rounds automatically.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
@@ -336,7 +364,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ---------------- 6-Card Bento Grid ---------------- */}
+      {/* ---------------- Bento Grid with AI Showcase ---------------- */}
       <section id="features" className="py-24 border-t border-slate-900">
         <div className="mx-auto max-w-7xl px-4 sm:px-8">
           <div className="text-center max-w-2xl mx-auto">
@@ -347,6 +375,32 @@ export default function Landing() {
           </div>
 
           <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* Featured Wide Card: AI Notice & Invite Auto-Fill */}
+            <div className="md:col-span-2 lg:col-span-3 rounded-3xl border border-violet-500/40 bg-gradient-to-r from-violet-950/40 via-slate-900/90 to-indigo-950/40 p-7 sm:p-9 ring-1 ring-violet-500/30 hover:border-violet-500/60 transition-all shadow-xl shadow-violet-950/20">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                <div className="space-y-3 max-w-xl">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-violet-500/20 px-3 py-1 text-xs font-bold text-violet-300 border border-violet-500/30">
+                    <Sparkles size={14} className="text-violet-400 animate-pulse" />
+                    <span>Google Gemini 3.6 Flash Integration</span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white">
+                    Zero-Typing Application Entry with AI Auto-Fill
+                  </h3>
+                  <p className="text-sm text-slate-400 leading-relaxed">
+                    Got a chaotic placement announcement on WhatsApp or an interview invite email? Just paste the raw text into the <strong>Add Company</strong> or <strong>Schedule Round</strong> modal. Gemini automatically extracts company name, role, CTC package, Superset links, round type, time, duration, and Google Meet URL into your form in ~1 second.
+                  </p>
+                </div>
+                <div className="w-full lg:w-auto shrink-0 rounded-2xl border border-violet-500/30 bg-slate-950/80 p-4 font-mono text-xs text-slate-300 space-y-1.5 shadow-inner min-w-[280px]">
+                  <p className="text-violet-400 font-bold text-[11px]">// Raw Notice ➔ Auto-Extracted</p>
+                  <p className="text-emerald-400">✓ Company: "Deloitte USI"</p>
+                  <p className="text-sky-400">✓ Role: "Associate Analyst (SDE)"</p>
+                  <p className="text-amber-400">✓ Package: "7.6 LPA"</p>
+                  <p className="text-fuchsia-400">✓ Superset Link: joinsuperset.com/...</p>
+                  <p className="text-indigo-400">✓ Round: Technical (45 mins)</p>
+                </div>
+              </div>
+            </div>
+
             {/* Bento Card 1 */}
             <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-7 sm:p-8 space-y-4 hover:border-slate-700 transition-colors">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500/20 text-indigo-400 ring-1 ring-indigo-500/30">
@@ -543,10 +597,10 @@ export default function Landing() {
                   Architecture &amp; Engineering Decisions
                 </h2>
               </div>
-              <span className="text-xs font-mono text-slate-400">Spring Boot 3 + React + PostgreSQL</span>
+              <span className="text-xs font-mono text-slate-400">Spring Boot 3 + Gemini AI + React + PostgreSQL</span>
             </div>
 
-            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               <div className="space-y-2">
                 <p className="text-xs font-bold uppercase tracking-wider text-indigo-400">Backend Core</p>
                 <p className="text-sm font-semibold text-white">Layered Spring Boot Monolith</p>
@@ -556,8 +610,16 @@ export default function Landing() {
               </div>
 
               <div className="space-y-2">
+                <p className="text-xs font-bold uppercase tracking-wider text-fuchsia-400">AI Intelligence</p>
+                <p className="text-sm font-semibold text-white">Google Gemini 3.6 Flash</p>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Deterministic JSON extraction from unstructured WhatsApp notices and invites via Spring's RestClient.
+                </p>
+              </div>
+
+              <div className="space-y-2">
                 <p className="text-xs font-bold uppercase tracking-wider text-violet-400">Domain Logic</p>
-                <p className="text-sm font-semibold text-white">Conflict Engine &amp; Community Feed</p>
+                <p className="text-sm font-semibold text-white">Conflict Engine &amp; Community</p>
                 <p className="text-xs text-slate-400 leading-relaxed">
                   Time-overlap detection algorithms for rounds alongside aggregated peer review upvoting services.
                 </p>
@@ -571,7 +633,7 @@ export default function Landing() {
                 </p>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 sm:col-span-2 lg:col-span-1">
                 <p className="text-xs font-bold uppercase tracking-wider text-sky-400">Frontend State</p>
                 <p className="text-sm font-semibold text-white">React Query + Zustand</p>
                 <p className="text-xs text-slate-400 leading-relaxed">
