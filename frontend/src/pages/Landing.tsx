@@ -5,7 +5,6 @@ import {
   CalendarClock,
   CalendarPlus,
   CheckCircle2,
-  Code2,
   HelpCircle,
   KanbanSquare,
   NotebookPen,
@@ -51,9 +50,6 @@ export default function Landing() {
             </a>
             <a href="#problem" className="hover:text-white transition-colors">
               Why PlaceTrack
-            </a>
-            <a href="#architecture" className="hover:text-white transition-colors">
-              Architecture
             </a>
           </nav>
 
@@ -577,68 +573,6 @@ export default function Landing() {
                   </div>
                   <span className="text-[11px] text-slate-500 font-mono">Shared for 2026 Batch</span>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ---------------- Architecture Showcase ---------------- */}
-      <section id="architecture" className="border-t border-slate-900 bg-slate-950/80 py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-8">
-          <div className="rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/40 via-slate-900 to-slate-950 p-8 sm:p-12 shadow-2xl ring-1 ring-white/10">
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-6">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-indigo-500/20 px-3 py-1 text-xs font-bold text-indigo-300">
-                  <Code2 size={14} />
-                  <span>Under The Hood</span>
-                </div>
-                <h2 className="mt-2 text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                  Architecture &amp; Engineering Decisions
-                </h2>
-              </div>
-              <span className="text-xs font-mono text-slate-400">Spring Boot 3 + Gemini AI + React + PostgreSQL</span>
-            </div>
-
-            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-              <div className="space-y-2">
-                <p className="text-xs font-bold uppercase tracking-wider text-indigo-400">Backend Core</p>
-                <p className="text-sm font-semibold text-white">Layered Spring Boot Monolith</p>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Clean controllers, services, repositories, and immutable Java Records for high-throughput REST APIs.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-xs font-bold uppercase tracking-wider text-fuchsia-400">AI Intelligence</p>
-                <p className="text-sm font-semibold text-white">Google Gemini 3.6 Flash</p>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Deterministic JSON extraction from unstructured WhatsApp notices and invites via Spring's RestClient.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-xs font-bold uppercase tracking-wider text-violet-400">Domain Logic</p>
-                <p className="text-sm font-semibold text-white">Conflict Engine &amp; Community</p>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Time-overlap detection algorithms for rounds alongside aggregated peer review upvoting services.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-xs font-bold uppercase tracking-wider text-emerald-400">Data &amp; Security</p>
-                <p className="text-sm font-semibold text-white">PostgreSQL &amp; JWT Security</p>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  User-isolated JPA query enforcement, BCrypt password hashing, and clean relational normalization.
-                </p>
-              </div>
-
-              <div className="space-y-2 sm:col-span-2 lg:col-span-1">
-                <p className="text-xs font-bold uppercase tracking-wider text-sky-400">Frontend State</p>
-                <p className="text-sm font-semibold text-white">React Query + Zustand</p>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Optimistic Kanban dragging with @dnd-kit, community search filters, and responsive mobile-first views.
-                </p>
               </div>
             </div>
           </div>
