@@ -82,11 +82,7 @@ const CardBody = memo(function CardBody({ company }: { company: Company }) {
           <Layers size={12} />
           {company.roundCount} {company.roundCount === 1 ? 'round' : 'rounds'}
         </span>
-        {company.stage === 'PPT' ? (
-          <span>Pre-placement talk</span>
-        ) : (
-          <span>Applied {formatDate(company.appliedOn)}</span>
-        )}
+        <span>Applied {formatDate(company.appliedOn)}</span>
       </div>
     </>
   )
