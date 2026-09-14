@@ -79,15 +79,15 @@ export default function Landing() {
 
         <div className="mx-auto max-w-7xl px-4 sm:px-8 text-center relative">
           {/* Tag Pill */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-gradient-to-r from-violet-500/10 via-indigo-500/10 to-fuchsia-500/10 px-4 py-1.5 text-xs font-semibold text-violet-300 backdrop-blur-md animate-slide-up shadow-sm hover:border-violet-400/50 transition-colors">
-            <Sparkles size={14} className="text-violet-400 animate-soft-pulse" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-gradient-to-r from-violet-500/10 via-indigo-500/10 to-fuchsia-500/10 px-4 py-1.5 text-xs font-semibold text-violet-300 backdrop-blur-md animate-slide-up hover:border-violet-400/50 transition-colors animate-badge-glow">
+            <Sparkles size={14} className="text-violet-400 animate-soft-pulse shrink-0" />
             <span>New: 1-Click AI Notice &amp; Superset Auto-Fill • Powered by Gemini 3.6</span>
           </div>
 
           {/* Main Headline */}
-          <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-white sm:text-6xl md:text-7xl max-w-4xl mx-auto leading-[1.1] animate-slide-up-delay-1">
+          <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-white sm:text-6xl md:text-7xl max-w-4xl mx-auto leading-[1.15] animate-slide-up-delay-1">
             Placement season deserves better than a{' '}
-            <span className="bg-gradient-to-r from-indigo-400 via-violet-300 via-pink-400 to-indigo-400 bg-clip-text text-transparent animate-shimmer">
+            <span className="gradient-text-animated pb-1">
               messy Google Sheet.
             </span>
           </h1>
@@ -102,10 +102,10 @@ export default function Landing() {
             <Link to="/signup">
               <Button
                 size="lg"
-                className="group px-8 py-3 text-sm font-bold shadow-md shadow-indigo-600/30 hover:shadow-indigo-600/45 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+                className="group px-8 py-3 text-sm font-bold animate-cta-pulse hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
               >
                 Start Tracking Free
-                <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
+                <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1.5" />
               </Button>
             </Link>
             <Link to="/login">
