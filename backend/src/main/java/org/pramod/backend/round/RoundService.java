@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -35,20 +36,24 @@ public class RoundService {
 
     @Transactional(readOnly = true)
     public List<RoundResponse> listForUser(User user) {
-        List<Round> all = roundRepository.findByCompany_UserOrderByScheduledAtAsc(user);
-        return all.stream().map(r -> toResponse(r, all)).toList();
+        List<Round> all = roundRepository.findByUserWithCompany(user);
+        Set<Long> journalRoundIds = journalRepository.findRoundIdsWithJournalByUser(user);
+        return all.stream()
+                .map(r -> toResponse(r, all, journalRoundIds.contains(r.getId())))
+                .toList();
     }
 
     /** Rounds scheduled from now through the next 7 days. */
     @Transactional(readOnly = true)
     public List<RoundResponse> listUpcoming(User user) {
         LocalDateTime now = LocalDateTime.now();
-        List<Round> all = roundRepository.findByCompany_UserOrderByScheduledAtAsc(user);
+        List<Round> all = roundRepository.findByUserWithCompany(user);
+        Set<Long> journalRoundIds = journalRepository.findRoundIdsWithJournalByUser(user);
         List<Round> window = roundRepository.findByCompany_UserAndScheduledAtBetweenOrderByScheduledAtAsc(
                 user, now, now.plusDays(7));
         return window.stream()
                 .filter(r -> r.getStatus() == RoundStatus.SCHEDULED)
-                .map(r -> toResponse(r, all))
+                .map(r -> toResponse(r, all, journalRoundIds.contains(r.getId())))
                 .toList();
     }
 
@@ -107,7 +112,7 @@ public class RoundService {
         round.setStatus(request.status() != null ? request.status() : RoundStatus.SCHEDULED);
     }
 
-    RoundResponse toResponse(Round round, List<Round> userRounds) {
+    RoundResponse toResponse(Round round, List<Round> userRounds, boolean hasJournal) {
         List<ConflictDto> conflicts = conflictDetectionService.findConflicts(round, userRounds).stream()
                 .map(c -> new ConflictDto(
                         c.getId(), c.getCompany().getName(), c.getType(), c.getScheduledAt()))
@@ -124,10 +129,14 @@ public class RoundService {
                 round.getMeetingLink(),
                 round.getLocation(),
                 round.getStatus(),
-                journalRepository.existsByRound(round),
+                hasJournal,
                 round.isAddedToCalendar(),
                 conflicts,
                 round.getCreatedAt());
+    }
+
+    RoundResponse toResponse(Round round, List<Round> userRounds) {
+        return toResponse(round, userRounds, journalRepository.existsByRound(round));
     }
 
     private static String blankToNull(String value) {

@@ -24,8 +24,12 @@ public class CompanyService {
 
     @Transactional(readOnly = true)
     public List<CompanyResponse> listForUser(User user) {
-        return companyRepository.findByUserOrderByUpdatedAtDesc(user).stream()
-                .map(this::toResponse)
+        return companyRepository.findByUserWithRoundCount(user).stream()
+                .map(row -> {
+                    Company company = (Company) row[0];
+                    int roundCount = ((Number) row[1]).intValue();
+                    return toResponse(company, roundCount);
+                })
                 .toList();
     }
 
@@ -91,12 +95,16 @@ public class CompanyService {
         company.setRegisteredOnSuperset(Boolean.TRUE.equals(request.registeredOnSuperset()));
     }
 
-    private CompanyResponse toResponse(Company c) {
+    private CompanyResponse toResponse(Company c, int roundCount) {
         return new CompanyResponse(
                 c.getId(), c.getName(), c.getRole(), c.getCtc(), c.getLocation(), c.getJdLink(),
                 c.getStage(), c.getAppliedOn(), c.isRegisteredOnSuperset(), c.getResearchNotes(),
-                c.getResumeVersion(), (int) roundRepository.countByCompany(c),
+                c.getResumeVersion(), roundCount,
                 c.getCreatedAt(), c.getUpdatedAt());
+    }
+
+    private CompanyResponse toResponse(Company c) {
+        return toResponse(c, (int) roundRepository.countByCompany(c));
     }
 
     private static String trimToNull(String value) {
