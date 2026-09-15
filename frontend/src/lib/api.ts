@@ -35,8 +35,11 @@ api.interceptors.response.use(
 /** Pulls a human-readable message out of any error shape the API can return. */
 export function apiError(error: unknown): string {
   if (axios.isAxiosError(error)) {
-    const data = error.response?.data as { message?: string } | undefined
-    return data?.message || error.message || 'Something went wrong.'
+    const data = error.response?.data as { message?: string; error?: string } | undefined
+    return data?.message || data?.error || error.message || 'Something went wrong.'
+  }
+  if (error instanceof Error) {
+    return error.message
   }
   return 'Something went wrong. Please try again.'
 }

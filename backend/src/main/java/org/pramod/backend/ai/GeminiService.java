@@ -12,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import org.pramod.backend.exception.AiServiceException;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +83,10 @@ public class GeminiService {
             return new ParsedCompanyResponse(name, role, ctc, location, jdLink, superset, researchNotes, resumeVersion);
         } catch (Exception e) {
             log.error("Failed to parse company notice with Gemini: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to analyze notice with AI. " + e.getMessage());
+            if (e instanceof AiServiceException ase) {
+                throw ase;
+            }
+            throw new AiServiceException("Failed to analyze notice with AI. " + e.getMessage());
         }
     }
 
@@ -145,11 +150,18 @@ public class GeminiService {
             return new ParsedRoundResponse(type, title, scheduledAt, durationMinutes, mode, meetingLink, location);
         } catch (Exception e) {
             log.error("Failed to parse round notice with Gemini: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to analyze round invite with AI. " + e.getMessage());
+            if (e instanceof AiServiceException ase) {
+                throw ase;
+            }
+            throw new AiServiceException("Failed to analyze round invite with AI. " + e.getMessage());
         }
     }
 
     private String callGemini(String prompt) {
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new AiServiceException("Gemini API key is not configured. Please set GEMINI_API_KEY in your server environment.");
+        }
+
         Map<String, Object> requestBody = Map.of(
                 "contents", List.of(
                         Map.of("parts", List.of(Map.of("text", prompt)))
@@ -159,30 +171,53 @@ public class GeminiService {
                 )
         );
 
+        List<String> candidateModels = List.of(model, "gemini-flash-latest", "gemini-3.5-flash");
         String response = null;
-        int maxRetries = 3;
-        for (int attempt = 1; attempt <= maxRetries; attempt++) {
-            try {
-                response = restClient.post()
-                        .uri("/models/{model}:generateContent?key={apiKey}", model, apiKey)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(requestBody)
-                        .retrieve()
-                        .body(String.class);
-                break;
-            } catch (Exception e) {
-                if (attempt < maxRetries && (e.getMessage() != null && (e.getMessage().contains("503") || e.getMessage().contains("429")))) {
-                    log.warn("Gemini API transient spike on attempt {}. Retrying in 1.5s... Error: {}", attempt, e.getMessage());
-                    try {
-                        Thread.sleep(1500L * attempt);
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        throw new RuntimeException("Interrupted during Gemini retry", ie);
+        Exception lastException = null;
+
+        for (String currentModel : candidateModels) {
+            int maxRetries = 2;
+            for (int attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    response = restClient.post()
+                            .uri("/models/{model}:generateContent?key={apiKey}", currentModel, apiKey)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .body(requestBody)
+                            .retrieve()
+                            .body(String.class);
+                    lastException = null;
+                    break;
+                } catch (Exception e) {
+                    lastException = e;
+                    String msg = e.getMessage() != null ? e.getMessage() : "";
+                    if (attempt < maxRetries && (msg.contains("503") || msg.contains("429"))) {
+                        log.warn("Gemini API transient spike for model {} on attempt {}. Retrying...", currentModel, attempt);
+                        try {
+                            Thread.sleep(1000L * attempt);
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                            throw new AiServiceException("Interrupted during AI retry", ie);
+                        }
+                    } else {
+                        break;
                     }
-                } else {
-                    throw e;
                 }
             }
+            if (response != null) {
+                break;
+            }
+        }
+
+        if (response == null) {
+            String err = lastException != null && lastException.getMessage() != null ? lastException.getMessage() : "Unknown error";
+            if (err.contains("429") || err.contains("RESOURCE_EXHAUSTED")) {
+                throw new AiServiceException("Gemini AI free-tier quota reached for today. Please try again later or configure an upgraded Gemini API key.");
+            } else if (err.contains("400") || err.contains("403") || err.contains("API_KEY_INVALID")) {
+                throw new AiServiceException("Gemini API key is invalid or unauthorized. Please verify your GEMINI_API_KEY.");
+            } else if (err.contains("503") || err.contains("UNAVAILABLE")) {
+                throw new AiServiceException("Google Gemini AI is temporarily experiencing high demand. Please try again in a few seconds.");
+            }
+            throw new AiServiceException("AI service failed: " + err);
         }
 
         try {
@@ -194,10 +229,12 @@ public class GeminiService {
                     return parts.get(0).path("text").asText();
                 }
             }
-            throw new RuntimeException("Empty response received from Gemini.");
+            throw new AiServiceException("Empty response received from Gemini.");
+        } catch (AiServiceException ase) {
+            throw ase;
         } catch (Exception e) {
             log.error("Failed to parse Gemini API response: {}", response, e);
-            throw new RuntimeException("Failed to parse response from Gemini: " + e.getMessage());
+            throw new AiServiceException("Failed to parse response from Gemini: " + e.getMessage());
         }
     }
 
