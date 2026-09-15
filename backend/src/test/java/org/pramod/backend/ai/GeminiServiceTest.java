@@ -53,6 +53,7 @@ class GeminiServiceTest {
                 Registration link on Superset: https://app.joinsuperset.com/join/#/signup/student/jobprofiles/deloitte
                 Eligible branches: CSE, ISE, ECE.
                 Cutoff: 60% / 6.5 CGPA throughout.
+                You applied with resume : Master Resume updated.
                 """;
 
         ParsedCompanyResponse parsed = geminiService.parseCompanyNotice(notice);
@@ -67,6 +68,8 @@ class GeminiServiceTest {
         assertTrue(parsed.registeredOnSuperset(), "Expected Superset to be true");
         assertNotNull(parsed.jdLink());
         assertTrue(parsed.jdLink().contains("joinsuperset.com"), "Expected JD link to be extracted");
+        assertNotNull(parsed.resumeVersion());
+        assertTrue(parsed.resumeVersion().toLowerCase().contains("master resume"), "Expected resume version to be extracted");
     }
 
     @Test

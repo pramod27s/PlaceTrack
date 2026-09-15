@@ -190,6 +190,7 @@ export interface ParsedCompanyData {
   jdLink: string | null
   registeredOnSuperset: boolean | null
   researchNotes: string | null
+  resumeVersion: string | null
 }
 
 export interface ParsedRoundData {

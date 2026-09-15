@@ -53,13 +53,14 @@ public class GeminiService {
                 - jdLink: string or null (Any URL/link to the job description, Superset registration, or application form)
                 - registeredOnSuperset: boolean (true if the text mentions Superset, Joinsuperset, or asks students to register on Superset, otherwise false)
                 - researchNotes: string or null (Summary of key eligibility criteria, CGPA cutoff, eligible branches, test dates, or important instructions mentioned in the notice)
+                - resumeVersion: string or null (The resume title, profile name, or version used to apply if mentioned in the text or confirmation, e.g. 'Master Resume updated', 'SDE-Resume-v2', 'SWE-Master')
 
                 Raw Notice:
                 \"\"\"
                 %s
                 \"\"\"
 
-                Return strictly a JSON object with keys: name, role, ctc, location, jdLink, registeredOnSuperset, researchNotes.
+                Return strictly a JSON object with keys: name, role, ctc, location, jdLink, registeredOnSuperset, researchNotes, resumeVersion.
                 """.formatted(today, today.getDayOfWeek(), rawText);
 
         try {
@@ -75,8 +76,9 @@ public class GeminiService {
                     ? node.get("registeredOnSuperset").asBoolean()
                     : false;
             String researchNotes = textOrNull(node.get("researchNotes"));
+            String resumeVersion = textOrNull(node.get("resumeVersion"));
 
-            return new ParsedCompanyResponse(name, role, ctc, location, jdLink, superset, researchNotes);
+            return new ParsedCompanyResponse(name, role, ctc, location, jdLink, superset, researchNotes, resumeVersion);
         } catch (Exception e) {
             log.error("Failed to parse company notice with Gemini: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to analyze notice with AI. " + e.getMessage());
@@ -157,12 +159,31 @@ public class GeminiService {
                 )
         );
 
-        String response = restClient.post()
-                .uri("/models/{model}:generateContent?key={apiKey}", model, apiKey)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(requestBody)
-                .retrieve()
-                .body(String.class);
+        String response = null;
+        int maxRetries = 3;
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                response = restClient.post()
+                        .uri("/models/{model}:generateContent?key={apiKey}", model, apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(requestBody)
+                        .retrieve()
+                        .body(String.class);
+                break;
+            } catch (Exception e) {
+                if (attempt < maxRetries && (e.getMessage() != null && (e.getMessage().contains("503") || e.getMessage().contains("429")))) {
+                    log.warn("Gemini API transient spike on attempt {}. Retrying in 1.5s... Error: {}", attempt, e.getMessage());
+                    try {
+                        Thread.sleep(1500L * attempt);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException("Interrupted during Gemini retry", ie);
+                    }
+                } else {
+                    throw e;
+                }
+            }
+        }
 
         try {
             JsonNode root = objectMapper.readTree(response);

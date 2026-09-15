@@ -20,7 +20,8 @@ public final class AiDtos {
             String location,
             String jdLink,
             Boolean registeredOnSuperset,
-            String researchNotes) {
+            String researchNotes,
+            String resumeVersion) {
     }
 
     public record ParsedRoundResponse(

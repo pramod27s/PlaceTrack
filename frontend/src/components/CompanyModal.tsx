@@ -132,8 +132,15 @@ function CompanyForm({
         registeredOnSuperset:
           data.registeredOnSuperset !== null ? data.registeredOnSuperset : prev.registeredOnSuperset,
         researchNotes: data.researchNotes || prev.researchNotes,
+        resumeVersion: data.resumeVersion || prev.resumeVersion,
       }))
-      if (data.location || data.jdLink || data.researchNotes || data.registeredOnSuperset) {
+      if (
+        data.location ||
+        data.jdLink ||
+        data.researchNotes ||
+        data.registeredOnSuperset ||
+        data.resumeVersion
+      ) {
         setShowMore(true)
       }
       setAiSuccess('Extracted details populated into form below! Review or edit anything you need.')
