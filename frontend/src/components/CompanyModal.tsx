@@ -130,7 +130,7 @@ function CompanyForm({
         location: data.location || prev.location,
         jdLink: data.jdLink || prev.jdLink,
         registeredOnSuperset:
-          data.registeredOnSuperset !== null ? data.registeredOnSuperset : prev.registeredOnSuperset,
+          data.registeredOnSuperset === true ? true : prev.registeredOnSuperset,
         researchNotes: data.researchNotes || prev.researchNotes,
         resumeVersion: data.resumeVersion || prev.resumeVersion,
       }))

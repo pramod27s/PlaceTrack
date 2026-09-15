@@ -53,7 +53,7 @@ public class GeminiService {
                 - ctc: string or null (The salary/CTC package, e.g. '7.6 LPA', '12 LPA', 'Rs. 45,000/month')
                 - location: string or null (Job location, e.g. 'Bangalore', 'Pan India', 'Hyderabad / Pune')
                 - jdLink: string or null (Any URL/link to the job description, Superset registration, or application form)
-                - registeredOnSuperset: boolean (true if the text mentions Superset, Joinsuperset, or asks students to register on Superset, otherwise false)
+                - registeredOnSuperset: boolean or null (true if the text mentions Superset, Joinsuperset, or asks students to register on Superset, otherwise null)
                 - researchNotes: string or null (Summary of key eligibility criteria, CGPA cutoff, eligible branches, test dates, or important instructions mentioned in the notice)
                 - resumeVersion: string or null (The resume title, profile name, or version used to apply if mentioned in the text or confirmation, e.g. 'Master Resume updated', 'SDE-Resume-v2', 'SWE-Master')
 
@@ -74,9 +74,9 @@ public class GeminiService {
             String ctc = textOrNull(node.get("ctc"));
             String location = textOrNull(node.get("location"));
             String jdLink = textOrNull(node.get("jdLink"));
-            Boolean superset = node.has("registeredOnSuperset") && !node.get("registeredOnSuperset").isNull()
-                    ? node.get("registeredOnSuperset").asBoolean()
-                    : false;
+            Boolean superset = (node.hasNonNull("registeredOnSuperset") && node.get("registeredOnSuperset").isBoolean())
+                    ? (node.get("registeredOnSuperset").asBoolean() ? Boolean.TRUE : null)
+                    : null;
             String researchNotes = textOrNull(node.get("researchNotes"));
             String resumeVersion = textOrNull(node.get("resumeVersion"));
 
