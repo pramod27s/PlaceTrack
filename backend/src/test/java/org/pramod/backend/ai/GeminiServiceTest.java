@@ -22,7 +22,7 @@ class GeminiServiceTest {
     void setUp() {
         String apiKey = resolveApiKey();
         Assumptions.assumeTrue(apiKey != null && !apiKey.isBlank(), "Skipping test: GEMINI_API_KEY is not configured");
-        geminiService = new GeminiService(apiKey, "gemini-flash-latest", new ObjectMapper());
+        geminiService = new GeminiService(apiKey, "gemini-3.6-flash", new ObjectMapper());
     }
 
     private static String resolveApiKey() {

@@ -14,9 +14,13 @@ import org.springframework.web.client.RestClient;
 
 import org.pramod.backend.exception.AiServiceException;
 
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -34,7 +38,13 @@ public class GeminiService {
         this.apiKey = apiKey;
         this.model = model;
         this.objectMapper = objectMapper;
+
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(Duration.ofSeconds(15));
+        factory.setReadTimeout(Duration.ofSeconds(30));
+
         this.restClient = RestClient.builder()
+                .requestFactory(factory)
                 .baseUrl("https://generativelanguage.googleapis.com/v1beta")
                 .build();
     }
@@ -171,7 +181,10 @@ public class GeminiService {
                 )
         );
 
-        List<String> candidateModels = List.of(model, "gemini-flash-latest", "gemini-3.5-flash");
+        List<String> candidateModels = Stream.of(model, "gemini-3.6-flash", "gemini-3.5-flash")
+                .filter(m -> m != null && !m.isBlank())
+                .distinct()
+                .toList();
         String response = null;
         Exception lastException = null;
 
