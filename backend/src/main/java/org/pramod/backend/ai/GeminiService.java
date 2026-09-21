@@ -29,13 +29,16 @@ public class GeminiService {
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
     private final String apiKey;
+    private final String fallbackApiKey;
     private final String model;
 
     public GeminiService(
             @Value("${gemini.api.key}") String apiKey,
+            @Value("${gemini.api.fallback-key:}") String fallbackApiKey,
             @Value("${gemini.api.model:gemini-3.6-flash}") String model,
             ObjectMapper objectMapper) {
         this.apiKey = apiKey;
+        this.fallbackApiKey = fallbackApiKey;
         this.model = model;
         this.objectMapper = objectMapper;
 
@@ -47,6 +50,13 @@ public class GeminiService {
                 .requestFactory(factory)
                 .baseUrl("https://generativelanguage.googleapis.com/v1beta")
                 .build();
+    }
+
+    public GeminiService(
+            String apiKey,
+            String model,
+            ObjectMapper objectMapper) {
+        this(apiKey, null, model, objectMapper);
     }
 
     public ParsedCompanyResponse parseCompanyNotice(String rawText) {
@@ -168,7 +178,12 @@ public class GeminiService {
     }
 
     private String callGemini(String prompt) {
-        if (apiKey == null || apiKey.isBlank()) {
+        List<String> candidateKeys = Stream.of(apiKey, fallbackApiKey)
+                .filter(k -> k != null && !k.isBlank())
+                .distinct()
+                .toList();
+
+        if (candidateKeys.isEmpty()) {
             throw new AiServiceException("Gemini API key is not configured. Please set GEMINI_API_KEY in your server environment.");
         }
 
@@ -181,43 +196,54 @@ public class GeminiService {
                 )
         );
 
-        List<String> candidateModels = Stream.of(model, "gemini-3.6-flash", "gemini-3.5-flash")
+        List<String> candidateModels = Stream.of(model, "gemini-3.6-flash", "gemini-2.5-flash", "gemini-3.5-flash")
                 .filter(m -> m != null && !m.isBlank())
                 .distinct()
                 .toList();
         String response = null;
         Exception lastException = null;
 
-        for (String currentModel : candidateModels) {
-            int maxRetries = 2;
-            for (int attempt = 1; attempt <= maxRetries; attempt++) {
-                try {
-                    response = restClient.post()
-                            .uri("/models/{model}:generateContent?key={apiKey}", currentModel, apiKey)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .body(requestBody)
-                            .retrieve()
-                            .body(String.class);
-                    lastException = null;
-                    break;
-                } catch (Exception e) {
-                    lastException = e;
-                    String msg = e.getMessage() != null ? e.getMessage() : "";
-                    if (attempt < maxRetries && (msg.contains("503") || msg.contains("429"))) {
-                        log.warn("Gemini API transient spike for model {} on attempt {}. Retrying...", currentModel, attempt);
-                        try {
-                            Thread.sleep(1000L * attempt);
-                        } catch (InterruptedException ie) {
-                            Thread.currentThread().interrupt();
-                            throw new AiServiceException("Interrupted during AI retry", ie);
+        keyLoop:
+        for (String currentKey : candidateKeys) {
+            for (String currentModel : candidateModels) {
+                int maxRetries = 2;
+                for (int attempt = 1; attempt <= maxRetries; attempt++) {
+                    try {
+                        response = restClient.post()
+                                .uri("/models/{model}:generateContent?key={apiKey}", currentModel, currentKey)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .body(requestBody)
+                                .retrieve()
+                                .body(String.class);
+                        lastException = null;
+                        break keyLoop;
+                    } catch (Exception e) {
+                        lastException = e;
+                        String msg = e.getMessage() != null ? e.getMessage() : "";
+                        boolean isQuotaOrAuth = msg.contains("429") || msg.contains("RESOURCE_EXHAUSTED")
+                                || msg.contains("400") || msg.contains("403") || msg.contains("API_KEY_INVALID");
+                        boolean isOverloaded = msg.contains("503") || msg.contains("UNAVAILABLE");
+
+                        if (attempt < maxRetries && isOverloaded) {
+                            log.warn("Gemini API transient spike for model {} on attempt {}. Retrying...", currentModel, attempt);
+                            try {
+                                Thread.sleep(1000L * attempt);
+                            } catch (InterruptedException ie) {
+                                Thread.currentThread().interrupt();
+                                throw new AiServiceException("Interrupted during AI retry", ie);
+                            }
+                        } else if (isQuotaOrAuth) {
+                            log.warn("Gemini API key issue for model {}. Switching to next key if available...", currentModel);
+                            break;
+                        } else {
+                            break;
                         }
-                    } else {
-                        break;
                     }
                 }
-            }
-            if (response != null) {
-                break;
+                String msg = lastException != null && lastException.getMessage() != null ? lastException.getMessage() : "";
+                if (msg.contains("429") || msg.contains("RESOURCE_EXHAUSTED") || msg.contains("403") || msg.contains("API_KEY_INVALID")) {
+                    break; // Move immediately to next candidate key
+                }
             }
         }
 

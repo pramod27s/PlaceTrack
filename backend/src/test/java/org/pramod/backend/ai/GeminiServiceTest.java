@@ -21,8 +21,10 @@ class GeminiServiceTest {
     @BeforeEach
     void setUp() {
         String apiKey = resolveApiKey();
-        Assumptions.assumeTrue(apiKey != null && !apiKey.isBlank(), "Skipping test: GEMINI_API_KEY is not configured");
-        geminiService = new GeminiService(apiKey, "gemini-3.6-flash", new ObjectMapper());
+        String fallbackKey = resolveFallbackApiKey();
+        Assumptions.assumeTrue((apiKey != null && !apiKey.isBlank()) || (fallbackKey != null && !fallbackKey.isBlank()),
+                "Skipping test: GEMINI_API_KEY is not configured");
+        geminiService = new GeminiService(apiKey, fallbackKey, "gemini-3.6-flash", new ObjectMapper());
     }
 
     private static String resolveApiKey() {
@@ -37,6 +39,24 @@ class GeminiServiceTest {
                 Properties props = new Properties();
                 props.load(is);
                 return props.getProperty("GEMINI_API_KEY");
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    private static String resolveFallbackApiKey() {
+        String key = System.getProperty("gemini.api.fallback-key");
+        if (key != null && !key.isBlank()) return key;
+
+        key = System.getenv("GEMINI_API_FALLBACK_KEY");
+        if (key != null && !key.isBlank()) return key;
+
+        try (InputStream is = GeminiServiceTest.class.getResourceAsStream("/application-secrets.properties")) {
+            if (is != null) {
+                Properties props = new Properties();
+                props.load(is);
+                return props.getProperty("GEMINI_API_FALLBACK_KEY");
             }
         } catch (Exception ignored) {
         }
