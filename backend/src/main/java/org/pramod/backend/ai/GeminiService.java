@@ -7,6 +7,7 @@ import org.pramod.backend.ai.dto.AiDtos.ParsedCompanyResponse;
 import org.pramod.backend.ai.dto.AiDtos.ParsedRoundResponse;
 import org.pramod.backend.round.RoundMode;
 import org.pramod.backend.round.RoundType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class GeminiService {
     private final String fallbackApiKey;
     private final String model;
 
+    @Autowired
     public GeminiService(
             @Value("${gemini.api.key}") String apiKey,
             @Value("${gemini.api.fallback-key:}") String fallbackApiKey,
