@@ -3,17 +3,22 @@ import { useAuth } from '../store/auth'
 
 export const TOKEN_KEY = 'placetrack.token'
 export const USER_KEY = 'placetrack.user'
+export const GEMINI_API_KEY_STORAGE = 'placetrack.gemini_api_key'
 
 /** Axios instance pointed at the API. `/api` is proxied to the backend in dev. */
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? '/api',
 })
 
-// Attach the bearer token to every outgoing request.
+// Attach the bearer token and optional custom Gemini API key to every outgoing request.
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem(TOKEN_KEY)
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
+  }
+  const customGeminiKey = localStorage.getItem(GEMINI_API_KEY_STORAGE)
+  if (customGeminiKey && customGeminiKey.trim()) {
+    config.headers['X-Gemini-Api-Key'] = customGeminiKey.trim()
   }
   return config
 })

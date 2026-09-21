@@ -2,7 +2,9 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import {
   CalendarClock,
+  ChevronDown,
   KanbanSquare,
+  Key,
   LayoutDashboard,
   LogOut,
   NotebookPen,
@@ -16,6 +18,8 @@ import { cn, initials } from '../lib/format'
 import { NotificationBell } from './NotificationBell'
 import { ToastContainer } from './ToastContainer'
 import { ThemeToggle } from './ThemeToggle'
+import { AiSettingsModal } from './AiSettingsModal'
+import { GEMINI_API_KEY_STORAGE } from '../lib/api'
 
 interface NavItem {
   to: string
@@ -49,6 +53,10 @@ export function AppLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   const [accountOpen, setAccountOpen] = useState(false)
+  const [aiModalOpen, setAiModalOpen] = useState(false)
+  const [hasCustomKey, setHasCustomKey] = useState(() =>
+    Boolean(localStorage.getItem(GEMINI_API_KEY_STORAGE)?.trim()),
+  )
 
   const handleSignOut = () => {
     signOut()
@@ -114,26 +122,6 @@ export function AppLayout() {
           </p>
         </div>
 
-        {/* User Card */}
-        <div className="border-t border-slate-800/80 p-3 bg-slate-950/80">
-          <div className="flex items-center gap-3 rounded-xl p-2 transition hover:bg-slate-900/80">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-xs font-bold text-white shadow-sm ring-2 ring-indigo-400/20">
-              {user ? initials(user.fullName) : '?'}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-slate-100">{user?.fullName}</p>
-              <p className="truncate text-[11px] text-slate-400">{user?.email}</p>
-            </div>
-            <button
-              type="button"
-              onClick={handleSignOut}
-              title="Sign out"
-              className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-800 hover:text-rose-400"
-            >
-              <LogOut size={16} />
-            </button>
-          </div>
-        </div>
       </aside>
 
       {/* Main Content Column */}
@@ -162,32 +150,75 @@ export function AppLayout() {
               <ThemeToggle />
               <NotificationBell />
 
-              {/* Mobile user profile button */}
-              <button
-                type="button"
-                aria-label="Account menu"
-                onClick={() => setAccountOpen((open) => !open)}
-                className="ml-1 flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-950/60 text-xs font-bold text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-300/60 dark:ring-indigo-700/50 transition hover:bg-indigo-200 dark:hover:bg-indigo-900/60 lg:hidden"
-              >
-                {user ? initials(user.fullName) : '?'}
-              </button>
-
-              {accountOpen && (
-                <div className="animate-pop absolute right-0 top-12 z-40 w-[min(calc(100vw-2rem),18rem)] overflow-hidden rounded-xl border border-slate-200 bg-white dark:bg-slate-900 dark:border-slate-800 shadow-2xl shadow-slate-900/10 lg:hidden">
-                  <div className="border-b border-slate-100 dark:border-slate-800 px-4 py-3 bg-slate-50/50 dark:bg-slate-950/50">
-                    <p className="truncate text-sm font-bold text-slate-900 dark:text-white">{user?.fullName}</p>
-                    <p className="truncate text-xs text-slate-500">{user?.email}</p>
+              {/* User profile & settings menu (Desktop & Mobile) */}
+              <div className="relative">
+                <button
+                  type="button"
+                  aria-label="Account menu"
+                  onClick={() => setAccountOpen((open) => !open)}
+                  className="ml-1 flex items-center gap-2 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 px-2 py-1.5 transition hover:border-slate-300 dark:hover:border-slate-700 shadow-sm backdrop-blur-sm"
+                >
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-950/60 text-xs font-bold text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-300/60 dark:ring-indigo-700/50">
+                    {user ? initials(user.fullName) : '?'}
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleSignOut}
-                    className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium text-rose-600 transition hover:bg-rose-50 dark:hover:bg-rose-950/30"
-                  >
-                    <LogOut size={16} />
-                    Sign out
-                  </button>
-                </div>
-              )}
+                  <span className="hidden text-xs font-semibold text-slate-700 dark:text-slate-200 sm:inline max-w-[110px] truncate">
+                    {user?.fullName?.split(' ')[0] ?? 'Account'}
+                  </span>
+                  <ChevronDown size={14} className="text-slate-400" />
+                </button>
+
+                {accountOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-30"
+                      onClick={() => setAccountOpen(false)}
+                    />
+                    <div className="animate-pop absolute right-0 top-12 z-40 w-72 overflow-hidden rounded-xl border border-slate-200 bg-white dark:bg-slate-900 dark:border-slate-800 shadow-2xl shadow-slate-900/10">
+                      <div className="border-b border-slate-100 dark:border-slate-800 px-4 py-3 bg-slate-50/50 dark:bg-slate-950/50">
+                        <p className="truncate text-sm font-bold text-slate-900 dark:text-white">{user?.fullName}</p>
+                        <p className="truncate text-xs text-slate-500 dark:text-slate-400">{user?.email}</p>
+                      </div>
+
+                      <div className="p-1.5 border-b border-slate-100 dark:border-slate-800">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAccountOpen(false)
+                            setAiModalOpen(true)
+                          }}
+                          className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition group"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <Key size={15} className="text-indigo-600 dark:text-indigo-400 transition group-hover:scale-110" />
+                            <span>AI API Key Settings</span>
+                          </div>
+                          <span
+                            className={cn(
+                              'rounded-full px-1.5 py-0.5 text-[9px] font-semibold',
+                              hasCustomKey
+                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/30'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                            )}
+                          >
+                            {hasCustomKey ? 'Custom' : 'Default'}
+                          </span>
+                        </button>
+                      </div>
+
+                      <div className="p-1.5">
+                        <button
+                          type="button"
+                          onClick={handleSignOut}
+                          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-medium text-rose-600 transition hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                        >
+                          <LogOut size={15} />
+                          Sign out
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </header>
@@ -226,6 +257,15 @@ export function AppLayout() {
 
       {/* Toast Notifications */}
       <ToastContainer />
+
+      {/* AI API Key Settings Modal */}
+      <AiSettingsModal
+        open={aiModalOpen}
+        onClose={() => setAiModalOpen(false)}
+        onKeySaved={() =>
+          setHasCustomKey(Boolean(localStorage.getItem(GEMINI_API_KEY_STORAGE)?.trim()))
+        }
+      />
     </div>
   )
 }

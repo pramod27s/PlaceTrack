@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Check, ChevronDown, ChevronUp, Loader2, Sparkles, Zap } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Key, Loader2, Sparkles, Zap } from 'lucide-react'
 import { apiError, parseCompanyNotice } from '../lib/api'
 import { useSaveCompany } from '../hooks/queries'
 import { STAGE_META, STAGE_ORDER } from '../lib/constants'
 import { cn } from '../lib/format'
 import { Button, ErrorNote, Field, Input, Modal, Textarea } from './ui'
+import { AiSettingsModal } from './AiSettingsModal'
 import type { Company, CompanyInput } from '../lib/types'
 
 interface CompanyModalProps {
@@ -107,6 +108,7 @@ function CompanyForm({
   )
 
   const [aiOpen, setAiOpen] = useState(false)
+  const [aiSettingsOpen, setAiSettingsOpen] = useState(false)
   const [rawNotice, setRawNotice] = useState('')
   const [isExtracting, setIsExtracting] = useState(false)
   const [aiError, setAiError] = useState('')
@@ -210,7 +212,25 @@ function CompanyForm({
               className="text-xs font-mono bg-white/90 dark:bg-slate-900/90"
             />
 
-            {aiError && <ErrorNote message={aiError} />}
+            {aiError && (
+              <div className="space-y-2">
+                <ErrorNote message={aiError} />
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-violet-200 bg-white/90 p-2.5 dark:border-violet-800/80 dark:bg-violet-950/40 shadow-sm">
+                  <div className="flex items-center gap-2 text-xs text-violet-950 dark:text-violet-200">
+                    <Key size={14} className="text-violet-600 dark:text-violet-400 shrink-0" />
+                    <span>Bypass shared limits with your own free Gemini API key:</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAiSettingsOpen(true)}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-2.5 py-1 text-xs font-semibold text-white shadow-sm hover:bg-violet-700 transition active:scale-95"
+                  >
+                    <Key size={12} />
+                    Add API Key
+                  </button>
+                </div>
+              </div>
+            )}
 
             {aiSuccess && (
               <div className="flex items-center gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 p-2 text-xs font-medium text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
@@ -427,6 +447,11 @@ function CompanyForm({
           </label>
         </div>
       )}
+
+      <AiSettingsModal
+        open={aiSettingsOpen}
+        onClose={() => setAiSettingsOpen(false)}
+      />
     </form>
   )
 }

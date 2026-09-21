@@ -62,6 +62,10 @@ public class GeminiService {
     }
 
     public ParsedCompanyResponse parseCompanyNotice(String rawText) {
+        return parseCompanyNotice(rawText, null);
+    }
+
+    public ParsedCompanyResponse parseCompanyNotice(String rawText, String userApiKey) {
         LocalDate today = LocalDate.now();
         String prompt = """
                 You are an AI assistant for a campus placement tracker called PlaceTrack.
@@ -88,7 +92,7 @@ public class GeminiService {
                 """.formatted(today, today.getDayOfWeek(), rawText);
 
         try {
-            String jsonOutput = callGemini(prompt);
+            String jsonOutput = callGemini(prompt, userApiKey);
             JsonNode node = objectMapper.readTree(jsonOutput);
 
             String name = textOrNull(node.get("name"));
@@ -113,6 +117,10 @@ public class GeminiService {
     }
 
     public ParsedRoundResponse parseRoundNotice(String rawText) {
+        return parseRoundNotice(rawText, null);
+    }
+
+    public ParsedRoundResponse parseRoundNotice(String rawText, String userApiKey) {
         LocalDate today = LocalDate.now();
         String prompt = """
                 You are an AI assistant for a campus placement tracker called PlaceTrack.
@@ -141,7 +149,7 @@ public class GeminiService {
                 """.formatted(today, today.getDayOfWeek(), today, rawText);
 
         try {
-            String jsonOutput = callGemini(prompt);
+            String jsonOutput = callGemini(prompt, userApiKey);
             JsonNode node = objectMapper.readTree(jsonOutput);
 
             RoundType type = null;
@@ -180,7 +188,11 @@ public class GeminiService {
     }
 
     private String callGemini(String prompt) {
-        List<String> candidateKeys = Stream.of(apiKey, fallbackApiKey)
+        return callGemini(prompt, null);
+    }
+
+    private String callGemini(String prompt, String userApiKey) {
+        List<String> candidateKeys = Stream.of(userApiKey, apiKey, fallbackApiKey)
                 .filter(k -> k != null && !k.isBlank())
                 .distinct()
                 .toList();
@@ -211,12 +223,14 @@ public class GeminiService {
                 int maxRetries = 2;
                 for (int attempt = 1; attempt <= maxRetries; attempt++) {
                     try {
-                        response = restClient.post()
+                        byte[] rawBytes = restClient.post()
                                 .uri("/models/{model}:generateContent?key={apiKey}", currentModel, currentKey)
+                                .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .body(requestBody)
                                 .retrieve()
-                                .body(String.class);
+                                .body(byte[].class);
+                        response = rawBytes != null ? new String(rawBytes, java.nio.charset.StandardCharsets.UTF_8) : null;
                         lastException = null;
                         break keyLoop;
                     } catch (Exception e) {
