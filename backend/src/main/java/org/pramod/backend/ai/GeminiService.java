@@ -266,7 +266,7 @@ public class GeminiService {
                         boolean isOverloaded = msg.contains("503") || msg.contains("UNAVAILABLE") || msg.contains("Read timed out");
 
                         if (attempt < maxRetries && isOverloaded) {
-                            log.warn("Gemini API transient spike for model {} on attempt {}. Retrying quickly...", currentModel, attempt);
+                            log.warn("Gemini API transient spike for model {} on attempt {}: {}. Retrying quickly...", currentModel, attempt, msg);
                             try {
                                 Thread.sleep(400L);
                             } catch (InterruptedException ie) {
@@ -274,9 +274,10 @@ public class GeminiService {
                                 throw new AiServiceException("Interrupted during AI retry", ie);
                             }
                         } else if (isQuotaOrAuth) {
-                            log.warn("Gemini API key issue for model {}. Switching to next key if available...", currentModel);
+                            log.warn("Gemini API key issue for model {}: {}. Switching to next key if available...", currentModel, msg);
                             break;
                         } else {
+                            log.warn("Gemini API unexpected failure for model {}: {}", currentModel, msg);
                             break;
                         }
                     }
