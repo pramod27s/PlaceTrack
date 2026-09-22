@@ -52,13 +52,9 @@ public class GeminiService {
         factory.setConnectTimeout(Duration.ofSeconds(4));
         factory.setReadTimeout(Duration.ofSeconds(12));
 
-        org.springframework.http.converter.ByteArrayHttpMessageConverter byteConverter = new org.springframework.http.converter.ByteArrayHttpMessageConverter();
-        byteConverter.setSupportedMediaTypes(List.of(MediaType.ALL));
-
         this.restClient = RestClient.builder()
                 .requestFactory(factory)
                 .baseUrl("https://generativelanguage.googleapis.com/v1beta")
-                .messageConverters(converters -> converters.add(0, byteConverter))
                 .build();
     }
 
@@ -220,7 +216,7 @@ public class GeminiService {
 
         Map<String, Object> generationConfig = new HashMap<>();
         generationConfig.put("responseMimeType", "application/json");
-        generationConfig.put("maxOutputTokens", 1000);
+        generationConfig.put("maxOutputTokens", 800); 
         if (!thinkingEnabled) {
             generationConfig.put("thinkingConfig", Map.of("thinkingBudget", 0));
         }
@@ -246,14 +242,20 @@ public class GeminiService {
                 int maxRetries = 2;
                 for (int attempt = 1; attempt <= maxRetries; attempt++) {
                     try {
-                        byte[] rawBytes = restClient.post()
+                        response = restClient.post()
                                 .uri("/models/{model}:generateContent?key={apiKey}", currentModel, currentKey)
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .body(requestBody)
-                                .retrieve()
-                                .body(byte[].class);
-                        response = rawBytes != null ? new String(rawBytes, java.nio.charset.StandardCharsets.UTF_8) : null;
+                                .exchange((req, res) -> {
+                                    byte[] bytes = res.getBody().readAllBytes();
+                                    String text = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
+                                    if (res.getStatusCode().is2xxSuccessful()) {
+                                        return text;
+                                    } else {
+                                        throw new RuntimeException("HTTP " + res.getStatusCode().value() + ": " + text);
+                                    }
+                                });
                         lastException = null;
                         break keyLoop;
                     } catch (Exception e) {
