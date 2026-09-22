@@ -19,6 +19,7 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -32,21 +33,24 @@ public class GeminiService {
     private final String apiKey;
     private final String fallbackApiKey;
     private final String model;
+    private final boolean thinkingEnabled;
 
     @Autowired
     public GeminiService(
             @Value("${gemini.api.key}") String apiKey,
             @Value("${gemini.api.fallback-key:}") String fallbackApiKey,
             @Value("${gemini.api.model:gemini-3.6-flash}") String model,
+            @Value("${gemini.api.thinking-enabled:false}") boolean thinkingEnabled,
             ObjectMapper objectMapper) {
         this.apiKey = apiKey;
         this.fallbackApiKey = fallbackApiKey;
         this.model = model;
+        this.thinkingEnabled = thinkingEnabled;
         this.objectMapper = objectMapper;
 
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(Duration.ofSeconds(15));
-        factory.setReadTimeout(Duration.ofSeconds(30));
+        factory.setConnectTimeout(Duration.ofSeconds(8));
+        factory.setReadTimeout(Duration.ofSeconds(10));
 
         this.restClient = RestClient.builder()
                 .requestFactory(factory)
@@ -56,9 +60,17 @@ public class GeminiService {
 
     public GeminiService(
             String apiKey,
+            String fallbackApiKey,
             String model,
             ObjectMapper objectMapper) {
-        this(apiKey, null, model, objectMapper);
+        this(apiKey, fallbackApiKey, model, false, objectMapper);
+    }
+
+    public GeminiService(
+            String apiKey,
+            String model,
+            ObjectMapper objectMapper) {
+        this(apiKey, null, model, false, objectMapper);
     }
 
     public ParsedCompanyResponse parseCompanyNotice(String rawText) {
@@ -194,6 +206,7 @@ public class GeminiService {
     private String callGemini(String prompt, String userApiKey) {
         List<String> candidateKeys = Stream.of(userApiKey, apiKey, fallbackApiKey)
                 .filter(k -> k != null && !k.isBlank())
+                .map(String::trim)
                 .distinct()
                 .toList();
 
@@ -201,17 +214,22 @@ public class GeminiService {
             throw new AiServiceException("Gemini API key is not configured. Please set GEMINI_API_KEY in your server environment.");
         }
 
+        Map<String, Object> generationConfig = new HashMap<>();
+        generationConfig.put("responseMimeType", "application/json");
+        if (!thinkingEnabled) {
+            generationConfig.put("thinkingConfig", Map.of("thinkingBudget", 0));
+        }
+
         Map<String, Object> requestBody = Map.of(
                 "contents", List.of(
                         Map.of("parts", List.of(Map.of("text", prompt)))
                 ),
-                "generationConfig", Map.of(
-                        "responseMimeType", "application/json"
-                )
+                "generationConfig", generationConfig
         );
 
-        List<String> candidateModels = Stream.of(model, "gemini-3.6-flash", "gemini-2.5-flash", "gemini-3.5-flash")
+        List<String> candidateModels = Stream.of(model, "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite")
                 .filter(m -> m != null && !m.isBlank())
+                .map(String::trim)
                 .distinct()
                 .toList();
         String response = null;
