@@ -220,7 +220,7 @@ public class GeminiService {
 
         Map<String, Object> generationConfig = new HashMap<>();
         generationConfig.put("responseMimeType", "application/json");
-        generationConfig.put("maxOutputTokens", 400);
+        generationConfig.put("maxOutputTokens", 1000);
         if (!thinkingEnabled) {
             generationConfig.put("thinkingConfig", Map.of("thinkingBudget", 0));
         }
