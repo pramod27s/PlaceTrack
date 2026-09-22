@@ -49,8 +49,8 @@ public class GeminiService {
         this.objectMapper = objectMapper;
 
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(Duration.ofSeconds(4));
-        factory.setReadTimeout(Duration.ofSeconds(12));
+        factory.setConnectTimeout(Duration.ofSeconds(3));
+        factory.setReadTimeout(Duration.ofSeconds(5));
 
         this.restClient = RestClient.builder()
                 .requestFactory(factory)
@@ -265,14 +265,9 @@ public class GeminiService {
                                 || msg.contains("400") || msg.contains("403") || msg.contains("API_KEY_INVALID");
                         boolean isOverloaded = msg.contains("503") || msg.contains("UNAVAILABLE") || msg.contains("Read timed out");
 
-                        if (attempt < maxRetries && isOverloaded) {
-                            log.warn("Gemini API transient spike for model {} on attempt {}: {}. Retrying quickly...", currentModel, attempt, msg);
-                            try {
-                                Thread.sleep(400L);
-                            } catch (InterruptedException ie) {
-                                Thread.currentThread().interrupt();
-                                throw new AiServiceException("Interrupted during AI retry", ie);
-                            }
+                        if (isOverloaded) {
+                            log.warn("Gemini API overloaded or timed out for model {} on attempt {}: {}. Failing fast to next model...", currentModel, attempt, msg);
+                            break; // Switch to the next candidate model immediately
                         } else if (isQuotaOrAuth) {
                             log.warn("Gemini API key issue for model {}: {}. Switching to next key if available...", currentModel, msg);
                             break;
