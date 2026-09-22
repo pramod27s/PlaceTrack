@@ -24,7 +24,7 @@ class GeminiServiceTest {
         String fallbackKey = resolveFallbackApiKey();
         Assumptions.assumeTrue((apiKey != null && !apiKey.isBlank()) || (fallbackKey != null && !fallbackKey.isBlank()),
                 "Skipping test: GEMINI_API_KEY is not configured");
-        geminiService = new GeminiService(apiKey, fallbackKey, "gemini-3.6-flash", new ObjectMapper());
+        geminiService = new GeminiService(apiKey, fallbackKey, "gemini-3.5-flash", new ObjectMapper());
     }
 
     private static String resolveApiKey() {

@@ -39,7 +39,7 @@ public class GeminiService {
     public GeminiService(
             @Value("${gemini.api.key}") String apiKey,
             @Value("${gemini.api.fallback-key:}") String fallbackApiKey,
-            @Value("${gemini.api.model:gemini-3.6-flash}") String model,
+            @Value("${gemini.api.model:gemini-3.5-flash}") String model,
             @Value("${gemini.api.thinking-enabled:false}") boolean thinkingEnabled,
             ObjectMapper objectMapper) {
         this.apiKey = apiKey;
@@ -49,12 +49,16 @@ public class GeminiService {
         this.objectMapper = objectMapper;
 
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(Duration.ofSeconds(8));
-        factory.setReadTimeout(Duration.ofSeconds(10));
+        factory.setConnectTimeout(Duration.ofSeconds(4));
+        factory.setReadTimeout(Duration.ofSeconds(12));
+
+        org.springframework.http.converter.ByteArrayHttpMessageConverter byteConverter = new org.springframework.http.converter.ByteArrayHttpMessageConverter();
+        byteConverter.setSupportedMediaTypes(List.of(MediaType.ALL));
 
         this.restClient = RestClient.builder()
                 .requestFactory(factory)
                 .baseUrl("https://generativelanguage.googleapis.com/v1beta")
+                .messageConverters(converters -> converters.add(0, byteConverter))
                 .build();
     }
 
@@ -216,6 +220,7 @@ public class GeminiService {
 
         Map<String, Object> generationConfig = new HashMap<>();
         generationConfig.put("responseMimeType", "application/json");
+        generationConfig.put("maxOutputTokens", 400);
         if (!thinkingEnabled) {
             generationConfig.put("thinkingConfig", Map.of("thinkingBudget", 0));
         }
@@ -227,7 +232,7 @@ public class GeminiService {
                 "generationConfig", generationConfig
         );
 
-        List<String> candidateModels = Stream.of(model, "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite")
+        List<String> candidateModels = Stream.of(model, "gemini-3.5-flash", "gemini-3.6-flash")
                 .filter(m -> m != null && !m.isBlank())
                 .map(String::trim)
                 .distinct()
@@ -256,12 +261,12 @@ public class GeminiService {
                         String msg = e.getMessage() != null ? e.getMessage() : "";
                         boolean isQuotaOrAuth = msg.contains("429") || msg.contains("RESOURCE_EXHAUSTED")
                                 || msg.contains("400") || msg.contains("403") || msg.contains("API_KEY_INVALID");
-                        boolean isOverloaded = msg.contains("503") || msg.contains("UNAVAILABLE");
+                        boolean isOverloaded = msg.contains("503") || msg.contains("UNAVAILABLE") || msg.contains("Read timed out");
 
                         if (attempt < maxRetries && isOverloaded) {
-                            log.warn("Gemini API transient spike for model {} on attempt {}. Retrying...", currentModel, attempt);
+                            log.warn("Gemini API transient spike for model {} on attempt {}. Retrying quickly...", currentModel, attempt);
                             try {
-                                Thread.sleep(1000L * attempt);
+                                Thread.sleep(400L);
                             } catch (InterruptedException ie) {
                                 Thread.currentThread().interrupt();
                                 throw new AiServiceException("Interrupted during AI retry", ie);
