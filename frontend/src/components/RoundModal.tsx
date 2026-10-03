@@ -240,7 +240,7 @@ function RoundForm({
             )}
 
             <div className="flex items-center justify-between">
-              <span className="text-[11px] text-slate-400 dark:text-slate-500">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
                 Unspecified details will remain blank.
               </span>
               <div className="flex items-center gap-1.5">

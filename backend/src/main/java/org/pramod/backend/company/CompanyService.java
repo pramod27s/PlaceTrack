@@ -11,6 +11,7 @@ import org.pramod.backend.user.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final RoundRepository roundRepository;
     private final JournalRepository journalRepository;
+    private final Clock clock;
 
     @Transactional(readOnly = true)
     public List<CompanyResponse> listForUser(User user) {
@@ -43,7 +45,7 @@ public class CompanyService {
         Company company = Company.builder()
                 .user(user)
                 .stage(request.stage() != null ? request.stage() : Stage.APPLIED)
-                .appliedOn(request.appliedOn() != null ? request.appliedOn() : LocalDate.now())
+                .appliedOn(request.appliedOn() != null ? request.appliedOn() : LocalDate.now(clock))
                 .build();
         apply(company, request);
         return toResponse(companyRepository.save(company));

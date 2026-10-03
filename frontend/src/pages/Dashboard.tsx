@@ -8,7 +8,6 @@ import {
   ClockAlert,
   NotebookPen,
   Plus,
-  Sparkles,
   TriangleAlert,
   ArrowRight,
 } from 'lucide-react'
@@ -27,34 +26,38 @@ function greeting(): string {
   return 'Good evening'
 }
 
+/** A headline number that links to the list it summarises. */
 function StatCard({
   icon,
-  gradientClass,
+  iconClass,
   value,
   label,
-  sublabel,
+  to,
 }: {
   icon: ReactNode
-  gradientClass: string
-  value: string | number
+  iconClass: string
+  value: number
   label: string
-  sublabel?: string
+  to: string
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-indigo-200 dark:hover:border-indigo-500/40 hover:shadow-md">
+    <Link
+      to={to}
+      className="group rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-colors hover:border-indigo-300 dark:hover:border-indigo-500/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+    >
       <div className="flex items-center justify-between">
-        <div className={cn('flex h-11 w-11 items-center justify-center rounded-xl text-white shadow-sm ring-1 ring-black/5 dark:ring-white/10', gradientClass)}>
+        <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl', iconClass)}>
           {icon}
         </div>
-        {sublabel && (
-          <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-100 dark:border-slate-700">
-            {sublabel}
-          </span>
-        )}
+        <ArrowRight
+          size={16}
+          aria-hidden="true"
+          className="text-slate-300 dark:text-slate-600 transition-colors group-hover:text-indigo-500"
+        />
       </div>
       <p className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{value}</p>
-      <p className="mt-0.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</p>
-    </div>
+      <p className="mt-0.5 text-sm font-medium text-slate-600 dark:text-slate-400">{label}</p>
+    </Link>
   )
 }
 
@@ -64,16 +67,18 @@ function AttentionItem({
   count,
   title,
   description,
+  to,
 }: {
   icon: ReactNode
   iconClass: string
   count: number
   title: string
   description: string
+  to: string
 }) {
   return (
     <Link
-      to="/rounds"
+      to={to}
       className="group flex items-start gap-3.5 p-4 transition-colors hover:bg-slate-50/90 dark:hover:bg-slate-800/60"
     >
       <span
@@ -130,29 +135,34 @@ export default function Dashboard() {
     return <LoadingState label="Loading your command center…" />
   }
   if (upcoming.isError || allRounds.isError) {
-    return <ErrorNote message="Couldn't load your dashboard. Please retry." />
+    return (
+      <ErrorNote
+        message="Couldn't load your dashboard."
+        onRetry={() => {
+          upcoming.refetch()
+          allRounds.refetch()
+        }}
+      />
+    )
   }
 
   return (
     <div className="space-y-7">
-      {/* Welcome Banner */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 sm:p-8 text-white shadow-xl shadow-slate-950/10 border border-slate-800">
-        <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 rounded-full bg-indigo-500/20 px-3 py-1 text-xs font-semibold text-indigo-300 ring-1 ring-indigo-400/30 backdrop-blur-sm">
-            <Sparkles size={13} className="text-indigo-300" />
-            <span>Placement Season Active</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            {greeting()}, {user?.fullName?.split(' ')[0] ?? 'Student'} 👋
+      {/* Welcome */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
+            {greeting()}, {user?.fullName?.split(' ')[0] ?? 'there'}
           </h2>
-          <p className="text-sm text-slate-300 max-w-xl leading-relaxed">
-            Here's what needs your focus today. Stay prepared, log your rounds, and track your offers.
+          <p className="max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+            {todayCount > 0
+              ? `You have ${todayCount} ${todayCount === 1 ? 'round' : 'rounds'} today.`
+              : rounds.length > 0
+                ? `Nothing today. ${rounds.length} ${rounds.length === 1 ? 'round is' : 'rounds are'} coming up this week.`
+                : 'No rounds scheduled this week.'}
           </p>
         </div>
-        <Button
-          onClick={() => setAddOpen(true)}
-          className="bg-white text-slate-950 hover:bg-slate-100 hover:text-indigo-950 shadow-lg font-bold border-none"
-        >
+        <Button onClick={() => setAddOpen(true)}>
           <Plus size={16} />
           Add company
         </Button>
@@ -171,10 +181,10 @@ export default function Dashboard() {
             detected across your upcoming rounds.
           </p>
           <Link
-            to="/rounds"
+            to="/rounds#upcoming"
             className="inline-flex items-center gap-1 text-sm font-bold text-rose-700 dark:text-rose-400 hover:text-rose-900 dark:hover:text-rose-300 transition-colors"
           >
-            Review schedule <ArrowRight size={14} />
+            Review conflicts <ArrowRight size={14} />
           </Link>
         </div>
       )}
@@ -182,32 +192,32 @@ export default function Dashboard() {
       {/* Stat Cards Grid */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
-          icon={<CalendarCheck2 size={22} />}
-          gradientClass="bg-gradient-to-tr from-indigo-600 to-indigo-500"
+          icon={<CalendarCheck2 size={20} />}
+          iconClass="bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400"
           value={todayCount}
-          label="Rounds Today"
-          sublabel="Active"
+          label="Rounds today"
+          to="/rounds#upcoming"
         />
         <StatCard
-          icon={<ClockAlert size={22} />}
-          gradientClass="bg-gradient-to-tr from-amber-500 to-orange-500"
+          icon={<ClockAlert size={20} />}
+          iconClass="bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400"
           value={overdueRounds.length}
-          label="Need Update"
-          sublabel={overdueRounds.length > 0 ? 'Pending' : 'Done'}
+          label="Need a status update"
+          to="/rounds#overdue"
         />
         <StatCard
-          icon={<CalendarClock size={22} />}
-          gradientClass="bg-gradient-to-tr from-sky-500 to-blue-600"
+          icon={<CalendarClock size={20} />}
+          iconClass="bg-sky-50 text-sky-600 dark:bg-sky-950/60 dark:text-sky-400"
           value={rounds.length}
-          label="Next 7 Days"
-          sublabel="Scheduled"
+          label="In the next 7 days"
+          to="/rounds#upcoming"
         />
         <StatCard
-          icon={<NotebookPen size={22} />}
-          gradientClass="bg-gradient-to-tr from-violet-600 to-fuchsia-600"
+          icon={<NotebookPen size={20} />}
+          iconClass="bg-violet-50 text-violet-600 dark:bg-violet-950/60 dark:text-violet-400"
           value={journalFollowUps.length}
-          label="Journal Follow-ups"
-          sublabel={journalFollowUps.length > 0 ? 'Notes' : 'Logged'}
+          label="Rounds without a journal"
+          to="/rounds#completed"
         />
       </div>
 
@@ -269,6 +279,7 @@ export default function Dashboard() {
                 icon={<ClockAlert size={18} className="text-amber-600 dark:text-amber-400" />}
                 iconClass="bg-amber-100/80 dark:bg-amber-950/60"
                 count={overdueRounds.length}
+                to="/rounds#overdue"
                 title="Update Round Status"
                 description="These scheduled interview rounds have already ended."
               />
@@ -278,6 +289,7 @@ export default function Dashboard() {
                 icon={<TriangleAlert size={18} className="text-rose-600 dark:text-rose-400" />}
                 iconClass="bg-rose-100/80 dark:bg-rose-950/60"
                 count={conflictCount}
+                to="/rounds#upcoming"
                 title="Resolve Conflicts"
                 description="Two or more interview slots overlap in time."
               />
@@ -287,6 +299,7 @@ export default function Dashboard() {
                 icon={<NotebookPen size={18} className="text-violet-600 dark:text-violet-400" />}
                 iconClass="bg-violet-100/80 dark:bg-violet-950/60"
                 count={journalFollowUps.length}
+                to="/rounds#completed"
                 title="Log Interview Journals"
                 description="Record questions asked and reflections while fresh."
               />

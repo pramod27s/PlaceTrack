@@ -160,7 +160,7 @@ export function AiSettingsModal({ open, onClose, onKeySaved }: AiSettingsModalPr
               <button
                 type="button"
                 onClick={() => setShowKey((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
                 tabIndex={-1}
               >
                 {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -202,7 +202,7 @@ export function AiSettingsModal({ open, onClose, onKeySaved }: AiSettingsModalPr
 
         {/* Privacy Note */}
         <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 pt-1">
-          <ShieldCheck size={14} className="text-slate-400 shrink-0" />
+          <ShieldCheck size={14} className="text-slate-500 shrink-0" />
           <span>
             Your API key is saved solely in your local browser and sent securely via request headers. It is never stored on our database.
           </span>

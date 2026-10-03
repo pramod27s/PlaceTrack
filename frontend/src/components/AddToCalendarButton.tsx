@@ -16,11 +16,6 @@ export function AddToCalendarButton({
   size = 'sm',
   className,
 }: AddToCalendarButtonProps) {
-  // 1. If round time is in the past (before current time), do not show the button
-  if (isPastIso(round.scheduledAt)) {
-    return null
-  }
-
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const markCalendarAdded = useMarkRoundCalendarAdded()
@@ -61,6 +56,12 @@ export function AddToCalendarButton({
       markCalendarAdded.mutate(round.id)
     }
     downloadIcsFile(round)
+  }
+
+  // Past rounds can't be added to a calendar. Checked after all hooks so the
+  // hook order stays stable when a round's start time passes while mounted.
+  if (isPastIso(round.scheduledAt)) {
+    return null
   }
 
   return (
@@ -105,7 +106,7 @@ export function AddToCalendarButton({
               <ExternalLink size={13} className="text-indigo-600 dark:text-indigo-400" />
               Google Calendar
             </span>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500">Web</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400">Web</span>
           </button>
 
           <button
@@ -118,7 +119,7 @@ export function AddToCalendarButton({
               <Download size={13} className="text-slate-500 dark:text-slate-400" />
               Download .ics file
             </span>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500">Apple / Outlook</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400">Apple / Outlook</span>
           </button>
         </div>
       )}

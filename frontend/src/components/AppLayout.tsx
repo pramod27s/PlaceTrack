@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   CalendarClock,
   ChevronDown,
@@ -53,6 +53,8 @@ export function AppLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   const [accountOpen, setAccountOpen] = useState(false)
+  const accountButtonRef = useRef<HTMLButtonElement>(null)
+  const accountMenuRef = useRef<HTMLDivElement>(null)
   const [aiModalOpen, setAiModalOpen] = useState(false)
   const [hasCustomKey, setHasCustomKey] = useState(() =>
     Boolean(localStorage.getItem(GEMINI_API_KEY_STORAGE)?.trim()),
@@ -63,6 +65,20 @@ export function AppLayout() {
     setAccountOpen(false)
     navigate('/login', { replace: true })
   }
+
+  // Account menu: focus the first item on open, close on Escape and return focus to the trigger.
+  useEffect(() => {
+    if (!accountOpen) return
+    accountMenuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus()
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setAccountOpen(false)
+        accountButtonRef.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [accountOpen])
 
   const currentSection = sectionTitle(location.pathname)
 
@@ -76,13 +92,8 @@ export function AppLayout() {
             <PlaceTrackIcon size={20} className="text-white" />
           </div>
           <div className="leading-tight">
-            <div className="flex items-center gap-1.5">
-              <p className="text-sm font-bold tracking-tight text-white">PlaceTrack</p>
-              <span className="inline-flex items-center rounded-full bg-indigo-500/20 px-1.5 py-0.2 text-[9px] font-semibold text-indigo-300 ring-1 ring-indigo-400/30">
-                PRO
-              </span>
-            </div>
-            <p className="text-[11px] font-medium text-slate-400">Command Center</p>
+            <p className="text-sm font-bold tracking-tight text-white">PlaceTrack</p>
+            <p className="text-xs font-medium text-slate-400">Placement tracker</p>
           </div>
         </div>
 
@@ -139,7 +150,7 @@ export function AppLayout() {
                   {currentSection.title}
                 </h1>
                 {currentSection.subtitle && (
-                  <p className="hidden text-[11px] font-medium text-slate-400 dark:text-slate-500 sm:block">
+                  <p className="hidden text-xs font-medium text-slate-500 dark:text-slate-400 sm:block">
                     {currentSection.subtitle}
                   </p>
                 )}
@@ -153,8 +164,12 @@ export function AppLayout() {
               {/* User profile & settings menu (Desktop & Mobile) */}
               <div className="relative">
                 <button
+                  ref={accountButtonRef}
                   type="button"
                   aria-label="Account menu"
+                  aria-haspopup="menu"
+                  aria-expanded={accountOpen}
+                  aria-controls="account-menu"
                   onClick={() => setAccountOpen((open) => !open)}
                   className="ml-1 flex items-center gap-2 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 px-2 py-1.5 transition hover:border-slate-300 dark:hover:border-slate-700 shadow-sm backdrop-blur-sm"
                 >
@@ -173,7 +188,12 @@ export function AppLayout() {
                       className="fixed inset-0 z-30"
                       onClick={() => setAccountOpen(false)}
                     />
-                    <div className="animate-pop absolute right-0 top-12 z-40 w-72 overflow-hidden rounded-xl border border-slate-200 bg-white dark:bg-slate-900 dark:border-slate-800 shadow-2xl shadow-slate-900/10">
+                    <div
+                      id="account-menu"
+                      ref={accountMenuRef}
+                      role="menu"
+                      aria-label="Account"
+                      className="animate-pop absolute right-0 top-12 z-40 w-72 overflow-hidden rounded-xl border border-slate-200 bg-white dark:bg-slate-900 dark:border-slate-800 shadow-2xl shadow-slate-900/10">
                       <div className="border-b border-slate-100 dark:border-slate-800 px-4 py-3 bg-slate-50/50 dark:bg-slate-950/50">
                         <p className="truncate text-sm font-bold text-slate-900 dark:text-white">{user?.fullName}</p>
                         <p className="truncate text-xs text-slate-500 dark:text-slate-400">{user?.email}</p>
@@ -182,6 +202,7 @@ export function AppLayout() {
                       <div className="p-1.5 border-b border-slate-100 dark:border-slate-800">
                         <button
                           type="button"
+                          role="menuitem"
                           onClick={() => {
                             setAccountOpen(false)
                             setAiModalOpen(true)
@@ -208,6 +229,7 @@ export function AppLayout() {
                       <div className="p-1.5">
                         <button
                           type="button"
+                          role="menuitem"
                           onClick={handleSignOut}
                           className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-medium text-rose-600 transition hover:bg-rose-50 dark:hover:bg-rose-950/30"
                         >

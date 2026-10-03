@@ -55,7 +55,7 @@ function InfoRow({
     <div className="flex items-start gap-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 p-3.5 transition hover:bg-slate-50 dark:hover:bg-slate-800">
       <span className="mt-0.5 text-indigo-500 dark:text-indigo-400">{icon}</span>
       <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{label}</p>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</p>
         <div className="mt-0.5 text-sm font-semibold text-slate-800 dark:text-slate-200">{children}</div>
       </div>
     </div>
@@ -301,7 +301,7 @@ export default function CompanyDetail() {
               {c.researchNotes}
             </p>
           ) : (
-            <div className="flex items-center gap-3 text-slate-400 dark:text-slate-500">
+            <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
               <Sparkles size={18} className="text-indigo-400" />
               <p className="text-xs font-medium">
                 No notes captured yet. Click "Edit details" above to jot down culture, tech stack, interviewer names, and why you want to work here.

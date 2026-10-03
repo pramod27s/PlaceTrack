@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { CalendarClock, NotebookPen, Pencil, Trash2 } from 'lucide-react'
 import { useAllRounds, useDeleteRound } from '../hooks/queries'
 import { RoundListItem } from '../components/RoundListItem'
@@ -37,8 +38,15 @@ function bucketOf(round: Round): Bucket {
 }
 
 export default function Rounds() {
-  const { data: rounds, isLoading, isError } = useAllRounds()
+  const { data: rounds, isLoading, isError, refetch } = useAllRounds()
   const deleteRound = useDeleteRound()
+  const { hash } = useLocation()
+
+  // Dashboard links point at a section (#overdue, #upcoming, #completed); scroll to it once loaded.
+  useEffect(() => {
+    if (!hash || !rounds) return
+    document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [hash, rounds])
 
   const [editRound, setEditRound] = useState<Round | null>(null)
   const [journalRound, setJournalRound] = useState<Round | null>(null)
@@ -54,7 +62,9 @@ export default function Rounds() {
   }, [rounds])
 
   if (isLoading) return <LoadingState label="Loading your schedule…" />
-  if (isError || !rounds) return <ErrorNote message="Couldn't load your rounds. Please retry." />
+  if (isError || !rounds) {
+    return <ErrorNote message="Couldn't load your rounds." onRetry={() => refetch()} />
+  }
 
   const confirmDelete = async () => {
     if (!pendingDelete) return
@@ -90,15 +100,15 @@ export default function Rounds() {
           const list = grouped[key]
           if (list.length === 0) return null
           return (
-            <section key={key} className="space-y-3">
+            <section key={key} id={key} className="scroll-mt-24 space-y-3">
               <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2.5">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">{title}</h3>
+                  <h3 className="text-base font-bold tracking-tight text-slate-800 dark:text-slate-200">{title}</h3>
                   <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold', badge)}>
                     {list.length}
                   </span>
                 </div>
-                <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{description}</span>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{description}</span>
               </div>
               <div className="space-y-3">
                 {list.map((round) => (

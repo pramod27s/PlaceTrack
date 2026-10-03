@@ -117,12 +117,12 @@ interface FieldProps {
 export function Field({ label, htmlFor, hint, required, children }: FieldProps) {
   return (
     <div className="space-y-1.5">
-      <label htmlFor={htmlFor} className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+      <label htmlFor={htmlFor} className="block text-sm font-medium text-slate-700 dark:text-slate-300">
         {label}
         {required && <span className="ml-0.5 text-rose-500">*</span>}
       </label>
       {children}
-      {hint && <p className="text-xs text-slate-400 dark:text-slate-500">{hint}</p>}
+      {hint && <p className="text-xs text-slate-500 dark:text-slate-400">{hint}</p>}
     </div>
   )
 }
@@ -191,7 +191,7 @@ export function LoadingState({
 }) {
   const text = message || label || 'Loading…'
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-20 text-slate-400 dark:text-slate-500">
+    <div className="flex flex-col items-center justify-center gap-3 py-20 text-slate-500 dark:text-slate-400">
       <Spinner className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
       <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{text}</p>
     </div>
@@ -250,6 +250,7 @@ export function Modal({
   const descriptionId = useId()
   const closeRef = useRef<HTMLButtonElement>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
+  const bodyRef = useRef<HTMLDivElement>(null)
   const displaySubtitle = subtitle || description
 
   useEffect(() => {
@@ -275,7 +276,11 @@ export function Modal({
     }
     document.addEventListener('keydown', onKey)
     document.body.style.overflow = 'hidden'
-    closeRef.current?.focus()
+    // Start on the first form field so users can type immediately; fall back to Close.
+    const firstField = bodyRef.current?.querySelector<HTMLElement>(
+      'input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled])',
+    )
+    ;(firstField ?? closeRef.current)?.focus()
     return () => {
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = ''
@@ -313,7 +318,7 @@ export function Modal({
             <X size={18} />
           </IconButton>
         </div>
-        <div className="px-5 py-5 sm:px-6 text-slate-800 dark:text-slate-200">{children}</div>
+        <div ref={bodyRef} className="px-5 py-5 sm:px-6 text-slate-800 dark:text-slate-200">{children}</div>
         {footer && (
           <div className="flex flex-wrap justify-end gap-2 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/90 px-5 py-3.5 sm:px-6">
             {footer}
@@ -329,15 +334,26 @@ export function Modal({
 export function ErrorNote({
   message,
   children,
+  onRetry,
 }: {
   message?: string
   children?: ReactNode
+  /** When given, shows a Retry button next to the message. */
+  onRetry?: () => void
 }) {
   const content = children || message
   if (!content) return null
   return (
-    <div className="rounded-lg border border-rose-200/80 dark:border-rose-900/50 bg-rose-50/90 dark:bg-rose-950/40 px-3.5 py-2.5 text-xs font-medium text-rose-800 dark:text-rose-300 shadow-sm">
-      {content}
+    <div
+      role="alert"
+      className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-rose-200/80 dark:border-rose-900/50 bg-rose-50/90 dark:bg-rose-950/40 px-3.5 py-2.5 text-sm font-medium text-rose-800 dark:text-rose-300 shadow-sm"
+    >
+      <span>{content}</span>
+      {onRetry && (
+        <Button type="button" variant="secondary" size="sm" onClick={onRetry}>
+          Retry
+        </Button>
+      )}
     </div>
   )
 }

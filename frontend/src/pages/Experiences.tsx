@@ -160,7 +160,7 @@ export default function Experiences() {
           <div className="relative flex-1">
             <Search
               size={17}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400"
             />
             <Input
               value={searchQuery}
@@ -171,7 +171,7 @@ export default function Experiences() {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 hover:text-slate-600 dark:hover:text-slate-200"
               >
                 Clear
               </button>
@@ -208,7 +208,7 @@ export default function Experiences() {
         <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800/80">
           {/* Verdict Filter */}
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mr-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mr-1">
               Verdict:
             </span>
             <button
@@ -242,7 +242,7 @@ export default function Experiences() {
           {/* Drive Type & Difficulty */}
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mr-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mr-1">
                 Drive:
               </span>
               <button
@@ -274,7 +274,7 @@ export default function Experiences() {
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mr-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mr-1">
                 Difficulty:
               </span>
               <button
@@ -383,7 +383,7 @@ export default function Experiences() {
                       </div>
                     </div>
 
-                    <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500 shrink-0">
+                    <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 shrink-0">
                       {formatDate(exp.createdAt)}
                     </span>
                   </div>
@@ -403,7 +403,7 @@ export default function Experiences() {
                   {/* Questions Excerpt */}
                   {exp.questionsAsked && (
                     <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-2.5 border border-slate-100 dark:border-slate-800">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1 flex items-center gap-1">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
                         <HelpCircle size={11} className="text-amber-500" />
                         Questions Preview:
                       </p>

@@ -64,7 +64,7 @@ function ToastItem({ toast }: { toast: Toast }) {
       <button
         type="button"
         onClick={() => dismissToast(toast.id)}
-        className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+        className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
       >
         <X size={14} />
       </button>

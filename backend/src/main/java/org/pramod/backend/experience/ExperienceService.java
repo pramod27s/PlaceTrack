@@ -1,7 +1,7 @@
 package org.pramod.backend.experience;
 
 import lombok.RequiredArgsConstructor;
-import org.pramod.backend.exception.BadRequestException;
+import org.pramod.backend.exception.ForbiddenException;
 import org.pramod.backend.exception.ResourceNotFoundException;
 import org.pramod.backend.experience.ExperienceDtos.ExperienceRequest;
 import org.pramod.backend.experience.ExperienceDtos.ExperienceResponse;
@@ -97,7 +97,7 @@ public class ExperienceService {
                 .orElseThrow(() -> new ResourceNotFoundException("Experience post not found with id " + id));
 
         if (!experience.getUser().getId().equals(user.getId())) {
-            throw new BadRequestException("You do not have permission to delete this experience.");
+            throw new ForbiddenException("You do not have permission to delete this experience.");
         }
 
         experienceRepository.delete(experience);
@@ -105,7 +105,7 @@ public class ExperienceService {
 
     @Transactional
     public ExperienceResponse toggleHelpful(User currentUser, Long id) {
-        Experience experience = experienceRepository.findById(id)
+        Experience experience = experienceRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Experience post not found with id " + id));
 
         if (currentUser != null) {

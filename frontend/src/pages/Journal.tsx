@@ -60,7 +60,7 @@ function Section({ label, value }: { label: string; value: string | null }) {
   if (!value || !value.trim()) return null
   return (
     <div className="rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 p-3">
-      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{label}</p>
+      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</p>
       <p className="mt-1 whitespace-pre-wrap text-xs font-medium leading-relaxed text-slate-700 dark:text-slate-200">{value}</p>
     </div>
   )
@@ -90,10 +90,10 @@ function EntryCard({
         <div className="min-w-0">
           <p className="text-sm font-bold text-slate-900 dark:text-slate-100 tracking-tight">
             {entry.title?.trim() || (
-              <span className="font-semibold text-slate-400 dark:text-slate-500">Untitled entry</span>
+              <span className="font-semibold text-slate-500 dark:text-slate-400">Untitled entry</span>
             )}
           </p>
-          <p className="mt-0.5 text-[11px] font-medium text-slate-400 dark:text-slate-500">
+          <p className="mt-0.5 text-[11px] font-medium text-slate-500 dark:text-slate-400">
             Logged {formatDate(entry.createdAt)}
             {entry.updatedAt !== entry.createdAt && (
               <> · edited {formatDate(entry.updatedAt)}</>
@@ -236,7 +236,7 @@ function JournalStarter() {
                 key={label}
                 className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80 p-3.5"
               >
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   Log
                 </p>
                 <p className="mt-0.5 text-xs font-bold text-slate-800 dark:text-slate-200">{label}</p>
@@ -421,7 +421,7 @@ export default function Journal() {
             <div className="relative flex-1 sm:w-72">
               <Search
                 size={16}
-                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400"
               />
               <Input
                 className="pl-9.5"

@@ -57,7 +57,7 @@ const CardBody = memo(function CardBody({ company }: { company: Company }) {
             className="flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-600/20 dark:ring-emerald-500/30"
           >
             <CircleCheckBig size={12} className="text-emerald-600 dark:text-emerald-400" />
-            <span className="hidden xl:inline">Superset</span>
+            <span className="sr-only">Registered on Superset</span>
           </span>
         )}
       </div>
@@ -71,13 +71,13 @@ const CardBody = memo(function CardBody({ company }: { company: Company }) {
         )}
         {company.location && (
           <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-[11px]">
-            <MapPin size={12} className="text-slate-400 dark:text-slate-500" />
+            <MapPin size={12} className="text-slate-500 dark:text-slate-400" />
             {company.location}
           </span>
         )}
       </div>
 
-      <div className="mt-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-800/80 pt-2.5 text-[11px] font-medium text-slate-400 dark:text-slate-500">
+      <div className="mt-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-800/80 pt-2.5 text-[11px] font-medium text-slate-500 dark:text-slate-400">
         <span className="inline-flex items-center gap-1">
           <Layers size={12} />
           {company.roundCount} {company.roundCount === 1 ? 'round' : 'rounds'}
@@ -145,7 +145,7 @@ const KanbanCard = memo(function KanbanCard({
       )}
 
       <label
-        className="mt-3 flex items-center gap-2 border-t border-slate-100 dark:border-slate-800/80 pt-2 text-xs font-medium text-slate-500 dark:text-slate-400 sm:hidden"
+        className="mt-3 flex items-center gap-2 border-t border-slate-100 dark:border-slate-800/80 pt-2 text-xs font-medium text-slate-500 dark:text-slate-400"
         onPointerDown={(event) => event.stopPropagation()}
         onClick={(event) => event.stopPropagation()}
       >
@@ -186,7 +186,12 @@ const KanbanColumn = memo(function KanbanColumn({
   const meta = STAGE_META[stage]
 
   return (
-    <div ref={setNodeRef} className="flex min-w-0 flex-col">
+    <div
+      ref={setNodeRef}
+      role="listitem"
+      aria-label={`${meta.label}, ${companies.length} ${companies.length === 1 ? 'company' : 'companies'}`}
+      className="flex w-[17rem] shrink-0 snap-start flex-col"
+    >
       {/* Column Header */}
       <div className="mb-2.5 flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
@@ -217,7 +222,7 @@ const KanbanColumn = memo(function KanbanColumn({
           />
         ))}
         {companies.length === 0 && (
-          <div className="flex min-h-[10rem] flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-white/40 dark:bg-slate-900/30 px-4 text-center text-xs font-medium text-slate-400 dark:text-slate-500">
+          <div className="flex min-h-[10rem] flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-white/40 dark:bg-slate-900/30 px-4 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
             <span>Drop company here</span>
           </div>
         )}
@@ -318,7 +323,12 @@ export function KanbanBoard({ companies, onCardClick, onShareExperience }: Kanba
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+      {/* One left-to-right row so the pipeline reads as a flow; scrolls sideways when it overflows. */}
+      <div
+        className="scrollbar-thin -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-4 sm:mx-0 sm:snap-none sm:px-0"
+        role="list"
+        aria-label="Pipeline stages"
+      >
         {STAGE_ORDER.map((stage) => (
           <KanbanColumn
             key={stage}
@@ -333,7 +343,7 @@ export function KanbanBoard({ companies, onCardClick, onShareExperience }: Kanba
 
       <DragOverlay dropAnimation={null}>
         {activeCompany && (
-          <div className="w-80 rotate-2 cursor-grabbing rounded-xl border border-indigo-400 dark:border-indigo-500 bg-white dark:bg-slate-900 p-3.5 shadow-2xl shadow-indigo-950/20 ring-2 ring-indigo-500/20">
+          <div className="w-[17rem] rotate-2 cursor-grabbing rounded-xl border border-indigo-400 dark:border-indigo-500 bg-white dark:bg-slate-900 p-3.5 shadow-2xl shadow-indigo-950/20 ring-2 ring-indigo-500/20">
             <CardBody company={activeCompany} />
           </div>
         )}

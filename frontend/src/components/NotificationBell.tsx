@@ -91,11 +91,11 @@ export function NotificationBell() {
         <div className="animate-pop absolute right-0 z-40 mt-2 w-[min(calc(100vw-2rem),20rem)] overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl shadow-slate-900/15 dark:shadow-black/50">
           <div className="border-b border-slate-100 dark:border-slate-800 px-4 py-3 bg-slate-50/50 dark:bg-slate-950/50">
             <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Notifications</p>
-            <p className="text-xs text-slate-400 dark:text-slate-500">Conflicts and rounds in the next 24 hours</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Conflicts and rounds in the next 24 hours</p>
           </div>
 
           {alerts.length === 0 ? (
-            <div className="px-4 py-8 text-center text-sm text-slate-400 dark:text-slate-500">
+            <div className="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
               You're all caught up.
             </div>
           ) : (

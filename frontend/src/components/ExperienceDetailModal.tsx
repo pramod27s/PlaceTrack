@@ -217,7 +217,7 @@ export function ExperienceDetailModal({
           {/* Topics / Tags */}
           {experience.topics && (
             <div className="space-y-1.5">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Core Topics Covered
               </p>
               <div className="flex flex-wrap gap-1.5">

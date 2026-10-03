@@ -12,6 +12,7 @@ import org.pramod.backend.user.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +25,7 @@ public class RoundService {
     private final JournalRepository journalRepository;
     private final CompanyService companyService;
     private final ConflictDetectionService conflictDetectionService;
+    private final Clock clock;
 
     @Transactional(readOnly = true)
     public List<RoundResponse> listForCompany(User user, Long companyId) {
@@ -46,7 +48,7 @@ public class RoundService {
     /** Rounds scheduled from now through the next 7 days. */
     @Transactional(readOnly = true)
     public List<RoundResponse> listUpcoming(User user) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(clock);
         List<Round> all = roundRepository.findByUserWithCompany(user);
         Set<Long> journalRoundIds = journalRepository.findRoundIdsWithJournalByUser(user);
         List<Round> window = roundRepository.findByCompany_UserAndScheduledAtBetweenOrderByScheduledAtAsc(

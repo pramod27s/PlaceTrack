@@ -23,11 +23,12 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// On an expired / invalid session (401 Unauthorized or 403 Forbidden), clear local state and bounce to login.
+// On an expired / invalid session (401 Unauthorized), clear local state and bounce to login.
+// 403 means "authenticated but not allowed" and is surfaced to the caller instead.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    if (error.response?.status === 401) {
       useAuth.getState().signOut()
       if (!window.location.pathname.startsWith('/login')) {
         window.location.assign('/login')

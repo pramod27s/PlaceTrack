@@ -116,7 +116,7 @@ export function RoundListItem({
               </>
             ) : (
               <>
-                <MapPin size={12} className="text-slate-400 dark:text-slate-500" />
+                <MapPin size={12} className="text-slate-500 dark:text-slate-400" />
                 In person {round.location ? `(${round.location})` : ''}
               </>
             )}

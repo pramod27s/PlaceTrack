@@ -88,7 +88,7 @@ type FilterType = 'all' | 'active' | 'superset' | 'interview' | 'offer'
 
 export default function Pipeline() {
   const navigate = useNavigate()
-  const { data: companies, isLoading, isError } = useCompanies()
+  const { data: companies, isLoading, isError, refetch } = useCompanies()
   const [modalOpen, setModalOpen] = useState(false)
   const [shareCompany, setShareCompany] = useState<Company | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -131,7 +131,9 @@ export default function Pipeline() {
   }, [companies, activeFilter, searchQuery])
 
   if (isLoading) return <PipelineSkeleton />
-  if (isError || !companies) return <ErrorNote message="Couldn't load your pipeline. Please retry." />
+  if (isError || !companies) {
+    return <ErrorNote message="Couldn't load your pipeline." onRetry={() => refetch()} />
+  }
 
   const totalCount = companies.length
   const activeCount = companies.filter((c) => c.stage !== 'REJECTED' && c.stage !== 'OFFER').length
@@ -236,7 +238,7 @@ export default function Pipeline() {
           <div className="relative w-full sm:w-64">
             <Search
               size={15}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400"
             />
             <Input
               className="pl-9 pr-8 text-xs font-medium"
@@ -248,7 +250,8 @@ export default function Pipeline() {
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                aria-label="Clear search"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-600 dark:hover:text-slate-200"
               >
                 <X size={14} />
               </button>

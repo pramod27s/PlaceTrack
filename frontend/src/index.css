@@ -28,6 +28,18 @@
     background-color: #090d16;
     color: #f1f5f9;
   }
+
+  /* Honour the OS "reduce motion" setting: stop looping and entrance animations. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer utilities {

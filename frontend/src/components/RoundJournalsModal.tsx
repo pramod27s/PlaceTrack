@@ -65,7 +65,7 @@ function EntryRow({
           <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
             {entry.title?.trim() || 'Untitled entry'}
           </p>
-          <p className="text-xs text-slate-400 dark:text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Logged {formatDateTime(entry.createdAt)}
             {entry.updatedAt !== entry.createdAt && (
               <> · edited {formatDateTime(entry.updatedAt)}</>

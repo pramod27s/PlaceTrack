@@ -11,14 +11,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 import org.pramod.backend.exception.AiServiceException;
 
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
+import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +39,14 @@ public class GeminiService {
     private final String fallbackApiKey;
     private final String model;
     private final boolean thinkingEnabled;
+    private final Clock clock;
+
+    /** Per-request read timeout: generation regularly takes several seconds. */
+    private static final Duration READ_TIMEOUT = Duration.ofSeconds(12);
+    /** Upper bound on the whole key/model/retry sequence for one user request. */
+    private static final Duration TOTAL_BUDGET = Duration.ofSeconds(25);
+    private static final int ATTEMPTS_PER_MODEL = 2;
+    private static final long RETRY_BACKOFF_MS = 700;
 
     @Autowired
     public GeminiService(
@@ -41,16 +54,18 @@ public class GeminiService {
             @Value("${gemini.api.fallback-key:}") String fallbackApiKey,
             @Value("${gemini.api.model:gemini-3.5-flash}") String model,
             @Value("${gemini.api.thinking-enabled:false}") boolean thinkingEnabled,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            Clock clock) {
         this.apiKey = apiKey;
         this.fallbackApiKey = fallbackApiKey;
         this.model = model;
         this.thinkingEnabled = thinkingEnabled;
         this.objectMapper = objectMapper;
+        this.clock = clock;
 
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(Duration.ofSeconds(3));
-        factory.setReadTimeout(Duration.ofSeconds(5));
+        factory.setReadTimeout(READ_TIMEOUT);
 
         this.restClient = RestClient.builder()
                 .requestFactory(factory)
@@ -63,14 +78,14 @@ public class GeminiService {
             String fallbackApiKey,
             String model,
             ObjectMapper objectMapper) {
-        this(apiKey, fallbackApiKey, model, false, objectMapper);
+        this(apiKey, fallbackApiKey, model, false, objectMapper, Clock.system(ZoneId.of("Asia/Kolkata")));
     }
 
     public GeminiService(
             String apiKey,
             String model,
             ObjectMapper objectMapper) {
-        this(apiKey, null, model, false, objectMapper);
+        this(apiKey, null, model, objectMapper);
     }
 
     public ParsedCompanyResponse parseCompanyNotice(String rawText) {
@@ -78,7 +93,7 @@ public class GeminiService {
     }
 
     public ParsedCompanyResponse parseCompanyNotice(String rawText, String userApiKey) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         String prompt = """
                 You are an AI assistant for a campus placement tracker called PlaceTrack.
                 Your task is to extract structured placement information from raw WhatsApp messages, Superset announcements, emails, or job postings.
@@ -133,7 +148,7 @@ public class GeminiService {
     }
 
     public ParsedRoundResponse parseRoundNotice(String rawText, String userApiKey) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         String prompt = """
                 You are an AI assistant for a campus placement tracker called PlaceTrack.
                 Your task is to extract interview round and scheduling details from an interview invitation, email, or announcement.
@@ -234,66 +249,40 @@ public class GeminiService {
                 .distinct()
                 .toList();
         String response = null;
-        Exception lastException = null;
+        Failure lastFailure = null;
+        long deadline = System.nanoTime() + TOTAL_BUDGET.toNanos();
 
         keyLoop:
         for (String currentKey : candidateKeys) {
             for (String currentModel : candidateModels) {
-                int maxRetries = 2;
-                for (int attempt = 1; attempt <= maxRetries; attempt++) {
+                for (int attempt = 1; attempt <= ATTEMPTS_PER_MODEL; attempt++) {
+                    if (System.nanoTime() > deadline) {
+                        log.warn("Gemini call budget of {}s exhausted; giving up.", TOTAL_BUDGET.toSeconds());
+                        break keyLoop;
+                    }
                     try {
-                        response = restClient.post()
-                                .uri("/models/{model}:generateContent?key={apiKey}", currentModel, currentKey)
-                                .accept(MediaType.APPLICATION_JSON)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .body(requestBody)
-                                .exchange((req, res) -> {
-                                    byte[] bytes = res.getBody().readAllBytes();
-                                    String text = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
-                                    if (res.getStatusCode().is2xxSuccessful()) {
-                                        return text;
-                                    } else {
-                                        throw new RuntimeException("HTTP " + res.getStatusCode().value() + ": " + text);
-                                    }
-                                });
-                        lastException = null;
+                        response = send(currentModel, currentKey, requestBody);
                         break keyLoop;
                     } catch (Exception e) {
-                        lastException = e;
-                        String msg = e.getMessage() != null ? e.getMessage() : "";
-                        boolean isQuotaOrAuth = msg.contains("429") || msg.contains("RESOURCE_EXHAUSTED")
-                                || msg.contains("400") || msg.contains("403") || msg.contains("API_KEY_INVALID");
-                        boolean isOverloaded = msg.contains("503") || msg.contains("UNAVAILABLE") || msg.contains("Read timed out");
+                        lastFailure = classify(e);
+                        log.warn("Gemini call failed (model={}, attempt={}): {} - {}",
+                                currentModel, attempt, lastFailure, describe(e));
 
-                        if (isOverloaded) {
-                            log.warn("Gemini API overloaded or timed out for model {} on attempt {}: {}. Failing fast to next model...", currentModel, attempt, msg);
-                            break; // Switch to the next candidate model immediately
-                        } else if (isQuotaOrAuth) {
-                            log.warn("Gemini API key issue for model {}: {}. Switching to next key if available...", currentModel, msg);
-                            break;
-                        } else {
-                            log.warn("Gemini API unexpected failure for model {}: {}", currentModel, msg);
-                            break;
+                        if (lastFailure == Failure.QUOTA || lastFailure == Failure.BAD_KEY) {
+                            continue keyLoop; // this key is unusable; other models won't help
                         }
+                        if (lastFailure == Failure.TRANSIENT && attempt < ATTEMPTS_PER_MODEL) {
+                            sleepQuietly(RETRY_BACKOFF_MS * attempt);
+                            continue; // retry the same model
+                        }
+                        break; // BAD_MODEL, BAD_REQUEST, OTHER, or retries used up: next model
                     }
-                }
-                String msg = lastException != null && lastException.getMessage() != null ? lastException.getMessage() : "";
-                if (msg.contains("429") || msg.contains("RESOURCE_EXHAUSTED") || msg.contains("403") || msg.contains("API_KEY_INVALID")) {
-                    break; // Move immediately to next candidate key
                 }
             }
         }
 
         if (response == null) {
-            String err = lastException != null && lastException.getMessage() != null ? lastException.getMessage() : "Unknown error";
-            if (err.contains("429") || err.contains("RESOURCE_EXHAUSTED")) {
-                throw new AiServiceException("Gemini AI free-tier quota reached for today. Please try again later or configure an upgraded Gemini API key.");
-            } else if (err.contains("400") || err.contains("403") || err.contains("API_KEY_INVALID")) {
-                throw new AiServiceException("Gemini API key is invalid or unauthorized. Please verify your GEMINI_API_KEY.");
-            } else if (err.contains("503") || err.contains("UNAVAILABLE")) {
-                throw new AiServiceException("Google Gemini AI is temporarily experiencing high demand. Please try again in a few seconds.");
-            }
-            throw new AiServiceException("AI service failed: " + err);
+            throw new AiServiceException(userMessage(lastFailure));
         }
 
         try {
@@ -311,6 +300,88 @@ public class GeminiService {
         } catch (Exception e) {
             log.error("Failed to parse Gemini API response: {}", response, e);
             throw new AiServiceException("Failed to parse response from Gemini: " + e.getMessage());
+        }
+    }
+
+    /** Why a single Gemini call failed, derived from the HTTP status (not the message text). */
+    private enum Failure { QUOTA, BAD_KEY, BAD_MODEL, BAD_REQUEST, TRANSIENT, OTHER }
+
+    /** A non-2xx reply from Gemini, carrying the status so it can be classified. */
+    private static final class GeminiHttpException extends RuntimeException {
+        private final int status;
+        private final String body;
+
+        GeminiHttpException(int status, String body) {
+            super("HTTP " + status);
+            this.status = status;
+            this.body = body;
+        }
+    }
+
+    private String send(String model, String key, Map<String, Object> requestBody) {
+        return restClient.post()
+                .uri("/models/{model}:generateContent", model)
+                // Header rather than ?key= so the key never appears in URLs, logs or error messages.
+                .header("x-goog-api-key", key)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(requestBody)
+                .exchange((req, res) -> {
+                    String text = new String(res.getBody().readAllBytes(), StandardCharsets.UTF_8);
+                    if (res.getStatusCode().is2xxSuccessful()) {
+                        return text;
+                    }
+                    throw new GeminiHttpException(res.getStatusCode().value(), text);
+                });
+    }
+
+    private static Failure classify(Exception e) {
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            if (t instanceof GeminiHttpException http) {
+                return switch (http.status) {
+                    case 429 -> Failure.QUOTA;
+                    case 401, 403 -> Failure.BAD_KEY;
+                    // Gemini reports a bad key as 400 with reason API_KEY_INVALID.
+                    case 400 -> http.body.contains("API_KEY_INVALID") ? Failure.BAD_KEY : Failure.BAD_REQUEST;
+                    case 404 -> Failure.BAD_MODEL;
+                    case 500, 502, 503, 504 -> Failure.TRANSIENT;
+                    default -> Failure.OTHER;
+                };
+            }
+            if (t instanceof SocketTimeoutException || t instanceof ResourceAccessException) {
+                return Failure.TRANSIENT;
+            }
+        }
+        return Failure.OTHER;
+    }
+
+    private static String describe(Exception e) {
+        if (e instanceof GeminiHttpException http) {
+            String body = http.body.length() > 300 ? http.body.substring(0, 300) + "..." : http.body;
+            return "HTTP " + http.status + ": " + body;
+        }
+        return e.getClass().getSimpleName() + ": " + e.getMessage();
+    }
+
+    private static String userMessage(Failure failure) {
+        if (failure == null) {
+            failure = Failure.TRANSIENT;
+        }
+        return switch (failure) {
+            case QUOTA -> "Gemini AI quota reached. Please try again later or configure your own Gemini API key.";
+            case BAD_KEY -> "Gemini API key is invalid or unauthorized. Please verify your API key.";
+            case BAD_MODEL -> "The configured Gemini model is not available. Please check GEMINI_MODEL.";
+            case BAD_REQUEST -> "Gemini rejected the request. Please try shortening or rephrasing the text.";
+            case TRANSIENT -> "Google Gemini AI is temporarily experiencing high demand. Please try again in a few seconds.";
+            case OTHER -> "AI service failed. Please try again.";
+        };
+    }
+
+    private static void sleepQuietly(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
         }
     }
 
