@@ -22,7 +22,6 @@ function PreviewCard({
   role,
   left,
   right,
-  accent,
   avatar,
   superset,
   className,
@@ -31,13 +30,12 @@ function PreviewCard({
   role: string
   left: string
   right: ReactNode
-  accent: string
   avatar: string
   superset?: boolean
   className?: string
 }) {
   return (
-    <div className={cn('rounded-lg border border-l-4 border-slate-800 bg-slate-900 p-3', accent, className)}>
+    <div className={cn('rounded-lg border border-slate-800 bg-slate-900 p-3', className)}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           <span className={cn('flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-xs font-semibold', avatar)}>
@@ -210,7 +208,6 @@ export function HeroPreview() {
                 role="Associate Analyst · 7.6 LPA"
                 left="Just added"
                 right="OA on Friday"
-                accent="border-l-sky-500"
                 avatar="bg-sky-900/50 text-sky-300"
                 superset
               />
@@ -221,7 +218,6 @@ export function HeroPreview() {
               role="SDE-1 · ₹44 LPA"
               left="OA scheduled"
               right="Fri, 10 AM"
-              accent="border-l-sky-500"
               avatar="bg-sky-900/50 text-sky-300"
               superset
             />
@@ -239,7 +235,6 @@ export function HeroPreview() {
                   In calendar
                 </>
               }
-              accent="border-l-blue-500"
               avatar="bg-blue-900/50 text-blue-300"
             />
           </Column>
@@ -251,7 +246,6 @@ export function HeroPreview() {
               role="Full-time SDE"
               left="4 journal notes"
               right="Offer accepted"
-              accent="border-l-emerald-500"
               avatar="bg-emerald-900/50 text-emerald-300"
             />
           </Column>

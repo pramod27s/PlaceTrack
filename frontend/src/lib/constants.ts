@@ -13,8 +13,6 @@ interface StageMeta {
   bar: string
   /** Kanban column background + border. */
   column: string
-  /** Left stripe on a Kanban card. */
-  accent: string
   /** Kanban column title colour. */
   heading: string
   /** Kanban column count pill. */
@@ -59,7 +57,6 @@ export const STAGE_META: Record<Stage, StageMeta> = {
     dot: 'bg-cyan-500',
     bar: 'bg-cyan-500',
     column: 'border-cyan-200 bg-cyan-50 dark:border-cyan-900/50 dark:bg-cyan-950/20',
-    accent: 'border-l-cyan-500 dark:border-l-cyan-500',
     heading: 'text-cyan-800 dark:text-cyan-300',
     count: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300',
     avatar: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300',
@@ -71,7 +68,6 @@ export const STAGE_META: Record<Stage, StageMeta> = {
     dot: 'bg-slate-500 dark:bg-slate-400',
     bar: 'bg-slate-500 dark:bg-slate-400',
     column: 'border-slate-200 bg-slate-100/70 dark:border-slate-800 dark:bg-slate-900/50',
-    accent: 'border-l-slate-400 dark:border-l-slate-400',
     heading: 'text-slate-800 dark:text-slate-200',
     count: 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
     avatar: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
@@ -83,7 +79,6 @@ export const STAGE_META: Record<Stage, StageMeta> = {
     dot: 'bg-sky-500',
     bar: 'bg-sky-500',
     column: 'border-sky-200 bg-sky-50 dark:border-sky-900/50 dark:bg-sky-950/20',
-    accent: 'border-l-sky-500 dark:border-l-sky-500',
     heading: 'text-sky-800 dark:text-sky-300',
     count: 'bg-sky-100 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300',
     avatar: 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300',
@@ -95,7 +90,6 @@ export const STAGE_META: Record<Stage, StageMeta> = {
     dot: 'bg-violet-500',
     bar: 'bg-violet-500',
     column: 'border-violet-200 bg-violet-50 dark:border-violet-900/50 dark:bg-violet-950/20',
-    accent: 'border-l-violet-500 dark:border-l-violet-500',
     heading: 'text-violet-800 dark:text-violet-300',
     count: 'bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300',
     avatar: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300',
@@ -107,7 +101,6 @@ export const STAGE_META: Record<Stage, StageMeta> = {
     dot: 'bg-amber-500',
     bar: 'bg-amber-500',
     column: 'border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/20',
-    accent: 'border-l-amber-500 dark:border-l-amber-500',
     heading: 'text-amber-800 dark:text-amber-300',
     count: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
     avatar: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
@@ -119,7 +112,6 @@ export const STAGE_META: Record<Stage, StageMeta> = {
     dot: 'bg-blue-500',
     bar: 'bg-blue-500',
     column: 'border-blue-200 bg-blue-50 dark:border-blue-900/50 dark:bg-blue-950/20',
-    accent: 'border-l-blue-500 dark:border-l-blue-500',
     heading: 'text-blue-800 dark:text-blue-300',
     count: 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
     avatar: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
@@ -131,7 +123,6 @@ export const STAGE_META: Record<Stage, StageMeta> = {
     dot: 'bg-fuchsia-500',
     bar: 'bg-fuchsia-500',
     column: 'border-fuchsia-200 bg-fuchsia-50 dark:border-fuchsia-900/50 dark:bg-fuchsia-950/20',
-    accent: 'border-l-fuchsia-500 dark:border-l-fuchsia-500',
     heading: 'text-fuchsia-800 dark:text-fuchsia-300',
     count: 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/50 dark:text-fuchsia-300',
     avatar: 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300',
@@ -143,7 +134,6 @@ export const STAGE_META: Record<Stage, StageMeta> = {
     dot: 'bg-emerald-500',
     bar: 'bg-emerald-500',
     column: 'border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/20',
-    accent: 'border-l-emerald-500 dark:border-l-emerald-500',
     heading: 'text-emerald-800 dark:text-emerald-300',
     count: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300',
     avatar: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
@@ -155,7 +145,6 @@ export const STAGE_META: Record<Stage, StageMeta> = {
     dot: 'bg-rose-500',
     bar: 'bg-rose-500',
     column: 'border-rose-200 bg-rose-50 dark:border-rose-900/50 dark:bg-rose-950/20',
-    accent: 'border-l-rose-500 dark:border-l-rose-500',
     heading: 'text-rose-800 dark:text-rose-300',
     count: 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300',
     avatar: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300',

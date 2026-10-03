@@ -110,9 +110,8 @@ const KanbanCard = memo(function KanbanCard({
         if (event.key === 'Enter') onSelect(company)
       }}
       className={cn(
-        'group cursor-grab rounded-lg border border-l-4 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3.5 shadow-sm transition-shadow',
-        'hover:shadow-md dark:hover:shadow-black/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:cursor-grabbing',
-        STAGE_META[company.stage].accent,
+        'group cursor-grab rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3.5 shadow-sm transition-shadow',
+        'hover:shadow-md dark:hover:shadow-black/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:cursor-grabbing',
         isDragging && 'opacity-40',
       )}
     >
@@ -341,8 +340,7 @@ export function KanbanBoard({ companies, onCardClick, onShareExperience }: Kanba
         {activeCompany && (
           <div
             className={cn(
-              'w-80 rotate-1 cursor-grabbing rounded-lg border border-l-4 border-slate-300 bg-white p-3.5 shadow-xl shadow-slate-900/15 dark:border-slate-600 dark:bg-slate-900',
-              STAGE_META[activeCompany.stage].accent,
+              'w-80 rotate-1 cursor-grabbing rounded-lg border border-slate-300 bg-white p-3.5 shadow-xl shadow-slate-900/15 dark:border-slate-600 dark:bg-slate-900',
             )}
           >
             <CardBody company={activeCompany} />
