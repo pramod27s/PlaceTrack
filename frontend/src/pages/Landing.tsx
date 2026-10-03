@@ -4,22 +4,22 @@ import {
   ArrowRight,
   BookOpen,
   CalendarClock,
-  CalendarPlus,
   Check,
-  CheckCircle2,
   HelpCircle,
   KanbanSquare,
   NotebookPen,
   ShieldCheck,
   Sparkles,
   ThumbsUp,
-  TriangleAlert,
   Users,
   X,
   Zap,
 } from 'lucide-react'
 
 import { PlaceTrackIcon } from '../components/PlaceTrackLogo'
+import { HeroPreview } from '../components/landing/HeroPreview'
+import { Reveal } from '../components/landing/Reveal'
+import { useInView } from '../hooks/useInView'
 import { cn } from '../lib/format'
 
 /* ------------------------------------------------------------------ helpers */
@@ -34,15 +34,65 @@ function Eyebrow({ children }: { children: ReactNode }) {
   return <p className="text-sm font-medium text-indigo-400">{children}</p>
 }
 
-/** A feature tile in the "Everything you need" grid. */
-function FeatureCard({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
+/** A feature tile in the "Everything you need" grid. Fades in on scroll; lifts and lights up on hover. */
+function FeatureCard({
+  icon,
+  title,
+  delay = 0,
+  children,
+}: {
+  icon: ReactNode
+  title: string
+  delay?: number
+  children: ReactNode
+}) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6 transition-colors hover:border-slate-700 sm:p-7">
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 text-slate-200" aria-hidden="true">
-        {icon}
+    <Reveal delay={delay}>
+      <div className="group h-full rounded-2xl border border-slate-800 bg-slate-900/50 p-6 transition-[border-color,transform,background-color] duration-300 hover:-translate-y-1 hover:border-indigo-500/40 hover:bg-slate-900 sm:p-7">
+        <div
+          className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 text-slate-200 transition-colors duration-300 group-hover:bg-indigo-600 group-hover:text-white"
+          aria-hidden="true"
+        >
+          {icon}
+        </div>
+        <h3 className="mt-4 text-base font-semibold text-white">{title}</h3>
+        <p className="mt-2 text-sm leading-relaxed text-slate-400">{children}</p>
       </div>
-      <h3 className="mt-4 text-base font-semibold text-white">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-slate-400">{children}</p>
+    </Reveal>
+  )
+}
+
+const EXTRACTED = [
+  ['Company', 'Deloitte USI'],
+  ['Role', 'Associate Analyst'],
+  ['CTC', '7.6 LPA'],
+  ['Superset', 'joinsuperset.com/…'],
+  ['Round', 'Technical, 45 min'],
+] as const
+
+/** The "AI pulled these out of the notice" box; fields tick in one by one when it scrolls into view. */
+function ExtractedFields() {
+  const [ref, inView] = useInView<HTMLDivElement>()
+  return (
+    <div
+      ref={ref}
+      className="w-full shrink-0 space-y-1.5 rounded-xl border border-slate-800 bg-slate-950 p-4 font-mono text-xs text-slate-300 lg:w-auto lg:min-w-[300px]"
+    >
+      <p className="flex items-center gap-2 text-slate-500">
+        Extracted from the notice
+        {!inView && <span className="animate-caret inline-block h-3.5 w-px bg-slate-500" aria-hidden="true" />}
+      </p>
+      {EXTRACTED.map(([k, v], i) => (
+        <p
+          key={k}
+          style={inView ? { animationDelay: `${200 + i * 180}ms` } : undefined}
+          className={cn('flex gap-2', inView ? 'animate-pop opacity-0' : 'opacity-0')}
+        >
+          <Check size={14} className="shrink-0 text-emerald-400" aria-hidden="true" />
+          <span className="text-slate-500">{k}:</span>
+          <span className="truncate text-slate-200">{v}</span>
+        </p>
+      ))}
     </div>
   )
 }
@@ -92,11 +142,19 @@ export default function Landing() {
       <main>
         {/* ---------------- Hero ---------------- */}
         <section className="relative overflow-hidden pb-20 pt-16 sm:pb-28 sm:pt-24">
-          {/* One soft, static glow behind the headline (a gradient, not a blur filter, so it's cheap to draw). */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 -z-0 h-[560px] bg-[radial-gradient(60%_60%_at_50%_0%,rgba(79,70,229,0.22),transparent_70%)]"
-          />
+          {/* Background: a faint dot grid plus two slowly drifting glows (gradients, not blur filters, so they stay cheap). */}
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div
+              className="absolute inset-0 bg-[radial-gradient(rgba(148,163,184,0.14)_1px,transparent_1px)] [background-size:28px_28px]"
+              style={{
+                maskImage: 'radial-gradient(70% 55% at 50% 30%, black, transparent)',
+                WebkitMaskImage: 'radial-gradient(70% 55% at 50% 30%, black, transparent)',
+              }}
+            />
+            <div className="animate-aurora absolute -top-56 left-1/2 h-[560px] w-[960px] -ml-[480px] rounded-full bg-[radial-gradient(closest-side,rgba(79,70,229,0.30),transparent)]" />
+            <div className="animate-aurora-slow absolute top-24 left-[8%] h-[380px] w-[560px] rounded-full bg-[radial-gradient(closest-side,rgba(14,165,233,0.12),transparent)]" />
+            <div className="animate-aurora absolute top-40 right-[6%] h-[340px] w-[480px] rounded-full bg-[radial-gradient(closest-side,rgba(168,85,247,0.10),transparent)]" />
+          </div>
 
           <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-8">
             <div className="animate-slide-up inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/80 px-3.5 py-1.5 text-xs font-medium text-slate-300">
@@ -123,97 +181,9 @@ export default function Landing() {
               </Link>
             </div>
 
-            {/* ---------------- Product preview ---------------- */}
-            <div className="relative mx-auto mt-16 max-w-5xl">
-              <div className="rounded-2xl border border-slate-800 bg-slate-900 p-3 text-left shadow-2xl shadow-black/40 sm:p-4">
-                {/* Window bar */}
-                <div className="flex items-center gap-3 border-b border-slate-800 px-2 pb-3">
-                  <div className="flex items-center gap-1.5" aria-hidden="true">
-                    <span className="h-2.5 w-2.5 rounded-full bg-slate-700" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-slate-700" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-slate-700" />
-                  </div>
-                  <span className="truncate text-xs text-slate-500">Example pipeline</span>
-                </div>
-
-                <div className="space-y-3 p-2 sm:p-4">
-                  {/* AI auto-fill */}
-                  <div className="flex items-start gap-2.5 rounded-lg border border-slate-800 bg-slate-950/60 p-3 text-sm text-slate-300">
-                    <Sparkles size={16} className="mt-0.5 shrink-0 text-indigo-400" aria-hidden="true" />
-                    <span>
-                      <span className="font-medium text-white">AI auto-fill:</span> paste a WhatsApp notice and the company,
-                      role, CTC and Superset link are filled in for you.
-                    </span>
-                  </div>
-
-                  {/* Conflict alert */}
-                  <div className="flex items-start gap-2.5 rounded-lg border border-rose-900/60 bg-rose-950/30 p-3 text-sm text-rose-200">
-                    <TriangleAlert size={16} className="mt-0.5 shrink-0 text-rose-400" aria-hidden="true" />
-                    <span>
-                      <span className="font-medium">Clash:</span> Google technical round overlaps with the Amazon OA on
-                      Friday at 10:00 AM.
-                    </span>
-                  </div>
-
-                  {/* Kanban preview */}
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    {[
-                      {
-                        stage: 'Online assessment',
-                        dot: 'bg-slate-400',
-                        company: 'Amazon',
-                        role: 'SDE-1 · ₹44 LPA',
-                        left: 'OA scheduled',
-                        right: 'Tomorrow, 10 AM',
-                        superset: true,
-                      },
-                      {
-                        stage: 'Technical',
-                        dot: 'bg-blue-500',
-                        company: 'Google',
-                        role: 'Software Engineer · ₹52 LPA',
-                        left: 'Google Meet',
-                        right: 'Added to calendar',
-                        icon: <CalendarPlus size={12} aria-hidden="true" />,
-                      },
-                      {
-                        stage: 'Offer',
-                        dot: 'bg-emerald-500',
-                        company: 'Microsoft',
-                        role: 'Full-time SDE',
-                        left: '4 journal notes',
-                        right: 'Offer accepted',
-                      },
-                    ].map((col) => (
-                      <div key={col.stage} className="rounded-xl border border-slate-800 bg-slate-950/50 p-2.5">
-                        <div className="mb-2 flex items-center justify-between px-1 text-sm">
-                          <span className="flex items-center gap-2 font-medium text-slate-300">
-                            <span className={cn('h-2 w-2 rounded-full', col.dot)} aria-hidden="true" />
-                            {col.stage}
-                          </span>
-                          <span className="rounded-full bg-slate-800 px-2 py-0.5 text-xs text-slate-400">1</span>
-                        </div>
-                        <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-                          <div className="flex items-start justify-between gap-2">
-                            <p className="text-sm font-semibold text-white">{col.company}</p>
-                            {col.superset && (
-                              <CheckCircle2 size={14} className="mt-0.5 text-emerald-400" aria-label="Registered on Superset" />
-                            )}
-                          </div>
-                          <p className="mt-0.5 text-xs text-slate-400">{col.role}</p>
-                          <div className="mt-3 flex items-center justify-between border-t border-slate-800 pt-2 text-xs text-slate-500">
-                            <span>{col.left}</span>
-                            <span className="inline-flex items-center gap-1 text-slate-300">
-                              {col.icon}
-                              {col.right}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+            {/* ---------------- Product preview (animated) ---------------- */}
+            <div className="animate-slide-up-delay-3 relative mx-auto mt-16 max-w-5xl">
+              <HeroPreview />
             </div>
           </div>
         </section>
@@ -221,7 +191,7 @@ export default function Landing() {
         {/* ---------------- The problem vs the solution ---------------- */}
         <section id="problem" className="scroll-mt-16 border-t border-slate-900 py-20 sm:py-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-8">
-            <div className="mx-auto max-w-2xl text-center">
+            <Reveal className="mx-auto max-w-2xl text-center">
               <Eyebrow>The reality of placement season</Eyebrow>
               <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-white sm:text-4xl">
                 Why spreadsheets fall apart under pressure
@@ -230,10 +200,10 @@ export default function Landing() {
                 With dozens of companies testing and interviewing at once, scattered notes lead to missed deadlines and
                 double-booked rounds.
               </p>
-            </div>
+            </Reveal>
 
             <div className="mt-12 grid gap-6 md:grid-cols-2">
-              <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 sm:p-8">
+              <Reveal className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 sm:p-8">
                 <p className="text-sm font-medium text-slate-400">The usual way</p>
                 <h3 className="mt-1 text-xl font-semibold text-white">Spreadsheets and WhatsApp forwards</h3>
                 <ul className="mt-5 space-y-3 text-sm text-slate-400">
@@ -250,9 +220,9 @@ export default function Landing() {
                     </li>
                   ))}
                 </ul>
-              </div>
+              </Reveal>
 
-              <div className="rounded-2xl border border-indigo-500/30 bg-indigo-950/20 p-6 sm:p-8">
+              <Reveal delay={120} className="rounded-2xl border border-indigo-500/30 bg-indigo-950/20 p-6 sm:p-8">
                 <p className="text-sm font-medium text-indigo-300">With PlaceTrack</p>
                 <h3 className="mt-1 text-xl font-semibold text-white">One organised placement pipeline</h3>
                 <ul className="mt-5 space-y-3 text-sm text-slate-300">
@@ -269,7 +239,7 @@ export default function Landing() {
                     </li>
                   ))}
                 </ul>
-              </div>
+              </Reveal>
             </div>
           </div>
         </section>
@@ -277,16 +247,16 @@ export default function Landing() {
         {/* ---------------- Features ---------------- */}
         <section id="features" className="scroll-mt-16 border-t border-slate-900 py-20 sm:py-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-8">
-            <div className="mx-auto max-w-2xl text-center">
+            <Reveal className="mx-auto max-w-2xl text-center">
               <Eyebrow>Built for students</Eyebrow>
               <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-white sm:text-4xl">
                 Everything you need for placement season
               </h2>
-            </div>
+            </Reveal>
 
             <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {/* Featured: AI auto-fill */}
-              <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6 sm:p-8 md:col-span-2 lg:col-span-3">
+              <Reveal className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6 sm:p-8 md:col-span-2 lg:col-span-3">
                 <div className="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
                   <div className="max-w-xl">
                     <div className="inline-flex items-center gap-2 rounded-full border border-slate-700 px-3 py-1 text-xs font-medium text-slate-300">
@@ -301,44 +271,29 @@ export default function Landing() {
                       CTC, Superset link, round type, time and meeting link for you to review.
                     </p>
                   </div>
-                  <div className="w-full shrink-0 space-y-1.5 rounded-xl border border-slate-800 bg-slate-950 p-4 font-mono text-xs text-slate-300 lg:w-auto lg:min-w-[300px]">
-                    <p className="text-slate-500">Extracted from the notice</p>
-                    {[
-                      ['Company', 'Deloitte USI'],
-                      ['Role', 'Associate Analyst'],
-                      ['CTC', '7.6 LPA'],
-                      ['Superset', 'joinsuperset.com/…'],
-                      ['Round', 'Technical, 45 min'],
-                    ].map(([k, v]) => (
-                      <p key={k} className="flex gap-2">
-                        <Check size={14} className="shrink-0 text-emerald-400" aria-hidden="true" />
-                        <span className="text-slate-500">{k}:</span>
-                        <span className="truncate text-slate-200">{v}</span>
-                      </p>
-                    ))}
-                  </div>
+                  <ExtractedFields />
                 </div>
-              </div>
+              </Reveal>
 
-              <FeatureCard icon={<KanbanSquare size={20} />} title="Kanban pipeline">
+              <FeatureCard icon={<KanbanSquare size={20} />} title="Kanban pipeline" delay={0}>
                 Move applications from Applied to OA, Technical, HR and Offer. Track Superset registration on every card.
               </FeatureCard>
-              <FeatureCard icon={<CalendarClock size={20} />} title="Clash detection and calendar">
+              <FeatureCard icon={<CalendarClock size={20} />} title="Clash detection and calendar" delay={100}>
                 Overlapping tests and interviews are flagged straight away. Add any round to Google Calendar, Apple
                 Calendar or Outlook.
               </FeatureCard>
-              <FeatureCard icon={<NotebookPen size={20} />} title="Interview journal">
+              <FeatureCard icon={<NotebookPen size={20} />} title="Interview journal" delay={200}>
                 A quick note after each round: questions asked, topics covered and what to fix. It becomes a searchable
                 question bank.
               </FeatureCard>
-              <FeatureCard icon={<Users size={20} />} title="Peer experiences">
+              <FeatureCard icon={<Users size={20} />} title="Peer experiences" delay={0}>
                 Read real interview questions, tips and round breakdowns shared by peers, with the option to post
                 anonymously.
               </FeatureCard>
-              <FeatureCard icon={<Zap size={20} />} title="Quick updates with undo">
+              <FeatureCard icon={<Zap size={20} />} title="Quick updates with undo" delay={100}>
                 Mark a round cleared or not cleared straight from its card, with an undo in case you tap the wrong one.
               </FeatureCard>
-              <FeatureCard icon={<ShieldCheck size={20} />} title="Private by default">
+              <FeatureCard icon={<ShieldCheck size={20} />} title="Private by default" delay={200}>
                 Your pipeline, CTC notes and journal are tied to your account and visible only to you.
               </FeatureCard>
             </div>
@@ -348,7 +303,7 @@ export default function Landing() {
         {/* ---------------- Peer experiences ---------------- */}
         <section id="community" className="scroll-mt-16 border-t border-slate-900 py-20 sm:py-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-8">
-            <div className="mx-auto max-w-3xl text-center">
+            <Reveal className="mx-auto max-w-3xl text-center">
               <Eyebrow>Peer experiences</Eyebrow>
               <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-white sm:text-4xl">
                 Learn from real interviews before your turn comes
@@ -357,7 +312,7 @@ export default function Landing() {
                 Seniors and batchmates share the exact questions they were asked, how the rounds were structured, and
                 what they'd do differently.
               </p>
-            </div>
+            </Reveal>
 
             <div className="mt-12 grid items-center gap-8 lg:grid-cols-12">
               <div className="space-y-4 lg:col-span-5">
@@ -377,8 +332,8 @@ export default function Landing() {
                     title: 'Share anonymously or by name',
                     body: 'Post candidly without your name, or add your name and batch so juniors can reach out.',
                   },
-                ].map((item) => (
-                  <div key={item.title} className="rounded-xl border border-slate-800 bg-slate-900/50 p-5">
+                ].map((item, i) => (
+                  <Reveal key={item.title} delay={i * 100} className="rounded-xl border border-slate-800 bg-slate-900/50 p-5 transition-colors hover:border-slate-700">
                     <div className="flex items-center gap-2.5 text-sm font-semibold text-white">
                       <span className="text-indigo-400" aria-hidden="true">
                         {item.icon}
@@ -386,12 +341,13 @@ export default function Landing() {
                       {item.title}
                     </div>
                     <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{item.body}</p>
-                  </div>
+                  </Reveal>
                 ))}
               </div>
 
               {/* Example post */}
-              <figure className="lg:col-span-7">
+              <Reveal delay={150} className="lg:col-span-7">
+              <figure>
                 <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl shadow-black/30 sm:p-6">
                   <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-800 pb-4">
                     <div className="flex items-center gap-3">
@@ -437,6 +393,7 @@ export default function Landing() {
                 </div>
                 <figcaption className="mt-3 text-center text-xs text-slate-500">Example of a shared experience</figcaption>
               </figure>
+              </Reveal>
             </div>
           </div>
         </section>
@@ -447,7 +404,7 @@ export default function Landing() {
             aria-hidden="true"
             className="pointer-events-none absolute inset-x-0 bottom-0 h-[360px] bg-[radial-gradient(50%_70%_at_50%_100%,rgba(79,70,229,0.18),transparent_70%)]"
           />
-          <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-8">
+          <Reveal className="relative mx-auto max-w-3xl px-4 text-center sm:px-8">
             <h2 className="text-balance text-3xl font-semibold tracking-tight text-white sm:text-5xl">
               Take control of your placement season.
             </h2>
@@ -458,7 +415,7 @@ export default function Landing() {
               Create a free account
               <ArrowRight size={16} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5" />
             </Link>
-          </div>
+          </Reveal>
         </section>
       </main>
 

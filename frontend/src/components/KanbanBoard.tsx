@@ -41,7 +41,7 @@ const CardBody = memo(function CardBody({ company }: { company: Company }) {
     <>
       <div className="flex items-start justify-between gap-2.5">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">
+          <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-semibold', STAGE_META[company.stage].avatar)}>
             {initials(company.name)}
           </div>
           <div className="min-w-0">
@@ -110,8 +110,9 @@ const KanbanCard = memo(function KanbanCard({
         if (event.key === 'Enter') onSelect(company)
       }}
       className={cn(
-        'group cursor-grab rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3.5 shadow-sm transition-colors',
-        'hover:border-slate-300 dark:hover:border-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:cursor-grabbing',
+        'group cursor-grab rounded-lg border border-l-4 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3.5 shadow-sm transition-shadow',
+        'hover:shadow-md dark:hover:shadow-black/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:cursor-grabbing',
+        STAGE_META[company.stage].accent,
         isDragging && 'opacity-40',
       )}
     >
@@ -127,9 +128,14 @@ const KanbanCard = memo(function KanbanCard({
               event.stopPropagation()
               onShareExperience?.(company)
             }}
-            className="flex h-8 w-full items-center justify-center gap-1.5 rounded-md border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+            className={cn(
+              'flex h-8 w-full items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-colors',
+              company.stage === 'OFFER'
+                ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:text-emerald-300 dark:hover:bg-emerald-950'
+                : 'border border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800',
+            )}
           >
-            <Sparkles size={12} aria-hidden="true" className="text-slate-500 dark:text-slate-400" />
+            <Sparkles size={12} aria-hidden="true" />
             Share your experience
           </button>
         </div>
@@ -186,21 +192,21 @@ const KanbanColumn = memo(function KanbanColumn({
       {/* Column Header */}
       <div className="mb-2.5 flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <span className={cn('h-2 w-2 rounded-full', meta.dot)} aria-hidden="true" />
-          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{meta.label}</span>
+          <span className={cn('h-2.5 w-2.5 rounded-full', meta.dot)} aria-hidden="true" />
+          <span className={cn('text-sm font-semibold', meta.heading)}>{meta.label}</span>
         </div>
-        <span className="rounded-full bg-slate-200/70 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium tabular-nums text-slate-600 dark:text-slate-400">
+        <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums', meta.count)}>
           {companies.length}
         </span>
       </div>
 
-      {/* Droppable container */}
+      {/* Droppable container, tinted with the stage colour */}
       <div
         className={cn(
           'min-h-[14rem] space-y-2 rounded-xl border p-2 transition-colors',
           isOver
             ? 'border-dashed border-indigo-400 dark:border-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/30'
-            : 'border-slate-200/70 dark:border-slate-800 bg-slate-100/60 dark:bg-slate-900/40',
+            : meta.column,
         )}
       >
         {companies.map((company) => (
@@ -213,7 +219,7 @@ const KanbanColumn = memo(function KanbanColumn({
           />
         ))}
         {companies.length === 0 && (
-          <div className="flex min-h-[10rem] flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 dark:border-slate-700 px-4 text-center text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex min-h-[10rem] flex-col items-center justify-center rounded-lg border border-dashed border-slate-300/80 bg-white/40 px-4 text-center text-xs text-slate-500 dark:border-slate-700 dark:bg-slate-900/30 dark:text-slate-400">
             <span>No companies in this stage</span>
           </div>
         )}
@@ -333,7 +339,12 @@ export function KanbanBoard({ companies, onCardClick, onShareExperience }: Kanba
 
       <DragOverlay dropAnimation={null}>
         {activeCompany && (
-          <div className="w-80 rotate-1 cursor-grabbing rounded-lg border border-indigo-400 dark:border-indigo-500 bg-white dark:bg-slate-900 p-3.5 shadow-xl shadow-slate-900/15">
+          <div
+            className={cn(
+              'w-80 rotate-1 cursor-grabbing rounded-lg border border-l-4 border-slate-300 bg-white p-3.5 shadow-xl shadow-slate-900/15 dark:border-slate-600 dark:bg-slate-900',
+              STAGE_META[activeCompany.stage].accent,
+            )}
+          >
             <CardBody company={activeCompany} />
           </div>
         )}
