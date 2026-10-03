@@ -190,7 +190,7 @@ const KanbanColumn = memo(function KanbanColumn({
       ref={setNodeRef}
       role="listitem"
       aria-label={`${meta.label}, ${companies.length} ${companies.length === 1 ? 'company' : 'companies'}`}
-      className="flex w-[17rem] shrink-0 snap-start flex-col"
+      className="flex min-w-0 flex-col"
     >
       {/* Column Header */}
       <div className="mb-2.5 flex items-center justify-between px-1">
@@ -323,9 +323,8 @@ export function KanbanBoard({ companies, onCardClick, onShareExperience }: Kanba
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
-      {/* One left-to-right row so the pipeline reads as a flow; scrolls sideways when it overflows. */}
       <div
-        className="scrollbar-thin -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-4 sm:mx-0 sm:snap-none sm:px-0"
+        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3"
         role="list"
         aria-label="Pipeline stages"
       >
@@ -343,7 +342,7 @@ export function KanbanBoard({ companies, onCardClick, onShareExperience }: Kanba
 
       <DragOverlay dropAnimation={null}>
         {activeCompany && (
-          <div className="w-[17rem] rotate-2 cursor-grabbing rounded-xl border border-indigo-400 dark:border-indigo-500 bg-white dark:bg-slate-900 p-3.5 shadow-2xl shadow-indigo-950/20 ring-2 ring-indigo-500/20">
+          <div className="w-80 rotate-2 cursor-grabbing rounded-xl border border-indigo-400 dark:border-indigo-500 bg-white dark:bg-slate-900 p-3.5 shadow-2xl shadow-indigo-950/20 ring-2 ring-indigo-500/20">
             <CardBody company={activeCompany} />
           </div>
         )}
