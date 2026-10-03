@@ -48,7 +48,7 @@ function FeatureCard({
 }) {
   return (
     <Reveal delay={delay}>
-      <div className="group h-full rounded-2xl border border-slate-800 bg-slate-900/50 p-6 transition-[border-color,transform,background-color] duration-300 hover:-translate-y-1 hover:border-indigo-500/40 hover:bg-slate-900 sm:p-7">
+      <div className="group h-full rounded-2xl border border-slate-800 bg-slate-900/50 p-6 transition-[border-color,translate,background-color] duration-300 ease-out hover:-translate-y-1 hover:border-indigo-500/40 hover:bg-slate-900 sm:p-7">
         <div
           className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 text-slate-200 transition-colors duration-300 group-hover:bg-indigo-600 group-hover:text-white"
           aria-hidden="true"

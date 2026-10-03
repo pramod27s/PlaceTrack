@@ -21,7 +21,7 @@ export function Reveal({
       ref={ref}
       style={style}
       className={cn(
-        'transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]',
+        'transition-[opacity,translate,scale] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]',
         inView ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0',
         className,
       )}
