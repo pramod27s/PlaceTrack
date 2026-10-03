@@ -48,8 +48,8 @@ export const PlaceTrackBadge: FC<PlaceTrackBadgeProps> = ({
 }) => {
   const sizeClasses = {
     sm: 'h-6 w-6 rounded-md',
-    md: 'h-9 w-9 rounded-xl',
-    lg: 'h-11 w-11 rounded-2xl',
+    md: 'h-9 w-9 rounded-lg',
+    lg: 'h-11 w-11 rounded-lg',
   }[size]
 
   const iconSizes = {
@@ -60,7 +60,7 @@ export const PlaceTrackBadge: FC<PlaceTrackBadgeProps> = ({
 
   return (
     <div
-      className={`flex items-center justify-center bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 shadow-sm shadow-indigo-600/15 ring-1 ring-white/10 shrink-0 ${sizeClasses} ${className}`}
+      className={`flex shrink-0 items-center justify-center bg-indigo-600 ${sizeClasses} ${className}`}
     >
       <PlaceTrackIcon size={iconSizes} className="text-white" />
     </div>

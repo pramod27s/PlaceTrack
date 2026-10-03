@@ -11,7 +11,7 @@ import {
   ErrorNote,
   IconButton,
   Modal,
-  Spinner,
+  Skeleton,
 } from './ui'
 import { JournalModal } from './JournalModal'
 import type { JournalEntry, Round } from '../lib/types'
@@ -24,12 +24,13 @@ interface RoundJournalsModalProps {
 function Rating({ value }: { value: number | null }) {
   if (!value) return null
   return (
-    <span className="flex items-center gap-0.5">
+    <span className="flex items-center gap-0.5" role="img" aria-label={`Rated ${value} out of 5`}>
       {[1, 2, 3, 4, 5].map((n) => (
         <Star
           key={n}
           size={12}
-          className={cn(n <= value ? 'fill-amber-400 text-amber-400' : 'text-slate-200 dark:text-slate-700')}
+          aria-hidden="true"
+          className={cn(n <= value ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-700')}
         />
       ))}
     </span>
@@ -56,10 +57,10 @@ function EntryRow({
     snippet(entry.topics) ||
     snippet(entry.whatWentWell) ||
     snippet(entry.whatFlopped) ||
-    'No notes yet — open to add details.'
+    'No notes yet. Edit to add details.'
 
   return (
-    <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-3.5 shadow-sm">
+    <div className="rounded-lg border border-slate-200 dark:border-slate-800 p-3.5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
@@ -92,7 +93,7 @@ function EntryRow({
 }
 
 export function RoundJournalsModal({ round, onClose }: RoundJournalsModalProps) {
-  const { data: entries, isLoading, isError } = useRoundJournals(round.id)
+  const { data: entries, isLoading, isError, refetch } = useRoundJournals(round.id)
   const deleteJournal = useDeleteJournal()
 
   const [editEntry, setEditEntry] = useState<JournalEntry | null>(null)
@@ -128,8 +129,8 @@ export function RoundJournalsModal({ round, onClose }: RoundJournalsModalProps) 
               Close
             </Button>
             <Button type="button" onClick={() => setCreating(true)}>
-              <Plus size={16} />
-              {entries && entries.length > 0 ? 'Add another' : 'Add first entry'}
+              <Plus size={16} aria-hidden="true" />
+              {entries && entries.length > 0 ? 'Add entry' : 'Add first entry'}
             </Button>
           </>
         }
@@ -137,16 +138,17 @@ export function RoundJournalsModal({ round, onClose }: RoundJournalsModalProps) 
         {error && <ErrorNote message={error} />}
 
         {isLoading ? (
-          <div className="flex justify-center py-10">
-            <Spinner className="h-7 w-7" />
+          <div className="space-y-2.5" aria-busy="true" aria-label="Loading entries">
+            <Skeleton className="h-20 w-full rounded-lg" />
+            <Skeleton className="h-20 w-full rounded-lg" />
           </div>
         ) : isError ? (
-          <ErrorNote message="Couldn't load journal entries. Please retry." />
+          <ErrorNote message="Couldn't load journal entries." onRetry={() => refetch()} />
         ) : !entries || entries.length === 0 ? (
           <EmptyState
             icon={<NotebookPen size={20} />}
             title="No entries yet"
-            description="Capture the questions, topics, and your own reflection here. Add multiple entries over time to track how your prep evolves."
+            description="Note the questions, topics and your reflection. You can add more entries over time."
           />
         ) : (
           <div className="space-y-2.5">

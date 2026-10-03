@@ -1,16 +1,14 @@
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import {
   Calendar,
+  Check,
   Copy,
-  HelpCircle,
-  Lightbulb,
   MapPin,
-  MessageSquare,
   Shield,
   ThumbsUp,
   Trash2,
   User,
-  Zap,
 } from 'lucide-react'
 import {
   DIFFICULTY_META,
@@ -20,13 +18,25 @@ import {
 import { cn, formatDate } from '../lib/format'
 import { useDeleteExperience, useHelpfulExperience } from '../hooks/queries'
 
-import { Button, ConfirmDialog, Modal } from './ui'
+import { Badge, Button, ConfirmDialog, Modal } from './ui'
 import type { Experience } from '../lib/types'
 
 
 interface ExperienceDetailModalProps {
   experience: Experience
   onClose: () => void
+}
+
+/** A titled block of long-form text from the post. */
+function ReadingSection({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="space-y-1.5">
+      <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{title}</h3>
+      <div className="max-w-prose whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+        {children}
+      </div>
+    </section>
+  )
 }
 
 export function ExperienceDetailModal({
@@ -62,73 +72,66 @@ export function ExperienceDetailModal({
     <>
       <Modal
         title={experience.title}
-        subtitle={`${experience.companyName} • ${experience.role}`}
+        subtitle={`${experience.companyName} · ${experience.role}`}
         onClose={onClose}
         size="xl"
+        footer={
+          <div className="flex w-full items-center justify-between gap-2">
+            {experience.isAuthor ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setConfirmDelete(true)}
+                className="text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400 dark:hover:bg-rose-950/40"
+              >
+                <Trash2 size={13} aria-hidden="true" />
+                Delete post
+              </Button>
+            ) : (
+              <span />
+            )}
+            <Button variant="secondary" onClick={onClose}>
+              Close
+            </Button>
+          </div>
+        }
       >
         <div className="space-y-6">
-          {/* Header Metadata Chips */}
-          <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-slate-200/80 dark:border-slate-800">
-            <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${verdictMeta.badge}`}
-            >
-              {verdictMeta.label}
-            </span>
-
-            <span
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${difficultyMeta.badge}`}
-            >
-              Difficulty: {difficultyMeta.label}
-            </span>
-
-            <span
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${driveMeta.badge}`}
-            >
-              {driveMeta.label}
-            </span>
-
+          {/* Metadata */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Badge className={verdictMeta.badge}>{verdictMeta.label}</Badge>
+            <Badge className={difficultyMeta.badge}>{difficultyMeta.label}</Badge>
+            <Badge className={driveMeta.badge}>{driveMeta.label}</Badge>
             {experience.ctc && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-800">
-                💰 {experience.ctc}
-              </span>
+              <Badge className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">{experience.ctc}</Badge>
             )}
-
             {experience.location && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                <MapPin size={12} />
+              <span className="inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                <MapPin size={12} aria-hidden="true" />
                 {experience.location}
               </span>
             )}
-
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-slate-500 dark:text-slate-400 ml-auto">
-              <Calendar size={12} />
+            <span className="ml-auto inline-flex items-center gap-1 text-xs tabular-nums text-slate-500 dark:text-slate-400">
+              <Calendar size={12} aria-hidden="true" />
               {formatDate(experience.createdAt)}
             </span>
           </div>
 
-          {/* Author Badge */}
-          <div className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-900/60 p-3.5 border border-slate-200/80 dark:border-slate-800">
+          {/* Author and actions */}
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 p-3 dark:border-slate-800">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 text-white font-bold text-sm shadow-sm">
-                {experience.isAnonymous ? (
-                  <Shield size={16} />
-                ) : (
-                  <User size={16} />
-                )}
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                {experience.isAnonymous ? <Shield size={15} aria-hidden="true" /> : <User size={15} aria-hidden="true" />}
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                <p className="flex items-center gap-1.5 text-sm font-medium text-slate-900 dark:text-slate-100">
                   {experience.authorName}
                   {experience.isAuthor && (
-                    <span className="text-[10px] bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.2 rounded font-semibold">
-                      Author
-                    </span>
+                    <Badge className="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">You</Badge>
                   )}
                 </p>
                 {experience.authorBatch && (
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    {experience.authorBatch}
-                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{experience.authorBatch}</p>
                 )}
               </div>
             </div>
@@ -139,87 +142,41 @@ export function ExperienceDetailModal({
                 size="sm"
                 onClick={handleHelpful}
                 disabled={helpfulMutation.isPending}
+                aria-pressed={experience.hasLiked}
                 className={cn(
-                  'gap-1.5 text-xs font-semibold transition-all',
-                  experience.hasLiked
-                    ? 'bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-600 dark:text-white dark:hover:bg-indigo-500 shadow-sm'
-                    : 'hover:border-indigo-300 dark:hover:border-indigo-600',
+                  experience.hasLiked &&
+                    'border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 dark:hover:bg-indigo-950',
                 )}
-                title={experience.hasLiked ? 'You found this helpful (Click to undo)' : 'Mark as helpful'}
               >
-                <ThumbsUp
-                  size={13}
-                  className={cn(
-                    experience.hasLiked
-                      ? 'fill-white text-white'
-                      : 'text-indigo-600 dark:text-indigo-400',
-                  )}
-                />
-                <span>Helpful ({experience.helpfulCount})</span>
+                <ThumbsUp size={13} aria-hidden="true" className={cn(experience.hasLiked && 'fill-current')} />
+                Helpful <span className="tabular-nums">{experience.helpfulCount}</span>
               </Button>
 
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopySummary}
-                className="text-xs gap-1"
-                title="Copy highlights to clipboard"
-              >
-                <Copy size={13} />
-                <span>{copied ? 'Copied!' : 'Copy'}</span>
+              <Button variant="ghost" size="sm" onClick={handleCopySummary}>
+                {copied ? <Check size={13} aria-hidden="true" /> : <Copy size={13} aria-hidden="true" />}
+                <span aria-live="polite">{copied ? 'Copied' : 'Copy'}</span>
               </Button>
             </div>
           </div>
 
-          {/* TL;DR Summary */}
-          {experience.summary && (
-            <div className="rounded-xl border border-indigo-100/80 dark:border-indigo-900/40 bg-indigo-50/30 dark:bg-indigo-950/20 p-4">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 mb-1 flex items-center gap-1.5">
-                <Zap size={13} /> Overview & Summary
-              </p>
-              <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-                {experience.summary}
-              </p>
-            </div>
-          )}
+          {experience.summary && <ReadingSection title="Summary">{experience.summary}</ReadingSection>}
 
-          {/* Rounds Details */}
           {experience.roundsDetails && (
-            <div className="space-y-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <MessageSquare size={14} className="text-indigo-500" />
-                Rounds Breakdown
-              </h3>
-              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
-                <p className="text-xs font-medium leading-relaxed text-slate-700 dark:text-slate-200 whitespace-pre-wrap">
-                  {experience.roundsDetails}
-                </p>
-              </div>
-            </div>
+            <ReadingSection title="Rounds">{experience.roundsDetails}</ReadingSection>
           )}
 
-          {/* Specific Questions Asked */}
           {experience.questionsAsked && (
-            <div className="space-y-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <HelpCircle size={14} className="text-amber-500" />
-                Key Questions & Topics Asked
-              </h3>
-              <div className="rounded-xl border border-amber-200/80 dark:border-amber-900/40 bg-amber-50/40 dark:bg-amber-950/20 p-4">
-                <p className="text-xs font-medium leading-relaxed text-slate-800 dark:text-slate-200 whitespace-pre-wrap font-mono text-[11px]">
-                  {experience.questionsAsked}
-                </p>
+            <section className="space-y-1.5">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Questions asked</h3>
+              <div className="whitespace-pre-wrap rounded-lg bg-slate-50 p-4 text-sm leading-relaxed text-slate-800 dark:bg-slate-800/60 dark:text-slate-200">
+                {experience.questionsAsked}
               </div>
-            </div>
+            </section>
           )}
 
-          {/* Topics / Tags */}
           {experience.topics && (
-            <div className="space-y-1.5">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Core Topics Covered
-              </p>
+            <section className="space-y-1.5">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Topics</h3>
               <div className="flex flex-wrap gap-1.5">
                 {experience.topics.split(',').map((tag, idx) => {
                   const clean = tag.trim()
@@ -227,57 +184,26 @@ export function ExperienceDetailModal({
                   return (
                     <span
                       key={idx}
-                      className="rounded-lg bg-slate-100 dark:bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-700 dark:text-slate-300 border border-slate-200/70 dark:border-slate-700/80"
+                      className="rounded-md border border-slate-200 px-2 py-0.5 text-xs text-slate-700 dark:border-slate-700 dark:text-slate-300"
                     >
-                      #{clean}
+                      {clean}
                     </span>
                   )
                 })}
               </div>
-            </div>
+            </section>
           )}
 
-          {/* Tips for Juniors */}
-          {experience.tips && (
-            <div className="rounded-xl border border-emerald-200/80 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/20 p-4">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 mb-1 flex items-center gap-1.5">
-                <Lightbulb size={14} className="text-emerald-600 dark:text-emerald-400" />
-                Preparation Advice & Tips
-              </p>
-              <p className="text-xs font-medium text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-                {experience.tips}
-              </p>
-            </div>
-          )}
-
-          {/* Footer Actions */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-200/80 dark:border-slate-800">
-            {experience.isAuthor ? (
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => setConfirmDelete(true)}
-                className="gap-1 text-xs"
-              >
-                <Trash2 size={13} />
-                <span>Delete My Post</span>
-              </Button>
-            ) : (
-              <div />
-            )}
-
-            <Button variant="secondary" size="md" onClick={onClose}>
-              Close
-            </Button>
-          </div>
+          {experience.tips && <ReadingSection title="Tips">{experience.tips}</ReadingSection>}
         </div>
       </Modal>
 
       {confirmDelete && (
         <ConfirmDialog
-          title="Delete Interview Experience"
-          message="Are you sure you want to delete this experience post? This cannot be undone."
+          title="Delete this post?"
+          message="Your experience will be removed for everyone. This can't be undone."
           confirmLabel="Delete"
+          loading={deleteMutation.isPending}
           onConfirm={handleDelete}
           onCancel={() => setConfirmDelete(false)}
         />

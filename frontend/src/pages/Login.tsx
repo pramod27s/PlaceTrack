@@ -46,10 +46,10 @@ export default function Login() {
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600">
           <PlaceTrackIcon size={20} className="text-white" />
         </div>
-        <span className="text-lg font-bold text-slate-900 dark:text-white">PlaceTrack</span>
+        <span className="text-lg font-semibold text-slate-900 dark:text-white">PlaceTrack</span>
       </div>
 
-      <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Welcome back</h2>
+      <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Welcome back</h2>
       <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
         Sign in to pick up where your placement season left off.
       </p>
@@ -81,8 +81,8 @@ export default function Login() {
           />
         </Field>
 
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? 'Signing in…' : 'Sign in'}
+        <Button type="submit" size="lg" className="w-full" loading={loading}>
+          Sign in
         </Button>
       </form>
 
@@ -90,15 +90,15 @@ export default function Login() {
         <button
           type="button"
           onClick={fillDemo}
-          className="mt-4 w-full rounded-xl border border-dashed border-indigo-200 dark:border-indigo-800 bg-indigo-50/60 dark:bg-indigo-950/40 px-4 py-2.5 text-sm font-medium text-indigo-700 dark:text-indigo-300 transition hover:bg-indigo-50 dark:hover:bg-indigo-900/50"
+          className="mt-3 w-full rounded-lg border border-dashed border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-white dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900"
         >
-          Explore with the demo account →
+          Fill in the demo account
         </button>
       )}
 
       <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
         New here?{' '}
-        <Link to="/signup" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">
+        <Link to="/signup" className="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">
           Create an account
         </Link>
       </p>

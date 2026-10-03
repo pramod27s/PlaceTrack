@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import type { FormEvent } from 'react'
+import type { FormEvent, ReactNode } from 'react'
 import { Shield, UserCheck } from 'lucide-react'
-import { apiError } from '../lib/api'
+import { apiError, apiFieldErrors } from '../lib/api'
 import { useCreateExperience } from '../hooks/queries'
 import {
   DIFFICULTIES,
@@ -40,6 +40,18 @@ const EMPTY: ExperienceInput = {
   anonymous: true,
 }
 
+/** A titled group of fields inside the form. */
+function FormSection({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="space-y-4">
+      <h3 className="border-b border-slate-100 pb-2 text-sm font-semibold text-slate-900 dark:border-slate-800 dark:text-slate-100">
+        {title}
+      </h3>
+      {children}
+    </section>
+  )
+}
+
 export function ExperienceModal({
   onClose,
   initialCompany,
@@ -57,78 +69,84 @@ export function ExperienceModal({
     ...initialData,
   }))
   const [error, setError] = useState('')
-
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const set = <K extends keyof ExperienceInput>(key: K, value: ExperienceInput[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }))
 
+  const invalid = (key: string) => Boolean(fieldErrors[key]) || undefined
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    if (!form.companyName.trim()) {
-      setError('Company name is required')
-      return
-    }
-    if (!form.role.trim()) {
-      setError('Role is required')
-      return
-    }
-    if (!form.title.trim()) {
-      setError('Title is required')
+    const missing: Record<string, string> = {}
+    if (!form.companyName.trim()) missing.companyName = 'Enter the company name.'
+    if (!form.role.trim()) missing.role = 'Enter the role.'
+    if (!form.title.trim()) missing.title = 'Give your post a title.'
+    if (Object.keys(missing).length) {
+      setFieldErrors(missing)
+      setError('Please fill in the required fields.')
       return
     }
 
     try {
       setError('')
+      setFieldErrors({})
       await create.mutateAsync(form)
       onClose()
     } catch (err) {
-      setError(apiError(err))
+      const perField = apiFieldErrors(err)
+      setFieldErrors(perField)
+      setError(Object.keys(perField).length ? 'Please fix the highlighted fields.' : apiError(err))
     }
   }
 
   return (
     <Modal
-      title="Share Interview Experience"
-      subtitle="Help your fellow classmates and juniors crack their placement drives with real questions and tips."
+      title="Share your interview experience"
+      subtitle="Real questions and tips help classmates and juniors prepare for the same drives."
       onClose={onClose}
       size="xl"
+      footer={
+        <>
+          <Button variant="secondary" type="button" onClick={onClose} disabled={create.isPending}>
+            Cancel
+          </Button>
+          <Button type="submit" form="experience-form" loading={create.isPending}>
+            Publish
+          </Button>
+        </>
+      }
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {error && <ErrorNote>{error}</ErrorNote>}
+      <form id="experience-form" onSubmit={handleSubmit} className="space-y-8" noValidate>
+        {error && <ErrorNote message={error} />}
 
-        {/* Section 1: Company & Role Details */}
-        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 p-4 space-y-4">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 text-[10px]">
-              1
-            </span>
-            <span>Drive Overview</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="Company Name *" hint="e.g. Amazon, Oracle, TCS">
+        <FormSection title="The drive">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="Company" htmlFor="x-company" required error={fieldErrors.companyName}>
               <Input
+                id="x-company"
                 value={form.companyName}
                 onChange={(e) => set('companyName', e.target.value)}
-                placeholder="Google / Cisco"
-                required
-                autoFocus
+                placeholder="e.g. Amazon, Oracle, TCS"
+                aria-invalid={invalid('companyName')}
               />
             </Field>
 
-            <Field label="Role / Designation *" hint="e.g. SDE-1, Intern, Analyst">
+            <Field label="Role" htmlFor="x-role" required error={fieldErrors.role}>
               <Input
+                id="x-role"
                 value={form.role}
                 onChange={(e) => set('role', e.target.value)}
-                placeholder="Software Engineer"
-                required
+                placeholder="e.g. SDE-1, Intern, Analyst"
+                aria-invalid={invalid('role')}
               />
             </Field>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Field label="Drive Type">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <Field label="Drive type" htmlFor="x-drive">
               <Select
+                id="x-drive"
                 value={form.driveType}
                 onChange={(e) => set('driveType', e.target.value as DriveType)}
               >
@@ -140,36 +158,33 @@ export function ExperienceModal({
               </Select>
             </Field>
 
-            <Field label="CTC / Stipend" hint="Optional, e.g. 16 LPA or 50k/mo">
+            <Field label="CTC or stipend" htmlFor="x-ctc" error={fieldErrors.ctc}>
               <Input
+                id="x-ctc"
                 value={form.ctc ?? ''}
                 onChange={(e) => set('ctc', e.target.value)}
-                placeholder="e.g. 18 LPA"
+                placeholder="e.g. 18 LPA or 50k/month"
+                aria-invalid={invalid('ctc')}
               />
             </Field>
 
-            <Field label="Location" hint="e.g. Bengaluru / Hybrid">
+            <Field label="Location" htmlFor="x-location" error={fieldErrors.location}>
               <Input
+                id="x-location"
                 value={form.location ?? ''}
                 onChange={(e) => set('location', e.target.value)}
-                placeholder="e.g. Pune / Remote"
+                placeholder="e.g. Pune, Remote"
+                aria-invalid={invalid('location')}
               />
             </Field>
           </div>
-        </div>
+        </FormSection>
 
-        {/* Section 2: Verdict & Experience Title */}
-        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 p-4 space-y-4">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 text-[10px]">
-              2
-            </span>
-            <span>Verdict & Difficulty</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="Final Outcome / Verdict">
+        <FormSection title="Outcome">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="Result" htmlFor="x-verdict">
               <Select
+                id="x-verdict"
                 value={form.verdict}
                 onChange={(e) => set('verdict', e.target.value as Verdict)}
               >
@@ -181,8 +196,9 @@ export function ExperienceModal({
               </Select>
             </Field>
 
-            <Field label="Overall Difficulty">
+            <Field label="Overall difficulty" htmlFor="x-difficulty">
               <Select
+                id="x-difficulty"
                 value={form.difficulty}
                 onChange={(e) => set('difficulty', e.target.value as Difficulty)}
               >
@@ -196,138 +212,113 @@ export function ExperienceModal({
           </div>
 
           <Field
-            label="Post Headline / Title *"
-            hint="A clear title summarizing your experience"
+            label="Title"
+            htmlFor="x-title"
+            required
+            hint="A clear one-line summary of your experience."
+            error={fieldErrors.title}
           >
             <Input
+              id="x-title"
               value={form.title}
               onChange={(e) => set('title', e.target.value)}
-              placeholder="e.g. Amazon SDE-1 On-Campus 2026 — 3 Rounds Experience & DSA Questions"
-              required
+              placeholder="e.g. Amazon SDE-1 on-campus 2026: 3 rounds, DSA heavy"
+              aria-invalid={invalid('title')}
             />
           </Field>
 
-          <Field
-            label="Quick Summary / TL;DR"
-            hint="1-2 sentences on how the drive was organized"
-          >
+          <Field label="Summary" htmlFor="x-summary" hint="One or two sentences on how the drive went.">
             <Textarea
+              id="x-summary"
               rows={2}
               value={form.summary ?? ''}
               onChange={(e) => set('summary', e.target.value)}
-              placeholder="Overall a smooth process. OA had 2 questions, followed by 2 technical rounds focused on Trees and System Design basics."
+              placeholder="Smooth process. The OA had 2 questions, then 2 technical rounds on trees and system design basics."
             />
           </Field>
-        </div>
+        </FormSection>
 
-        {/* Section 3: In-Depth Rounds & Questions */}
-        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 p-4 space-y-4">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 text-[10px]">
-              3
-            </span>
-            <span>Rounds Breakdown & Questions Asked</span>
-          </div>
-
-          <Field
-            label="Round-by-Round Breakdown"
-            hint="Break down OA, Round 1, Round 2, HR..."
-          >
+        <FormSection title="Rounds and questions">
+          <Field label="Round-by-round breakdown" htmlFor="x-rounds" hint="OA, round 1, round 2, HR…">
             <Textarea
+              id="x-rounds"
               rows={4}
               value={form.roundsDetails ?? ''}
               onChange={(e) => set('roundsDetails', e.target.value)}
-              placeholder="• Round 1 (Online Test): 2 LeetCode medium questions (Graph BFS, 2D DP) + 20 CS core MCQs.&#10;• Round 2 (Technical 1 - 45 min): Deep dive into project architecture, SQL query optimization, and LRU Cache design.&#10;• Round 3 (HR/Managerial - 30 min): Standard behavioral questions and situational scenarios."
+              placeholder={'Round 1 (online test): 2 LeetCode mediums (graph BFS, 2D DP) and 20 CS MCQs.\nRound 2 (technical, 45 min): project deep dive, SQL optimisation, LRU cache design.\nRound 3 (HR, 30 min): behavioural and situational questions.'}
             />
           </Field>
 
           <Field
-            label="Key Questions & Topics Asked"
-            hint="Specific DSA problems, concepts, or DBMS/OS questions"
+            label="Questions asked"
+            htmlFor="x-questions"
+            hint="Specific DSA problems, concepts, or DBMS and OS questions."
           >
             <Textarea
+              id="x-questions"
               rows={3}
               value={form.questionsAsked ?? ''}
               onChange={(e) => set('questionsAsked', e.target.value)}
-              placeholder="1. Coin Change problem variation&#10;2. How does indexing work in PostgreSQL B-trees?&#10;3. Differences between Process and Thread, Mutex vs Semaphore."
+              placeholder={'1. Coin change variation\n2. How do B-tree indexes work in PostgreSQL?\n3. Process vs thread, mutex vs semaphore'}
             />
           </Field>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field
-              label="Topics / Tags (comma separated)"
-              hint="e.g. DSA, DP, Graphs, OS, DBMS, Spring Boot"
-            >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="Topics" htmlFor="x-topics" hint="Comma separated, e.g. DSA, DP, Graphs, OS, DBMS">
               <Input
+                id="x-topics"
                 value={form.topics ?? ''}
                 onChange={(e) => set('topics', e.target.value)}
-                placeholder="DSA, Dynamic Programming, SQL, OS"
+                placeholder="DSA, Dynamic programming, SQL, OS"
               />
             </Field>
 
-            <Field
-              label="Tips / Advice for Juniors"
-              hint="What helped you most? What should others prep?"
-            >
+            <Field label="Tips for others" htmlFor="x-tips" hint="What helped you most?">
               <Input
+                id="x-tips"
                 value={form.tips ?? ''}
                 onChange={(e) => set('tips', e.target.value)}
-                placeholder="Revise CS fundamentals thoroughly and practice dry runs out loud."
+                placeholder="Revise CS fundamentals and practise explaining your approach out loud."
               />
             </Field>
           </div>
-        </div>
+        </FormSection>
 
-        {/* Section 4: Privacy & Author Attribution */}
-        <div className="rounded-2xl border border-indigo-100 dark:border-indigo-900/50 bg-indigo-50/40 dark:bg-indigo-950/20 p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {form.anonymous ? (
-                <Shield className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-              ) : (
-                <UserCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-              )}
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                Privacy & Attribution
+        <FormSection title="Privacy">
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 px-3.5 py-3 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/60">
+            <input
+              type="checkbox"
+              checked={form.anonymous}
+              onChange={(e) => set('anonymous', e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded accent-indigo-600"
+            />
+            <span className="text-sm">
+              <span className="flex items-center gap-1.5 font-medium text-slate-800 dark:text-slate-200">
+                {form.anonymous ? (
+                  <Shield size={14} aria-hidden="true" />
+                ) : (
+                  <UserCheck size={14} aria-hidden="true" />
+                )}
+                Post anonymously
               </span>
-            </div>
-            <label className="flex items-center gap-2 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={form.anonymous}
-                onChange={(e) => set('anonymous', e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900"
-              />
-              <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">
-                Post Anonymously
+              <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
+                {form.anonymous
+                  ? 'Your name and email are hidden. The post shows "Anonymous Student".'
+                  : 'Your full name is shown with the post so peers can reach out.'}
               </span>
-            </label>
-          </div>
+            </span>
+          </label>
 
-          <p className="text-xs text-slate-600 dark:text-slate-400">
-            {form.anonymous
-              ? '🛡️ Your name and email will be hidden from everyone. Your post will be marked as "Anonymous Student".'
-              : '👤 Your full name will be shown alongside your post to help peers connect with you.'}
-          </p>
-
-          <Field label="Batch / Branch (Optional)" hint="e.g. 2026 Batch, CSE '25">
+          <Field label="Batch or branch" htmlFor="x-batch" hint="Optional, e.g. 2026 batch, CSE" error={fieldErrors.authorBatch}>
             <Input
+              id="x-batch"
               value={form.authorBatch ?? ''}
               onChange={(e) => set('authorBatch', e.target.value)}
-              placeholder="e.g. 2026 Batch"
+              placeholder="e.g. 2026 batch"
+              aria-invalid={invalid('authorBatch')}
             />
           </Field>
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center justify-end gap-3 pt-2">
-          <Button variant="secondary" type="button" onClick={onClose} disabled={create.isPending}>
-            Cancel
-          </Button>
-          <Button variant="primary" type="submit" disabled={create.isPending}>
-            {create.isPending ? 'Publishing...' : 'Publish Experience 🚀'}
-          </Button>
-        </div>
+        </FormSection>
       </form>
     </Modal>
   )

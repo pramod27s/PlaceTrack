@@ -5,7 +5,7 @@ import { useAllRounds, useDeleteRound } from '../hooks/queries'
 import { RoundListItem } from '../components/RoundListItem'
 import { RoundModal } from '../components/RoundModal'
 import { RoundJournalsModal } from '../components/RoundJournalsModal'
-import { ConfirmDialog, EmptyState, ErrorNote, IconButton, LoadingState } from '../components/ui'
+import { ConfirmDialog, EmptyState, ErrorNote, IconButton, ListSkeleton } from '../components/ui'
 import { cn, isPastIso } from '../lib/format'
 import type { Round } from '../lib/types'
 
@@ -15,20 +15,20 @@ const SECTIONS: { key: Bucket; title: string; description: string; badge: string
   {
     key: 'overdue',
     title: 'Needs an update',
-    description: 'Scheduled rounds whose timing has passed',
-    badge: 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 ring-1 ring-amber-200 dark:ring-amber-800',
+    description: 'Ended, but still marked as scheduled',
+    badge: 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300',
   },
   {
     key: 'upcoming',
-    title: 'Upcoming schedule',
+    title: 'Upcoming',
     description: 'Rounds ahead of you',
-    badge: 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200 dark:ring-indigo-800',
+    badge: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300',
   },
   {
     key: 'completed',
-    title: 'Completed rounds',
-    description: 'Rounds you have already completed',
-    badge: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-700',
+    title: 'Past rounds',
+    description: 'Rounds with an outcome',
+    badge: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300',
   },
 ]
 
@@ -61,7 +61,7 @@ export default function Rounds() {
     return groups
   }, [rounds])
 
-  if (isLoading) return <LoadingState label="Loading your schedule…" />
+  if (isLoading) return <ListSkeleton rows={5} label="Loading rounds" />
   if (isError || !rounds) {
     return <ErrorNote message="Couldn't load your rounds." onRetry={() => refetch()} />
   }
@@ -75,25 +75,25 @@ export default function Rounds() {
   return (
     <div className="space-y-7">
       {/* Header bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-sm">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">Rounds &amp; Schedule</h2>
-            <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-bold text-slate-700 dark:text-slate-300">
-              {rounds.length} {rounds.length === 1 ? 'total round' : 'total rounds'}
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">All rounds</h2>
+            <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium tabular-nums text-slate-600 dark:text-slate-300">
+              {rounds.length}
             </span>
           </div>
-          <p className="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">
-            Timeline of all interviews, assessments, and pre-placement talks with conflict alerts.
+          <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+            Interviews, assessments and talks across every company, with overlaps flagged.
           </p>
         </div>
       </div>
 
       {rounds.length === 0 ? (
         <EmptyState
-          icon={<CalendarClock size={24} />}
-          title="No interview rounds scheduled"
-          description="Open any company from your pipeline to add technical, HR, OA, or GD rounds."
+          icon={<CalendarClock size={22} />}
+          title="No rounds yet"
+          description="Open a company from your pipeline to add an OA, GD, technical or HR round."
         />
       ) : (
         SECTIONS.map(({ key, title, description, badge }) => {
@@ -101,14 +101,14 @@ export default function Rounds() {
           if (list.length === 0) return null
           return (
             <section key={key} id={key} className="scroll-mt-24 space-y-3">
-              <div className="flex items-center justify-between px-1">
-                <div className="flex items-center gap-2.5">
-                  <h3 className="text-base font-bold tracking-tight text-slate-800 dark:text-slate-200">{title}</h3>
-                  <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold', badge)}>
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">{title}</h3>
+                  <span className={cn('rounded-full px-2 py-0.5 text-xs font-medium tabular-nums', badge)}>
                     {list.length}
                   </span>
                 </div>
-                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{description}</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">{description}</span>
               </div>
               <div className="space-y-3">
                 {list.map((round) => (

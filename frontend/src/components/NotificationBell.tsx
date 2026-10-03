@@ -71,25 +71,36 @@ export function NotificationBell() {
     const onClick = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
     }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
     document.addEventListener('mousedown', onClick)
-    return () => document.removeEventListener('mousedown', onClick)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onClick)
+      document.removeEventListener('keydown', onKey)
+    }
   }, [open])
 
   return (
     <div className="relative" ref={ref}>
-      <IconButton onClick={() => setOpen((v) => !v)} aria-label="Notifications" type="button">
-        <Bell size={19} />
+      <IconButton
+        onClick={() => setOpen((v) => !v)}
+        aria-label={alerts.length > 0 ? `Notifications, ${alerts.length} new` : 'Notifications'}
+        aria-expanded={open}
+        aria-haspopup="true"
+        type="button"
+        className="relative"
+      >
+        <Bell size={19} aria-hidden="true" />
         {alerts.length > 0 && (
-          <span className="absolute right-1.5 top-1.5 flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500" />
-          </span>
+          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-950" aria-hidden="true" />
         )}
       </IconButton>
 
       {open && (
-        <div className="animate-pop absolute right-0 z-40 mt-2 w-[min(calc(100vw-2rem),20rem)] overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl shadow-slate-900/15 dark:shadow-black/50">
-          <div className="border-b border-slate-100 dark:border-slate-800 px-4 py-3 bg-slate-50/50 dark:bg-slate-950/50">
+        <div className="animate-pop absolute right-0 z-40 mt-2 w-[min(calc(100vw-2rem),20rem)] overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg shadow-slate-900/10 dark:shadow-black/50">
+          <div className="border-b border-slate-100 dark:border-slate-800 px-4 py-3">
             <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Notifications</p>
             <p className="text-xs text-slate-500 dark:text-slate-400">Conflicts and rounds in the next 24 hours</p>
           </div>
@@ -114,8 +125,8 @@ export function NotificationBell() {
                       className={cn(
                         'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
                         alert.kind === 'conflict'
-                          ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400'
-                          : 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400',
+                          ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300',
                       )}
                     >
                       {alert.kind === 'conflict' ? (

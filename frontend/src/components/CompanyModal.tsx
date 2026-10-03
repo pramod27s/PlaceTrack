@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Check, ChevronDown, ChevronUp, Key, Loader2, Sparkles, Zap } from 'lucide-react'
-import { apiError, parseCompanyNotice } from '../lib/api'
+import { ChevronDown, ChevronUp } from 'lucide-react'
+import { apiError, apiFieldErrors, parseCompanyNotice } from '../lib/api'
 import { useSaveCompany } from '../hooks/queries'
 import { STAGE_META, STAGE_ORDER } from '../lib/constants'
 import { cn } from '../lib/format'
-import { Button, ErrorNote, Field, Input, Modal, Textarea } from './ui'
-import { AiSettingsModal } from './AiSettingsModal'
+import { Button, ErrorNote, Field, FilterChip, Input, Modal, Textarea } from './ui'
+import { AiNoticePanel } from './AiNoticePanel'
 import type { Company, CompanyInput } from '../lib/types'
 
 interface CompanyModalProps {
@@ -55,19 +55,19 @@ export function CompanyModal({ open, onClose, company }: CompanyModalProps) {
       open={open}
       onClose={onClose}
       size="lg"
-      title={company ? 'Edit company' : 'Quick Add Company'}
+      title={company ? 'Edit company' : 'Add company'}
       description={
         company
           ? 'Update the details for this application.'
-          : 'Add a company to your placement pipeline in seconds.'
+          : 'Only the name is required. You can add the rest later.'
       }
       footer={
         <>
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" form="company-form" disabled={save.isPending}>
-            {save.isPending ? 'Saving…' : company ? 'Save changes' : 'Add to pipeline'}
+          <Button type="submit" form="company-form" loading={save.isPending}>
+            {company ? 'Save changes' : 'Add to pipeline'}
           </Button>
         </>
       }
@@ -95,6 +95,7 @@ function CompanyForm({
     company ? fromCompany(company) : blankForm(),
   )
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   // If editing and has extra data, default to expanded, otherwise fast-track mode
   const [showMore, setShowMore] = useState<boolean>(
     Boolean(
@@ -107,55 +108,31 @@ function CompanyForm({
     ),
   )
 
-  const [aiOpen, setAiOpen] = useState(false)
-  const [aiSettingsOpen, setAiSettingsOpen] = useState(false)
-  const [rawNotice, setRawNotice] = useState('')
-  const [isExtracting, setIsExtracting] = useState(false)
-  const [aiError, setAiError] = useState('')
-  const [aiSuccess, setAiSuccess] = useState('')
-
   const set = <K extends keyof CompanyInput>(key: K, value: CompanyInput[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }))
 
-  const handleExtractNotice = async () => {
-    if (!rawNotice.trim()) return
-    setIsExtracting(true)
-    setAiError('')
-    setAiSuccess('')
-    try {
-      const data = await parseCompanyNotice(rawNotice)
-      setForm((prev) => ({
-        ...prev,
-        name: data.name || prev.name,
-        role: data.role || prev.role,
-        ctc: data.ctc || prev.ctc,
-        location: data.location || prev.location,
-        jdLink: data.jdLink || prev.jdLink,
-        registeredOnSuperset:
-          data.registeredOnSuperset === true ? true : prev.registeredOnSuperset,
-        researchNotes: data.researchNotes || prev.researchNotes,
-        resumeVersion: data.resumeVersion || prev.resumeVersion,
-      }))
-      if (
-        data.location ||
-        data.jdLink ||
-        data.researchNotes ||
-        data.registeredOnSuperset ||
-        data.resumeVersion
-      ) {
-        setShowMore(true)
-      }
-      setAiSuccess('Extracted details populated into form below! Review or edit anything you need.')
-    } catch (err) {
-      setAiError(apiError(err))
-    } finally {
-      setIsExtracting(false)
+  const fillFromNotice = async (text: string) => {
+    const data = await parseCompanyNotice(text)
+    setForm((prev) => ({
+      ...prev,
+      name: data.name || prev.name,
+      role: data.role || prev.role,
+      ctc: data.ctc || prev.ctc,
+      location: data.location || prev.location,
+      jdLink: data.jdLink || prev.jdLink,
+      registeredOnSuperset: data.registeredOnSuperset === true ? true : prev.registeredOnSuperset,
+      researchNotes: data.researchNotes || prev.researchNotes,
+      resumeVersion: data.resumeVersion || prev.resumeVersion,
+    }))
+    if (data.location || data.jdLink || data.researchNotes || data.registeredOnSuperset || data.resumeVersion) {
+      setShowMore(true)
     }
   }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError('')
+    setFieldErrors({})
     try {
       await save.mutateAsync({
         id: company?.id,
@@ -163,7 +140,12 @@ function CompanyForm({
       })
       onClose()
     } catch (err) {
-      setError(apiError(err))
+      const perField = apiFieldErrors(err)
+      setFieldErrors(perField)
+      setError(Object.keys(perField).length ? 'Please fix the highlighted fields.' : apiError(err))
+      if (perField.location || perField.jdLink || perField.resumeVersion || perField.researchNotes) {
+        setShowMore(true)
+      }
     }
   }
 
@@ -171,248 +153,115 @@ function CompanyForm({
     <form id="company-form" onSubmit={handleSubmit} className="space-y-4">
       {error && <ErrorNote message={error} />}
 
-      {/* AI Auto-Fill Card */}
-      <div className="overflow-hidden rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-50/70 via-indigo-50/40 to-fuchsia-50/30 dark:border-violet-900/60 dark:from-violet-950/30 dark:via-indigo-950/20 dark:to-purple-950/10 p-3.5 shadow-sm transition-all duration-200">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Sparkles size={16} className="text-violet-600 dark:text-violet-400 shrink-0" />
-            <div>
-              <p className="text-xs font-bold text-violet-950 dark:text-violet-200">
-                AI Auto-Fill from Notice
-              </p>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Paste raw text from WhatsApp, Superset, or email
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setAiOpen((prev) => !prev)}
-            className="inline-flex items-center gap-1 rounded-lg border border-violet-200 bg-white/80 px-2.5 py-1 text-xs font-semibold text-violet-700 hover:bg-violet-50 dark:border-violet-800 dark:bg-violet-900/40 dark:text-violet-300 dark:hover:bg-violet-900/60 transition-colors"
-          >
-            {aiOpen ? (
-              <>
-                Hide <ChevronUp size={14} />
-              </>
-            ) : (
-              <>
-                Paste notice <ChevronDown size={14} />
-              </>
-            )}
-          </button>
-        </div>
+      <AiNoticePanel
+        heading="Fill from a notice"
+        description="Paste text from WhatsApp, Superset or email and AI fills the form."
+        placeholder="e.g. Drive: Deloitte USI · Role: Analyst · CTC: 7.6 LPA · Register on Superset by Friday"
+        onExtract={fillFromNotice}
+      />
 
-        {aiOpen && (
-          <div className="mt-3 space-y-2.5 pt-2.5 border-t border-violet-200/60 dark:border-violet-900/40">
-            <Textarea
-              value={rawNotice}
-              onChange={(e) => setRawNotice(e.target.value)}
-              placeholder="Paste raw announcement here (e.g. Drive: Deloitte USI, Role: Analyst, CTC: 7.6 LPA, Superset link...)"
-              rows={3}
-              className="text-xs font-mono bg-white/90 dark:bg-slate-900/90"
-            />
-
-            {aiError && (
-              <div className="space-y-2">
-                <ErrorNote message={aiError} />
-                <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-violet-200 bg-white/90 p-2.5 dark:border-violet-800/80 dark:bg-violet-950/40 shadow-sm">
-                  <div className="flex items-center gap-2 text-xs text-violet-950 dark:text-violet-200">
-                    <Key size={14} className="text-violet-600 dark:text-violet-400 shrink-0" />
-                    <span>Bypass shared limits with your own free Gemini API key:</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setAiSettingsOpen(true)}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-2.5 py-1 text-xs font-semibold text-white shadow-sm hover:bg-violet-700 transition active:scale-95"
-                  >
-                    <Key size={12} />
-                    Add API Key
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {aiSuccess && (
-              <div className="flex items-center gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 p-2 text-xs font-medium text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
-                <Check size={14} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
-                <span>{aiSuccess}</span>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                Unmentioned fields will remain blank.
-              </span>
-              <div className="flex items-center gap-1.5">
-                {rawNotice && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setRawNotice('')
-                      setAiSuccess('')
-                      setAiError('')
-                    }}
-                    className="text-xs"
-                  >
-                    Clear
-                  </Button>
-                )}
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={handleExtractNotice}
-                  disabled={isExtracting || !rawNotice.trim()}
-                  className="bg-violet-600 hover:bg-violet-700 text-white font-semibold text-xs shadow-sm shadow-violet-500/20"
-                >
-                  {isExtracting ? (
-                    <>
-                      <Loader2 size={13} className="animate-spin mr-1" />
-                      Extracting…
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles size={13} className="mr-1" />
-                      Extract & Auto-Fill
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {!company && !aiOpen && (
-        <div className="flex items-center gap-2 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 p-2.5 text-xs text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200/60 dark:ring-indigo-800/60">
-          <Zap size={14} className="shrink-0 text-indigo-600 dark:text-indigo-400" />
-          <span className="font-medium">
-            <strong>Fast Track:</strong> Enter the company name and choose a stage. You can add extra details anytime later.
-          </span>
-        </div>
-      )}
-
-      {/* 1. Company Name */}
-      <Field label="Company name" htmlFor="c-name" required>
+      <Field label="Company name" htmlFor="c-name" required error={fieldErrors.name}>
         <Input
           id="c-name"
           value={form.name}
           onChange={(e) => set('name', e.target.value)}
-          placeholder="e.g. Google, Microsoft, TCS, Infosys…"
+          placeholder="e.g. Google, Microsoft, TCS"
           required
           autoFocus
-          className="text-base font-semibold"
+          aria-invalid={Boolean(fieldErrors.name) || undefined}
         />
       </Field>
 
-      {/* 2. Fast Stage Selector Pills */}
-      <div className="space-y-1.5">
-        <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-          Pipeline Stage
-        </label>
+      <fieldset className="space-y-1.5">
+        <legend className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Stage</legend>
         <div className="flex flex-wrap gap-1.5">
           {STAGE_ORDER.map((stageKey) => {
             const meta = STAGE_META[stageKey]
-            const isSelected = form.stage === stageKey
             return (
-              <button
-                key={stageKey}
-                type="button"
-                onClick={() => set('stage', stageKey)}
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all duration-150',
-                  isSelected
-                    ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm scale-[1.02]'
-                    : 'bg-slate-100/80 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700',
-                )}
-              >
-                <span className={cn('h-2 w-2 rounded-full', meta.dot)} />
+              <FilterChip key={stageKey} selected={form.stage === stageKey} onClick={() => set('stage', stageKey)}>
+                <span className={cn('h-2 w-2 rounded-full', meta.dot)} aria-hidden="true" />
                 {meta.short}
-              </button>
+              </FilterChip>
             )
           })}
         </div>
-      </div>
+      </fieldset>
 
-      {/* Compact Quick Fields: Role & CTC */}
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Role (optional)" htmlFor="c-role">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Role" htmlFor="c-role" error={fieldErrors.role}>
           <Input
             id="c-role"
             value={form.role}
             onChange={(e) => set('role', e.target.value)}
             placeholder="e.g. Software Engineer"
+            aria-invalid={Boolean(fieldErrors.role) || undefined}
           />
         </Field>
-        <Field label="CTC / Package (optional)" htmlFor="c-ctc">
+        <Field label="CTC" htmlFor="c-ctc" error={fieldErrors.ctc}>
           <Input
             id="c-ctc"
             value={form.ctc}
             onChange={(e) => set('ctc', e.target.value)}
             placeholder="e.g. 14 LPA"
+            aria-invalid={Boolean(fieldErrors.ctc) || undefined}
           />
         </Field>
       </div>
 
-      {/* Expand / Collapse More Details */}
-      <div className="pt-1">
-        <button
-          type="button"
-          onClick={() => setShowMore((prev) => !prev)}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
-        >
-          {showMore ? (
-            <>
-              <ChevronUp size={14} />
-              Hide extra details
-            </>
-          ) : (
-            <>
-              <ChevronDown size={14} />
-              + Add more details (location, JD link, notes, superset...)
-            </>
-          )}
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={() => setShowMore((prev) => !prev)}
+        aria-expanded={showMore}
+        className="inline-flex items-center gap-1.5 rounded text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+      >
+        {showMore ? <ChevronUp size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
+        {showMore ? 'Fewer details' : 'More details'}
+        {!showMore && (
+          <span className="font-normal text-slate-500 dark:text-slate-400">· location, JD link, notes, Superset</span>
+        )}
+      </button>
 
       {showMore && (
-        <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800 animate-fade-in">
+        <div className="animate-fade-in space-y-4 border-t border-slate-100 pt-4 dark:border-slate-800">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Location" htmlFor="c-location">
+            <Field label="Location" htmlFor="c-location" error={fieldErrors.location}>
               <Input
                 id="c-location"
                 value={form.location}
                 onChange={(e) => set('location', e.target.value)}
                 placeholder="Bengaluru / Remote"
+                aria-invalid={Boolean(fieldErrors.location) || undefined}
               />
             </Field>
-            <Field label="Resume version used" htmlFor="c-resume">
+            <Field label="Resume version used" htmlFor="c-resume" error={fieldErrors.resumeVersion}>
               <Input
                 id="c-resume"
                 value={form.resumeVersion}
                 onChange={(e) => set('resumeVersion', e.target.value)}
-                placeholder="Resume v3 — Backend"
+                placeholder="Resume v3 (backend)"
+                aria-invalid={Boolean(fieldErrors.resumeVersion) || undefined}
               />
             </Field>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Applied on" htmlFor="c-applied">
+            <Field label="Applied on" htmlFor="c-applied" error={fieldErrors.appliedOn}>
               <Input
                 id="c-applied"
                 type="date"
                 value={form.appliedOn ?? ''}
                 onChange={(e) => set('appliedOn', e.target.value)}
+                aria-invalid={Boolean(fieldErrors.appliedOn) || undefined}
               />
             </Field>
-            <Field label="Job description link" htmlFor="c-jd">
+            <Field label="Job description link" htmlFor="c-jd" error={fieldErrors.jdLink}>
               <Input
                 id="c-jd"
                 type="url"
                 value={form.jdLink}
                 onChange={(e) => set('jdLink', e.target.value)}
                 placeholder="https://…"
+                aria-invalid={Boolean(fieldErrors.jdLink) || undefined}
               />
             </Field>
           </div>
@@ -420,7 +269,8 @@ function CompanyForm({
           <Field
             label="Research notes"
             htmlFor="c-notes"
-            hint="Culture, tech stack, recent news, interviewer names, why you want in."
+            hint="Eligibility, tech stack, recent news, why you want to join."
+            error={fieldErrors.researchNotes}
           >
             <Textarea
               id="c-notes"
@@ -428,30 +278,26 @@ function CompanyForm({
               value={form.researchNotes}
               onChange={(e) => set('researchNotes', e.target.value)}
               placeholder="What did you learn while researching this company?"
+              aria-invalid={Boolean(fieldErrors.researchNotes) || undefined}
             />
           </Field>
 
-          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 px-3.5 py-3 transition hover:border-indigo-200 dark:hover:border-indigo-500/40 hover:bg-indigo-50/40 dark:hover:bg-indigo-950/40">
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 px-3.5 py-3 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/60">
             <input
               type="checkbox"
-              className="mt-0.5 h-4 w-4 accent-indigo-600 rounded"
+              className="mt-0.5 h-4 w-4 rounded accent-indigo-600"
               checked={form.registeredOnSuperset}
               onChange={(e) => set('registeredOnSuperset', e.target.checked)}
             />
             <span className="text-sm">
-              <span className="font-medium text-slate-800 dark:text-slate-200">Registered on Superset / College Portal</span>
+              <span className="font-medium text-slate-800 dark:text-slate-200">Registered on Superset or the college portal</span>
               <span className="block text-xs text-slate-500 dark:text-slate-400">
-                Confirms the TPO-portal registration step is complete.
+                Tick this once the TPO portal registration is done.
               </span>
             </span>
           </label>
         </div>
       )}
-
-      <AiSettingsModal
-        open={aiSettingsOpen}
-        onClose={() => setAiSettingsOpen(false)}
-      />
     </form>
   )
 }

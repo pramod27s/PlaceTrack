@@ -85,8 +85,8 @@ export function JournalModal({ round, entry, onClose }: JournalModalProps) {
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" form="journal-form" disabled={saving}>
-            {saving ? 'Saving…' : entry ? 'Save changes' : 'Add entry'}
+          <Button type="submit" form="journal-form" loading={saving}>
+            {entry ? 'Save changes' : 'Add entry'}
           </Button>
         </>
       }
@@ -97,7 +97,7 @@ export function JournalModal({ round, entry, onClose }: JournalModalProps) {
         <Field
           label="Title"
           htmlFor="j-title"
-          hint="Optional — e.g. 'Immediate notes' or 'Day-after reflection'."
+          hint="Optional, e.g. Immediate notes or Day-after reflection."
         >
           <Input
             id="j-title"
@@ -159,17 +159,19 @@ export function JournalModal({ round, entry, onClose }: JournalModalProps) {
         </Field>
 
         <Field label="How did it go?">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1" role="group" aria-label="Rating">
             {[1, 2, 3, 4, 5].map((value) => (
               <button
                 key={value}
                 type="button"
                 aria-label={`Rate ${value} of 5`}
+                aria-pressed={form.rating === value}
                 onClick={() => set('rating', form.rating === value ? null : value)}
-                className="rounded-md p-0.5 transition hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                className="rounded-md p-1 transition-colors hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:hover:bg-slate-800"
               >
                 <Star
-                  size={26}
+                  size={22}
+                  aria-hidden="true"
                   className={cn(
                     form.rating && value <= form.rating
                       ? 'fill-amber-400 text-amber-400'

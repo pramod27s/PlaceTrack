@@ -41,48 +41,45 @@ const CardBody = memo(function CardBody({ company }: { company: Company }) {
     <>
       <div className="flex items-start justify-between gap-2.5">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500/10 to-violet-500/20 dark:from-indigo-500/20 dark:to-violet-500/30 text-xs font-bold text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-500/20 dark:ring-indigo-400/30">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">
             {initials(company.name)}
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-bold text-slate-900 dark:text-slate-100 tracking-tight">{company.name}</p>
+            <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{company.name}</p>
             {company.role && (
-              <p className="truncate text-xs text-slate-500 dark:text-slate-400 font-medium">{company.role}</p>
+              <p className="truncate text-xs text-slate-500 dark:text-slate-400">{company.role}</p>
             )}
           </div>
         </div>
         {company.registeredOnSuperset && (
-          <span
-            title="Registered on Superset"
-            className="flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-600/20 dark:ring-emerald-500/30"
-          >
-            <CircleCheckBig size={12} className="text-emerald-600 dark:text-emerald-400" />
+          <span title="Registered on Superset" className="mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400">
+            <CircleCheckBig size={14} aria-hidden="true" />
             <span className="sr-only">Registered on Superset</span>
           </span>
         )}
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-slate-500 dark:text-slate-400">
         {company.ctc && (
-          <span className="inline-flex items-center gap-0.5 font-semibold text-slate-800 dark:text-slate-200 bg-slate-100/80 dark:bg-slate-800 px-2 py-0.5 rounded-md">
-            <IndianRupee size={11} className="text-slate-500 dark:text-slate-400" />
+          <span className="inline-flex items-center gap-0.5 font-medium text-slate-700 dark:text-slate-200">
+            <IndianRupee size={11} aria-hidden="true" />
             {company.ctc}
           </span>
         )}
         {company.location && (
-          <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-[11px]">
-            <MapPin size={12} className="text-slate-500 dark:text-slate-400" />
+          <span className="flex items-center gap-1">
+            <MapPin size={12} aria-hidden="true" />
             {company.location}
           </span>
         )}
       </div>
 
-      <div className="mt-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-800/80 pt-2.5 text-[11px] font-medium text-slate-500 dark:text-slate-400">
-        <span className="inline-flex items-center gap-1">
-          <Layers size={12} />
+      <div className="mt-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-2.5 text-2xs text-slate-500 dark:text-slate-400">
+        <span className="inline-flex items-center gap-1 tabular-nums">
+          <Layers size={12} aria-hidden="true" />
           {company.roundCount} {company.roundCount === 1 ? 'round' : 'rounds'}
         </span>
-        <span>Applied {formatDate(company.appliedOn)}</span>
+        <span className="tabular-nums">Applied {formatDate(company.appliedOn)}</span>
       </div>
     </>
   )
@@ -113,16 +110,16 @@ const KanbanCard = memo(function KanbanCard({
         if (event.key === 'Enter') onSelect(company)
       }}
       className={cn(
-        'group cursor-grab rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-3.5 shadow-sm transition-all duration-150',
-        'hover:-translate-y-0.5 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-md dark:hover:shadow-black/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:cursor-grabbing',
-        isDragging && 'opacity-30 scale-95',
+        'group cursor-grab rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3.5 shadow-sm transition-colors',
+        'hover:border-slate-300 dark:hover:border-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:cursor-grabbing',
+        isDragging && 'opacity-40',
       )}
     >
       <CardBody company={company} />
 
-      {/* 🚀 Quick Share Experience Button on Card */}
+      {/* Share-experience shortcut once a company reaches a final stage */}
       {(company.stage === 'OFFER' || company.stage === 'REJECTED') && (
-        <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/80">
+        <div className="mt-3 border-t border-slate-100 dark:border-slate-800 pt-2.5">
           <button
             type="button"
             onPointerDown={(event) => event.stopPropagation()}
@@ -130,32 +127,26 @@ const KanbanCard = memo(function KanbanCard({
               event.stopPropagation()
               onShareExperience?.(company)
             }}
-            className={cn(
-              'w-full flex items-center justify-center gap-1.5 rounded-lg py-1.5 px-2 text-xs font-bold transition-all shadow-xs',
-              company.stage === 'OFFER'
-                ? 'bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-300 dark:ring-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/60'
-                : 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-300 dark:ring-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/60',
-            )}
-            title="Publish interview experience to Community Vault"
+            className="flex h-8 w-full items-center justify-center gap-1.5 rounded-md border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
           >
-            <Sparkles size={12} className={company.stage === 'OFFER' ? 'text-emerald-600 dark:text-emerald-400' : 'text-indigo-600 dark:text-indigo-400'} />
-            <span>{company.stage === 'OFFER' ? 'Share Offer Story' : 'Share Interview Experience'}</span>
+            <Sparkles size={12} aria-hidden="true" className="text-slate-500 dark:text-slate-400" />
+            Share your experience
           </button>
         </div>
       )}
 
       <label
-        className="mt-3 flex items-center gap-2 border-t border-slate-100 dark:border-slate-800/80 pt-2 text-xs font-medium text-slate-500 dark:text-slate-400"
+        className="mt-3 flex items-center gap-2 border-t border-slate-100 dark:border-slate-800 pt-2 text-xs text-slate-500 dark:text-slate-400"
         onPointerDown={(event) => event.stopPropagation()}
         onClick={(event) => event.stopPropagation()}
       >
-        <MoveRight size={14} className="shrink-0 text-indigo-500" />
+        <MoveRight size={14} className="shrink-0" aria-hidden="true" />
         <span className="sr-only">Move {company.name} to stage</span>
         <select
           aria-label={`Move ${company.name} to stage`}
           value={company.stage}
           onChange={(event) => onMove(company, event.target.value as Stage)}
-          className="min-w-0 flex-1 cursor-pointer bg-transparent py-1 text-xs font-semibold text-slate-600 dark:text-slate-300 outline-none"
+          className="min-w-0 flex-1 cursor-pointer rounded bg-transparent py-1 text-xs font-medium text-slate-600 dark:text-slate-300 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           {STAGE_ORDER.map((stage) => (
             <option key={stage} value={stage} className="dark:bg-slate-900 dark:text-slate-100">
@@ -195,21 +186,21 @@ const KanbanColumn = memo(function KanbanColumn({
       {/* Column Header */}
       <div className="mb-2.5 flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <span className={cn('h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-slate-900 shadow-sm', meta.dot)} />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">{meta.label}</span>
+          <span className={cn('h-2 w-2 rounded-full', meta.dot)} aria-hidden="true" />
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{meta.label}</span>
         </div>
-        <span className="rounded-full bg-slate-200/80 dark:bg-slate-800 px-2 py-0.5 text-[11px] font-bold text-slate-600 dark:text-slate-400">
+        <span className="rounded-full bg-slate-200/70 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium tabular-nums text-slate-600 dark:text-slate-400">
           {companies.length}
         </span>
       </div>
 
-      {/* Droppable Container */}
+      {/* Droppable container */}
       <div
         className={cn(
-          'min-h-[14rem] space-y-2.5 rounded-2xl p-2.5 transition-all duration-200',
+          'min-h-[14rem] space-y-2 rounded-xl border p-2 transition-colors',
           isOver
-            ? 'border-2 border-dashed border-indigo-400 dark:border-indigo-500 bg-indigo-50/80 dark:bg-indigo-950/40 ring-4 ring-indigo-500/10 dark:ring-indigo-500/30'
-            : 'border border-slate-200/60 dark:border-slate-800/80 bg-slate-100/60 dark:bg-slate-900/40',
+            ? 'border-dashed border-indigo-400 dark:border-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/30'
+            : 'border-slate-200/70 dark:border-slate-800 bg-slate-100/60 dark:bg-slate-900/40',
         )}
       >
         {companies.map((company) => (
@@ -222,8 +213,8 @@ const KanbanColumn = memo(function KanbanColumn({
           />
         ))}
         {companies.length === 0 && (
-          <div className="flex min-h-[10rem] flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-white/40 dark:bg-slate-900/30 px-4 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
-            <span>Drop company here</span>
+          <div className="flex min-h-[10rem] flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 dark:border-slate-700 px-4 text-center text-xs text-slate-500 dark:text-slate-400">
+            <span>No companies in this stage</span>
           </div>
         )}
       </div>
@@ -342,7 +333,7 @@ export function KanbanBoard({ companies, onCardClick, onShareExperience }: Kanba
 
       <DragOverlay dropAnimation={null}>
         {activeCompany && (
-          <div className="w-80 rotate-2 cursor-grabbing rounded-xl border border-indigo-400 dark:border-indigo-500 bg-white dark:bg-slate-900 p-3.5 shadow-2xl shadow-indigo-950/20 ring-2 ring-indigo-500/20">
+          <div className="w-80 rotate-1 cursor-grabbing rounded-lg border border-indigo-400 dark:border-indigo-500 bg-white dark:bg-slate-900 p-3.5 shadow-xl shadow-slate-900/15">
             <CardBody company={activeCompany} />
           </div>
         )}

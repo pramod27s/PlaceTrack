@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
+import type { ReactNode } from 'react'
 import {
   ArrowRight,
   BookOpen,
   CalendarClock,
   CalendarPlus,
+  Check,
   CheckCircle2,
   HelpCircle,
   KanbanSquare,
@@ -13,607 +15,464 @@ import {
   ThumbsUp,
   TriangleAlert,
   Users,
+  X,
   Zap,
 } from 'lucide-react'
 
 import { PlaceTrackIcon } from '../components/PlaceTrackLogo'
-import { Button } from '../components/ui'
+import { cn } from '../lib/format'
+
+/* ------------------------------------------------------------------ helpers */
+
+const PRIMARY_LINK =
+  'inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 font-medium text-white shadow-sm transition-colors hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950'
+const SECONDARY_LINK =
+  'inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-900 font-medium text-slate-200 transition-colors hover:border-slate-600 hover:bg-slate-800 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950'
+
+/** Small label above a section heading. */
+function Eyebrow({ children }: { children: ReactNode }) {
+  return <p className="text-sm font-medium text-indigo-400">{children}</p>
+}
+
+/** A feature tile in the "Everything you need" grid. */
+function FeatureCard({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6 transition-colors hover:border-slate-700 sm:p-7">
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 text-slate-200" aria-hidden="true">
+        {icon}
+      </div>
+      <h3 className="mt-4 text-base font-semibold text-white">{title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-slate-400">{children}</p>
+    </div>
+  )
+}
+
+/* -------------------------------------------------------------------- page */
 
 export default function Landing() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
       {/* ---------------- Navbar ---------------- */}
-      <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-3.5 sm:px-8">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 shadow-sm shadow-indigo-600/15 ring-1 ring-white/10">
-              <PlaceTrackIcon size={18} className="text-white sm:hidden" />
-              <PlaceTrackIcon size={20} className="text-white hidden sm:block" />
+      <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-950/85 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-8">
+          <Link to="/" className="flex min-w-0 items-center gap-2.5 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-600">
+              <PlaceTrackIcon size={18} className="text-white" />
             </div>
-            <div className="leading-tight min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="text-base font-extrabold tracking-tight text-white truncate">PlaceTrack</span>
-                <span className="hidden sm:inline-flex rounded-full bg-indigo-500/20 px-2 py-0.5 text-[10px] font-bold text-indigo-300 ring-1 ring-indigo-400/30">
-                  v1.0
-                </span>
-              </div>
-              <p className="hidden sm:block text-[11px] font-medium text-slate-400">Placement Command Center</p>
-            </div>
-          </div>
+            <span className="truncate text-base font-semibold tracking-tight text-white">PlaceTrack</span>
+          </Link>
 
-          <nav className="hidden items-center gap-8 md:flex text-sm font-medium text-slate-400">
-            <a href="#features" className="hover:text-white transition-colors">
+          <nav aria-label="Page sections" className="hidden items-center gap-8 text-sm text-slate-400 md:flex">
+            <a href="#features" className="transition-colors hover:text-white">
               Features
             </a>
-            <a href="#community" className="hover:text-white transition-colors">
-              Community Vault
+            <a href="#community" className="transition-colors hover:text-white">
+              Experiences
             </a>
-            <a href="#problem" className="hover:text-white transition-colors">
+            <a href="#problem" className="transition-colors hover:text-white">
               Why PlaceTrack
             </a>
           </nav>
 
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <Link
               to="/login"
-              className="text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition-colors px-2.5 py-1.5 whitespace-nowrap"
+              className="whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
             >
               Sign in
             </Link>
-            <Link to="/signup" className="shrink-0">
-              <Button size="sm" className="font-bold shadow-md shadow-indigo-500/25 text-xs sm:text-sm px-3 py-1.5 sm:px-4 sm:py-2 whitespace-nowrap">
-                Get Started
-                <ArrowRight size={13} />
-              </Button>
+            <Link to="/signup" className={cn(PRIMARY_LINK, 'h-9 whitespace-nowrap px-3.5 text-sm')}>
+              Get started
+              <ArrowRight size={14} aria-hidden="true" />
             </Link>
           </div>
         </div>
       </header>
 
-      {/* ---------------- Hero Section ---------------- */}
-      <section className="relative overflow-hidden pt-20 pb-28 md:pt-28 md:pb-36">
-        {/* Ambient Animated Gradient Glows */}
-        <div className="pointer-events-none absolute -top-40 left-1/2 -z-10 h-[520px] w-[850px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-indigo-600/30 via-violet-600/25 to-pink-600/15 blur-[140px] animate-pulse-glow" />
-        <div className="pointer-events-none absolute top-1/3 -left-32 -z-10 h-[380px] w-[380px] rounded-full bg-indigo-600/20 blur-[110px] animate-float-slow" />
-        <div className="pointer-events-none absolute top-1/2 -right-32 -z-10 h-[380px] w-[380px] rounded-full bg-violet-600/20 blur-[110px] animate-float-reverse" />
+      <main>
+        {/* ---------------- Hero ---------------- */}
+        <section className="relative overflow-hidden pb-20 pt-16 sm:pb-28 sm:pt-24">
+          {/* One soft, static glow behind the headline (a gradient, not a blur filter, so it's cheap to draw). */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 -z-0 h-[560px] bg-[radial-gradient(60%_60%_at_50%_0%,rgba(79,70,229,0.22),transparent_70%)]"
+          />
 
-        <div className="mx-auto max-w-7xl px-4 sm:px-8 text-center relative">
-          {/* Tag Pill */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-gradient-to-r from-violet-500/10 via-indigo-500/10 to-fuchsia-500/10 px-4 py-1.5 text-xs font-semibold text-violet-300 backdrop-blur-md animate-slide-up hover:border-violet-400/50 transition-colors animate-badge-glow">
-            <Sparkles size={14} className="text-violet-400 animate-soft-pulse shrink-0" />
-            <span>New: 1-Click AI Notice &amp; Superset Auto-Fill • Powered by Gemini 3.6</span>
-          </div>
-
-          {/* Main Headline */}
-          <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-white sm:text-6xl md:text-7xl max-w-4xl mx-auto leading-[1.15] animate-slide-up-delay-1">
-            Placement season deserves better than a{' '}
-            <span className="gradient-text-animated pb-1">
-              messy Google Sheet.
-            </span>
-          </h1>
-
-          {/* Subtitle */}
-          <p className="mt-6 max-w-2xl mx-auto text-base sm:text-lg text-slate-300 font-normal leading-relaxed animate-slide-up-delay-2">
-            Turn WhatsApp forwards, portal notices, and overlapping interview rounds into one structured command center. Paste raw announcements with AI auto-fill, track your pipeline, detect schedule clashes, log reflections, and explore peer interview intel.
-          </p>
-
-          {/* Action CTAs */}
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4 animate-slide-up-delay-3">
-            <Link to="/signup">
-              <Button
-                size="lg"
-                className="group px-8 py-3 text-sm font-bold animate-cta-pulse hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
-              >
-                Start Tracking Free
-                <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1.5" />
-              </Button>
-            </Link>
-            <Link to="/login">
-              <Button
-                variant="outline"
-                size="lg"
-                className="px-7 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
-              >
-                Sign In to Pipeline
-              </Button>
-            </Link>
-          </div>
-
-          {/* ---------------- Interactive Hero Mockup Preview with Motion ---------------- */}
-          <div className="relative mt-16 mx-auto max-w-5xl">
-            {/* Floating Live Badge 1: Top-Right Countdown */}
-            <div className="hidden lg:flex items-center gap-2.5 absolute -top-5 -right-6 z-20 rounded-2xl border border-indigo-500/30 bg-slate-900/90 px-4 py-2.5 text-xs font-semibold text-white shadow-xl shadow-indigo-950/50 backdrop-blur-xl animate-float">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
-              </span>
-              <span className="text-slate-300">Upcoming OA:</span>
-              <span className="font-bold text-amber-300">Amazon in 2h 45m</span>
+          <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-8">
+            <div className="animate-slide-up inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/80 px-3.5 py-1.5 text-xs font-medium text-slate-300">
+              <Sparkles size={14} className="shrink-0 text-indigo-400" aria-hidden="true" />
+              <span>New: AI fills in forms from placement notices</span>
             </div>
 
-            {/* Floating Live Badge 2: Bottom-Left Offer Notification */}
-            <div className="hidden lg:flex items-center gap-2.5 absolute -bottom-5 -left-6 z-20 rounded-2xl border border-emerald-500/30 bg-slate-900/90 px-4 py-2.5 text-xs font-semibold text-white shadow-xl shadow-emerald-950/40 backdrop-blur-xl animate-float-slow">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-[10px]">
-                ✓
-              </span>
-              <span className="text-slate-300">Offer Secured:</span>
-              <span className="font-bold text-emerald-300">Microsoft Full-Time SDE</span>
+            <h1 className="animate-slide-up-delay-1 mx-auto mt-6 max-w-4xl text-balance text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-6xl md:text-7xl">
+              Placement season deserves better than a <span className="text-indigo-400">messy Google Sheet.</span>
+            </h1>
+
+            <p className="animate-slide-up-delay-2 mx-auto mt-6 max-w-2xl text-pretty text-base leading-relaxed text-slate-300 sm:text-lg">
+              Turn WhatsApp forwards, portal notices and overlapping interview rounds into one organised pipeline.
+              Paste a notice and AI fills in the details, then track every round through to the offer.
+            </p>
+
+            <div className="animate-slide-up-delay-3 mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+              <Link to="/signup" className={cn(PRIMARY_LINK, 'group h-11 px-6 text-sm')}>
+                Start tracking for free
+                <ArrowRight size={16} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <Link to="/login" className={cn(SECONDARY_LINK, 'h-11 px-6 text-sm')}>
+                Sign in
+              </Link>
             </div>
 
-            {/* Floating Live Badge 3: Right-Side Community Intel */}
-            <div className="hidden xl:flex items-center gap-2 absolute top-1/2 -right-12 z-20 -translate-y-1/2 rounded-2xl border border-sky-500/30 bg-slate-900/90 px-3.5 py-2 text-xs font-medium text-slate-200 shadow-xl shadow-sky-950/40 backdrop-blur-xl animate-float-reverse">
-              <Users size={14} className="text-sky-400" />
-              <span>48 Senior Reviews in Vault</span>
-            </div>
-
-            {/* Floating Live Badge 4: Left-Side AI Auto-Fill */}
-            <div className="hidden xl:flex items-center gap-2 absolute top-1/4 -left-12 z-20 -translate-y-1/2 rounded-2xl border border-violet-500/30 bg-slate-900/90 px-3.5 py-2 text-xs font-medium text-slate-200 shadow-xl shadow-violet-950/40 backdrop-blur-xl animate-float">
-              <Sparkles size={14} className="text-violet-400" />
-              <span className="font-semibold text-violet-300">AI Notice Parser:</span>
-              <span className="text-slate-300">Deloitte parsed in 1s</span>
-            </div>
-
-            {/* Main Preview Container */}
-            <div className="rounded-3xl border border-slate-800/80 bg-slate-900/90 p-3 sm:p-5 shadow-2xl shadow-indigo-950/40 ring-1 ring-white/10 backdrop-blur-2xl text-left transition-all duration-300 hover:border-slate-700">
-              {/* Window bar */}
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3 px-2">
-                <div className="flex items-center gap-2">
-                  <span className="h-3 w-3 rounded-full bg-rose-500/80" />
-                  <span className="h-3 w-3 rounded-full bg-amber-500/80" />
-                  <span className="h-3 w-3 rounded-full bg-emerald-500/80" />
+            {/* ---------------- Product preview ---------------- */}
+            <div className="relative mx-auto mt-16 max-w-5xl">
+              <div className="rounded-2xl border border-slate-800 bg-slate-900 p-3 text-left shadow-2xl shadow-black/40 sm:p-4">
+                {/* Window bar */}
+                <div className="flex items-center gap-3 border-b border-slate-800 px-2 pb-3">
+                  <div className="flex items-center gap-1.5" aria-hidden="true">
+                    <span className="h-2.5 w-2.5 rounded-full bg-slate-700" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-slate-700" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-slate-700" />
+                  </div>
+                  <span className="truncate text-xs text-slate-500">Example pipeline</span>
                 </div>
-                <span className="text-[11px] font-mono font-medium text-slate-500">
-                  placetrack.app/pipeline — live preview
-                </span>
-                <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Live Sync
-                </div>
-              </div>
 
-              {/* Simulated Live UI inside Hero */}
-              <div className="p-3 sm:p-5 space-y-4">
-                {/* Simulated AI Notice Auto-Fill Banner */}
-                <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-violet-500/30 bg-gradient-to-r from-violet-950/40 via-indigo-950/30 to-purple-950/20 p-2.5 text-xs text-violet-200">
-                  <div className="flex items-center gap-2">
-                    <Sparkles size={14} className="text-violet-400 shrink-0 animate-pulse" />
+                <div className="space-y-3 p-2 sm:p-4">
+                  {/* AI auto-fill */}
+                  <div className="flex items-start gap-2.5 rounded-lg border border-slate-800 bg-slate-950/60 p-3 text-sm text-slate-300">
+                    <Sparkles size={16} className="mt-0.5 shrink-0 text-indigo-400" aria-hidden="true" />
                     <span>
-                      <strong>AI Auto-Fill Active:</strong> Paste raw WhatsApp text → auto-populates Company, Role, CTC, Superset links &amp; rounds
+                      <span className="font-medium text-white">AI auto-fill:</span> paste a WhatsApp notice and the company,
+                      role, CTC and Superset link are filled in for you.
                     </span>
                   </div>
-                  <span className="rounded-md bg-violet-500/20 px-2 py-0.5 text-[10px] font-bold text-violet-300 ring-1 ring-violet-500/30">
-                    Google Gemini 3.6
-                  </span>
-                </div>
 
-                {/* Conflict Alert Banner with Live Radar Ping */}
-                <div className="flex flex-wrap items-center gap-2.5 rounded-xl border border-rose-500/30 bg-rose-950/40 p-3 text-xs text-rose-200 shadow-inner">
-                  <span className="relative flex h-2.5 w-2.5 shrink-0">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
-                  </span>
-                  <TriangleAlert size={15} className="text-rose-400 shrink-0" />
-                  <span className="font-semibold">
-                    Conflict detected: Google Technical Round overlaps with Amazon OA (Friday, 10:00 AM)
-                  </span>
-                  <span className="ml-auto font-bold text-rose-300 underline cursor-pointer hover:text-rose-100 transition-colors">
-                    Auto-flagged by Conflict Engine
-                  </span>
-                </div>
+                  {/* Conflict alert */}
+                  <div className="flex items-start gap-2.5 rounded-lg border border-rose-900/60 bg-rose-950/30 p-3 text-sm text-rose-200">
+                    <TriangleAlert size={16} className="mt-0.5 shrink-0 text-rose-400" aria-hidden="true" />
+                    <span>
+                      <span className="font-medium">Clash:</span> Google technical round overlaps with the Amazon OA on
+                      Friday at 10:00 AM.
+                    </span>
+                  </div>
 
-                {/* Kanban Column Preview */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {/* Column 1 */}
-                  <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 space-y-2.5">
-                    <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-400">
-                      <span className="flex items-center gap-1.5">
-                        <span className="h-2 w-2 rounded-full bg-sky-500 animate-pulse" />
-                        Online Assessment
+                  {/* Kanban preview */}
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    {[
+                      {
+                        stage: 'Online assessment',
+                        dot: 'bg-slate-400',
+                        company: 'Amazon',
+                        role: 'SDE-1 · ₹44 LPA',
+                        left: 'OA scheduled',
+                        right: 'Tomorrow, 10 AM',
+                        superset: true,
+                      },
+                      {
+                        stage: 'Technical',
+                        dot: 'bg-blue-500',
+                        company: 'Google',
+                        role: 'Software Engineer · ₹52 LPA',
+                        left: 'Google Meet',
+                        right: 'Added to calendar',
+                        icon: <CalendarPlus size={12} aria-hidden="true" />,
+                      },
+                      {
+                        stage: 'Offer',
+                        dot: 'bg-emerald-500',
+                        company: 'Microsoft',
+                        role: 'Full-time SDE',
+                        left: '4 journal notes',
+                        right: 'Offer accepted',
+                      },
+                    ].map((col) => (
+                      <div key={col.stage} className="rounded-xl border border-slate-800 bg-slate-950/50 p-2.5">
+                        <div className="mb-2 flex items-center justify-between px-1 text-sm">
+                          <span className="flex items-center gap-2 font-medium text-slate-300">
+                            <span className={cn('h-2 w-2 rounded-full', col.dot)} aria-hidden="true" />
+                            {col.stage}
+                          </span>
+                          <span className="rounded-full bg-slate-800 px-2 py-0.5 text-xs text-slate-400">1</span>
+                        </div>
+                        <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="text-sm font-semibold text-white">{col.company}</p>
+                            {col.superset && (
+                              <CheckCircle2 size={14} className="mt-0.5 text-emerald-400" aria-label="Registered on Superset" />
+                            )}
+                          </div>
+                          <p className="mt-0.5 text-xs text-slate-400">{col.role}</p>
+                          <div className="mt-3 flex items-center justify-between border-t border-slate-800 pt-2 text-xs text-slate-500">
+                            <span>{col.left}</span>
+                            <span className="inline-flex items-center gap-1 text-slate-300">
+                              {col.icon}
+                              {col.right}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ---------------- The problem vs the solution ---------------- */}
+        <section id="problem" className="scroll-mt-16 border-t border-slate-900 py-20 sm:py-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-8">
+            <div className="mx-auto max-w-2xl text-center">
+              <Eyebrow>The reality of placement season</Eyebrow>
+              <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                Why spreadsheets fall apart under pressure
+              </h2>
+              <p className="mt-3 text-pretty text-base text-slate-400">
+                With dozens of companies testing and interviewing at once, scattered notes lead to missed deadlines and
+                double-booked rounds.
+              </p>
+            </div>
+
+            <div className="mt-12 grid gap-6 md:grid-cols-2">
+              <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 sm:p-8">
+                <p className="text-sm font-medium text-slate-400">The usual way</p>
+                <h3 className="mt-1 text-xl font-semibold text-white">Spreadsheets and WhatsApp forwards</h3>
+                <ul className="mt-5 space-y-3 text-sm text-slate-400">
+                  {[
+                    'Hours spent copying company names, eligibility and CTCs out of forwarded messages.',
+                    'Interview slots double-booked with no warning.',
+                    'No record of the questions you struggled with in earlier rounds.',
+                    'Losing track of which resume version went to which company.',
+                    'No easy way to see what seniors were actually asked.',
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <X size={16} className="mt-0.5 shrink-0 text-rose-400" aria-hidden="true" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="rounded-2xl border border-indigo-500/30 bg-indigo-950/20 p-6 sm:p-8">
+                <p className="text-sm font-medium text-indigo-300">With PlaceTrack</p>
+                <h3 className="mt-1 text-xl font-semibold text-white">One organised placement pipeline</h3>
+                <ul className="mt-5 space-y-3 text-sm text-slate-300">
+                  {[
+                    'Paste a WhatsApp or Superset notice and AI fills in the details.',
+                    'Overlapping rounds are flagged automatically.',
+                    'A journal after each round builds your own question bank.',
+                    'Add any round to Google Calendar or download an .ics file.',
+                    'Read real interview experiences shared by your peers.',
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <Check size={16} className="mt-0.5 shrink-0 text-emerald-400" aria-hidden="true" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ---------------- Features ---------------- */}
+        <section id="features" className="scroll-mt-16 border-t border-slate-900 py-20 sm:py-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-8">
+            <div className="mx-auto max-w-2xl text-center">
+              <Eyebrow>Built for students</Eyebrow>
+              <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                Everything you need for placement season
+              </h2>
+            </div>
+
+            <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {/* Featured: AI auto-fill */}
+              <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6 sm:p-8 md:col-span-2 lg:col-span-3">
+                <div className="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
+                  <div className="max-w-xl">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-slate-700 px-3 py-1 text-xs font-medium text-slate-300">
+                      <Sparkles size={14} className="text-indigo-400" aria-hidden="true" />
+                      AI auto-fill
+                    </div>
+                    <h3 className="mt-4 text-xl font-semibold text-white sm:text-2xl">Add applications without retyping them</h3>
+                    <p className="mt-3 text-sm leading-relaxed text-slate-400">
+                      Got a placement announcement on WhatsApp or an interview invite by email? Paste it into{' '}
+                      <span className="font-medium text-slate-200">Add company</span> or{' '}
+                      <span className="font-medium text-slate-200">Schedule round</span>. AI pulls out the company, role,
+                      CTC, Superset link, round type, time and meeting link for you to review.
+                    </p>
+                  </div>
+                  <div className="w-full shrink-0 space-y-1.5 rounded-xl border border-slate-800 bg-slate-950 p-4 font-mono text-xs text-slate-300 lg:w-auto lg:min-w-[300px]">
+                    <p className="text-slate-500">Extracted from the notice</p>
+                    {[
+                      ['Company', 'Deloitte USI'],
+                      ['Role', 'Associate Analyst'],
+                      ['CTC', '7.6 LPA'],
+                      ['Superset', 'joinsuperset.com/…'],
+                      ['Round', 'Technical, 45 min'],
+                    ].map(([k, v]) => (
+                      <p key={k} className="flex gap-2">
+                        <Check size={14} className="shrink-0 text-emerald-400" aria-hidden="true" />
+                        <span className="text-slate-500">{k}:</span>
+                        <span className="truncate text-slate-200">{v}</span>
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <FeatureCard icon={<KanbanSquare size={20} />} title="Kanban pipeline">
+                Move applications from Applied to OA, Technical, HR and Offer. Track Superset registration on every card.
+              </FeatureCard>
+              <FeatureCard icon={<CalendarClock size={20} />} title="Clash detection and calendar">
+                Overlapping tests and interviews are flagged straight away. Add any round to Google Calendar, Apple
+                Calendar or Outlook.
+              </FeatureCard>
+              <FeatureCard icon={<NotebookPen size={20} />} title="Interview journal">
+                A quick note after each round: questions asked, topics covered and what to fix. It becomes a searchable
+                question bank.
+              </FeatureCard>
+              <FeatureCard icon={<Users size={20} />} title="Peer experiences">
+                Read real interview questions, tips and round breakdowns shared by peers, with the option to post
+                anonymously.
+              </FeatureCard>
+              <FeatureCard icon={<Zap size={20} />} title="Quick updates with undo">
+                Mark a round cleared or not cleared straight from its card, with an undo in case you tap the wrong one.
+              </FeatureCard>
+              <FeatureCard icon={<ShieldCheck size={20} />} title="Private by default">
+                Your pipeline, CTC notes and journal are tied to your account and visible only to you.
+              </FeatureCard>
+            </div>
+          </div>
+        </section>
+
+        {/* ---------------- Peer experiences ---------------- */}
+        <section id="community" className="scroll-mt-16 border-t border-slate-900 py-20 sm:py-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-8">
+            <div className="mx-auto max-w-3xl text-center">
+              <Eyebrow>Peer experiences</Eyebrow>
+              <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                Learn from real interviews before your turn comes
+              </h2>
+              <p className="mt-3 text-pretty text-base leading-relaxed text-slate-400">
+                Seniors and batchmates share the exact questions they were asked, how the rounds were structured, and
+                what they'd do differently.
+              </p>
+            </div>
+
+            <div className="mt-12 grid items-center gap-8 lg:grid-cols-12">
+              <div className="space-y-4 lg:col-span-5">
+                {[
+                  {
+                    icon: <BookOpen size={18} />,
+                    title: 'Real questions by company',
+                    body: 'Search a company to see the DSA, system design and behavioural questions from recent rounds.',
+                  },
+                  {
+                    icon: <ThumbsUp size={18} />,
+                    title: 'The most helpful posts first',
+                    body: 'Mark posts as helpful and sort by them, so the best preparation guides rise to the top.',
+                  },
+                  {
+                    icon: <HelpCircle size={18} />,
+                    title: 'Share anonymously or by name',
+                    body: 'Post candidly without your name, or add your name and batch so juniors can reach out.',
+                  },
+                ].map((item) => (
+                  <div key={item.title} className="rounded-xl border border-slate-800 bg-slate-900/50 p-5">
+                    <div className="flex items-center gap-2.5 text-sm font-semibold text-white">
+                      <span className="text-indigo-400" aria-hidden="true">
+                        {item.icon}
                       </span>
-                      <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px]">3</span>
+                      {item.title}
                     </div>
+                    <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{item.body}</p>
+                  </div>
+                ))}
+              </div>
 
-                    <div className="rounded-lg border border-slate-800 bg-slate-900/90 p-3 space-y-2 shadow-sm card-hover cursor-pointer">
-                      <div className="flex items-start justify-between">
-                        <p className="text-xs font-bold text-white">Amazon</p>
-                        <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-300 ring-1 ring-emerald-500/30">
-                          Superset ✓
-                        </span>
+              {/* Example post */}
+              <figure className="lg:col-span-7">
+                <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl shadow-black/30 sm:p-6">
+                  <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-800 pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 text-sm font-semibold text-slate-200">
+                        G
                       </div>
-                      <p className="text-[11px] text-slate-400 font-medium">SDE-1 (₹44 LPA)</p>
-                      <div className="flex items-center justify-between border-t border-slate-800/80 pt-2 text-[10px] text-slate-500">
-                        <span>OA Scheduled</span>
-                        <span className="text-indigo-400 font-semibold">Tomorrow 10 AM</span>
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h4 className="text-sm font-semibold text-white">Google · Software Engineer</h4>
+                          <span className="rounded-md bg-emerald-950/60 px-2 py-0.5 text-xs font-medium text-emerald-300">
+                            Selected
+                          </span>
+                        </div>
+                        <p className="mt-0.5 text-xs text-slate-400">On-campus · ₹52 LPA · Anonymous senior</p>
                       </div>
                     </div>
+                    <span className="rounded-md bg-amber-950/60 px-2 py-0.5 text-xs font-medium text-amber-300">Medium</span>
                   </div>
 
-                  {/* Column 2 */}
-                  <div className="rounded-xl border border-indigo-500/30 bg-indigo-950/20 p-3 space-y-2.5 ring-1 ring-indigo-500/20">
-                    <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-indigo-300">
-                      <span className="flex items-center gap-1.5">
-                        <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                        Technical Interview
-                      </span>
-                      <span className="rounded-full bg-indigo-500/30 px-2 py-0.5 text-[10px]">2</span>
-                    </div>
-
-                    <div className="rounded-lg border border-indigo-500/40 bg-slate-900 p-3 space-y-2 shadow-md card-hover cursor-pointer">
-                      <div className="flex items-start justify-between">
-                        <p className="text-xs font-bold text-white">Google</p>
-                        <span className="rounded bg-indigo-500/20 px-1.5 py-0.5 text-[10px] font-bold text-indigo-300">
-                          Round 2
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-400 font-medium">Software Engineer (₹52 LPA)</p>
-                      <div className="flex items-center justify-between border-t border-slate-800/80 pt-2 text-[10px]">
-                        <span className="text-slate-400">Google Meet</span>
-                        <span className="inline-flex items-center gap-1 text-indigo-300 font-bold">
-                          <CalendarPlus size={11} />
-                          1-Click Cal Sync
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Column 3 */}
-                  <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 space-y-2.5">
-                    <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-emerald-400">
-                      <span className="flex items-center gap-1.5">
-                        <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                        Offer Secured 🎉
-                      </span>
-                      <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px]">1</span>
-                    </div>
-
-                    <div className="rounded-lg border border-emerald-500/30 bg-slate-900/90 p-3 space-y-2 shadow-sm card-hover cursor-pointer">
-                      <div className="flex items-start justify-between">
-                        <p className="text-xs font-bold text-white">Microsoft</p>
-                        <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-300">
-                          Accepted
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-400 font-medium">Full-Time SDE</p>
-                      <div className="border-t border-slate-800/80 pt-2 text-[10px] text-emerald-400 font-semibold">
-                        Journal &amp; questions logged (4 notes)
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ---------------- The Core Pain vs Solution ---------------- */}
-      <section id="problem" className="border-t border-slate-900 bg-slate-950/90 py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-8">
-          <div className="text-center max-w-2xl mx-auto">
-            <span className="text-xs font-bold uppercase tracking-widest text-indigo-400">The Reality of Placement Season</span>
-            <h2 className="mt-3 text-3xl font-extrabold text-white tracking-tight sm:text-4xl">
-              Why standard spreadsheets fail under pressure
-            </h2>
-            <p className="mt-3 text-sm text-slate-400">
-              When 30 companies are testing and interviewing at once, scattered notes and messy sheets cause missed opportunities.
-            </p>
-          </div>
-
-          <div className="mt-14 grid gap-6 md:grid-cols-2">
-            {/* The Old Way */}
-            <div className="rounded-3xl border border-rose-500/20 bg-rose-950/10 p-7 sm:p-8 space-y-4">
-              <div className="inline-flex items-center gap-2 rounded-full bg-rose-500/20 px-3 py-1 text-xs font-bold text-rose-300">
-                <span>The Chaotic Way</span>
-              </div>
-              <h3 className="text-xl font-bold text-white">Spreadsheets &amp; WhatsApp Forwards</h3>
-              <ul className="space-y-3 text-sm text-slate-400">
-                <li className="flex items-start gap-2.5">
-                  <span className="text-rose-400 font-bold">✕</span>
-                  <span>Wasting hours copying company names, eligibility, and CTCs from messy WhatsApp forwards.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-rose-400 font-bold">✕</span>
-                  <span>Double-booked interview slots without any collision warning.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-rose-400 font-bold">✕</span>
-                  <span>Zero record of what questions you flopped on in previous technical rounds.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-rose-400 font-bold">✕</span>
-                  <span>Confusion over which tailored resume version was submitted to which drive.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-rose-400 font-bold">✕</span>
-                  <span>No shared peer wisdom to know what actual questions seniors were asked.</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* The PlaceTrack Way */}
-            <div className="rounded-3xl border border-emerald-500/30 bg-emerald-950/15 p-7 sm:p-8 space-y-4 shadow-xl shadow-emerald-950/20">
-              <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-bold text-emerald-300">
-                <span>The PlaceTrack Way</span>
-              </div>
-              <h3 className="text-xl font-bold text-white">Structured Placement Command Center</h3>
-              <ul className="space-y-3 text-sm text-slate-300 font-medium">
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={18} className="text-emerald-400 shrink-0 mt-0.5" />
-                  <span><strong>1-Click AI Auto-Fill:</strong> Paste raw WhatsApp and Superset notices to populate details instantly.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={18} className="text-emerald-400 shrink-0 mt-0.5" />
-                  <span>Real-time overlap conflict detection flags overlapping rounds automatically.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={18} className="text-emerald-400 shrink-0 mt-0.5" />
-                  <span>Compounding interview journal creates a personal question bank for revision.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={18} className="text-emerald-400 shrink-0 mt-0.5" />
-                  <span>1-Click Google Calendar &amp; .ics export with pre-filled meeting links.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={18} className="text-emerald-400 shrink-0 mt-0.5" />
-                  <span>Campus Community Vault to discover real drive experiences and questions from peers.</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ---------------- Bento Grid with AI Showcase ---------------- */}
-      <section id="features" className="py-24 border-t border-slate-900">
-        <div className="mx-auto max-w-7xl px-4 sm:px-8">
-          <div className="text-center max-w-2xl mx-auto">
-            <span className="text-xs font-bold uppercase tracking-widest text-indigo-400">Engineered For Students</span>
-            <h2 className="mt-3 text-3xl font-extrabold text-white tracking-tight sm:text-4xl">
-              Everything you need to conquer placement season
-            </h2>
-          </div>
-
-          <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Featured Wide Card: AI Notice & Invite Auto-Fill */}
-            <div className="md:col-span-2 lg:col-span-3 rounded-3xl border border-violet-500/40 bg-gradient-to-r from-violet-950/40 via-slate-900/90 to-indigo-950/40 p-7 sm:p-9 ring-1 ring-violet-500/30 hover:border-violet-500/60 transition-all shadow-xl shadow-violet-950/20">
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-                <div className="space-y-3 max-w-xl">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-violet-500/20 px-3 py-1 text-xs font-bold text-violet-300 border border-violet-500/30">
-                    <Sparkles size={14} className="text-violet-400 animate-pulse" />
-                    <span>Google Gemini 3.6 Flash Integration</span>
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white">
-                    Zero-Typing Application Entry with AI Auto-Fill
-                  </h3>
-                  <p className="text-sm text-slate-400 leading-relaxed">
-                    Got a chaotic placement announcement on WhatsApp or an interview invite email? Just paste the raw text into the <strong>Add Company</strong> or <strong>Schedule Round</strong> modal. Gemini automatically extracts company name, role, CTC package, Superset links, round type, time, duration, and Google Meet URL into your form in ~1 second.
-                  </p>
-                </div>
-                <div className="w-full lg:w-auto shrink-0 rounded-2xl border border-violet-500/30 bg-slate-950/80 p-4 font-mono text-xs text-slate-300 space-y-1.5 shadow-inner min-w-[280px]">
-                  <p className="text-violet-400 font-bold text-[11px]">// Raw Notice ➔ Auto-Extracted</p>
-                  <p className="text-emerald-400">✓ Company: "Deloitte USI"</p>
-                  <p className="text-sky-400">✓ Role: "Associate Analyst (SDE)"</p>
-                  <p className="text-amber-400">✓ Package: "7.6 LPA"</p>
-                  <p className="text-fuchsia-400">✓ Superset Link: joinsuperset.com/...</p>
-                  <p className="text-indigo-400">✓ Round: Technical (45 mins)</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Bento Card 1 */}
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-7 sm:p-8 space-y-4 hover:border-slate-700 transition-colors">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500/20 text-indigo-400 ring-1 ring-indigo-500/30">
-                <KanbanSquare size={24} />
-              </div>
-              <h3 className="text-lg font-bold text-white">Customizable Stage Kanban</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">
-                Move applications effortlessly from Applied → OA → Technical → HR → Offer. Includes a dedicated Superset registration checkbox.
-              </p>
-            </div>
-
-            {/* Bento Card 2 */}
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-7 sm:p-8 space-y-4 hover:border-slate-700 transition-colors">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-500/20 text-violet-400 ring-1 ring-violet-500/30">
-                <CalendarClock size={24} />
-              </div>
-              <h3 className="text-lg font-bold text-white">Conflict Engine &amp; Calendar</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">
-                Auto-detects overlapping tests and interviews with instant clash warnings. 1-click sync to Google Calendar, Apple, or Outlook.
-              </p>
-            </div>
-
-            {/* Bento Card 3 */}
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-7 sm:p-8 space-y-4 hover:border-slate-700 transition-colors">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30">
-                <NotebookPen size={24} />
-              </div>
-              <h3 className="text-lg font-bold text-white">Compounding Interview Journal</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">
-                60-second reflection prompt capturing questions asked, topics covered, and mistakes made. Searchable prep bank for next drives.
-              </p>
-            </div>
-
-            {/* Bento Card 4: Community Vault */}
-            <div className="rounded-3xl border border-indigo-500/40 bg-gradient-to-b from-indigo-950/30 to-slate-900/60 p-7 sm:p-8 space-y-4 ring-1 ring-indigo-500/30 hover:border-indigo-500/60 transition-colors">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/20 text-sky-400 ring-1 ring-sky-500/30">
-                <Users size={24} />
-              </div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-white">Community Experience Vault</h3>
-                <span className="rounded-full bg-indigo-500/20 px-2 py-0.5 text-[10px] font-bold text-indigo-300">
-                  New
-                </span>
-              </div>
-              <p className="text-sm text-slate-400 leading-relaxed">
-                Discover real campus interview questions, tips, and drive breakdowns shared by peers with full anonymity options and helpful upvoting.
-              </p>
-            </div>
-
-            {/* Bento Card 5 */}
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-7 sm:p-8 space-y-4 hover:border-slate-700 transition-colors">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-400 ring-1 ring-amber-500/30">
-                <Zap size={24} />
-              </div>
-              <h3 className="text-lg font-bold text-white">Instant Inline Status &amp; Undo</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">
-                1-click to mark rounds Cleared or Failed directly from cards with instant Undo toast safety nets.
-              </p>
-            </div>
-
-            {/* Bento Card 6 */}
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-7 sm:p-8 space-y-4 hover:border-slate-700 transition-colors">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-fuchsia-500/20 text-fuchsia-400 ring-1 ring-fuchsia-500/30">
-                <ShieldCheck size={24} />
-              </div>
-              <h3 className="text-lg font-bold text-white">Strict Tenant Isolation</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">
-                JWT-secured Spring Boot backend ensuring your application pipeline, CTC notes, and reflections stay private to your account.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ---------------- Community Vault Spotlight Showcase ---------------- */}
-      <section id="community" className="py-24 border-t border-slate-900 bg-slate-950/70 relative overflow-hidden">
-        <div className="pointer-events-none absolute top-1/2 right-0 -z-10 h-[450px] w-[450px] rounded-full bg-indigo-600/10 blur-[130px]" />
-        
-        <div className="mx-auto max-w-7xl px-4 sm:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-500/10 px-3.5 py-1 text-xs font-bold text-sky-300">
-              <Users size={14} className="text-sky-400" />
-              <span>Campus Interview Intelligence</span>
-            </div>
-            <h2 className="mt-4 text-3xl font-extrabold text-white tracking-tight sm:text-4xl">
-              Learn from real interviews before your turn comes
-            </h2>
-            <p className="mt-3 text-sm sm:text-base text-slate-400 leading-relaxed">
-              Don't enter your dream interview blind. The Community Vault lets seniors and batchmates share exact questions asked, round patterns, and verdict tips.
-            </p>
-          </div>
-
-          {/* Community Feature Highlights & Interactive-style Mockup */}
-          <div className="mt-14 grid gap-8 lg:grid-cols-12 items-center">
-            {/* Left: Key capabilities */}
-            <div className="lg:col-span-5 space-y-6">
-              <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 space-y-2 hover:border-indigo-500/40 transition-colors">
-                <div className="flex items-center gap-2.5 text-indigo-400 font-bold text-sm">
-                  <BookOpen size={18} />
-                  <span>Real Questions &amp; Topic Breakdowns</span>
-                </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Search by company name to see DSA questions, system design prompts, and behavioral questions asked in recent rounds.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 space-y-2 hover:border-sky-500/40 transition-colors">
-                <div className="flex items-center gap-2.5 text-sky-400 font-bold text-sm">
-                  <ThumbsUp size={18} />
-                  <span>Peer Upvoting &amp; Curated Insights</span>
-                </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Upvote high-yield experiences with 1-click. Sort by most helpful to quickly read the best preparation playbooks.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 space-y-2 hover:border-emerald-500/40 transition-colors">
-                <div className="flex items-center gap-2.5 text-emerald-400 font-bold text-sm">
-                  <HelpCircle size={18} />
-                  <span>Anonymous or Verified Sharing</span>
-                </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Share your candid experience freely with one-click anonymity, or build your campus reputation with your verified batch name.
-                </p>
-              </div>
-            </div>
-
-            {/* Right: Mock Community Card */}
-            <div className="lg:col-span-7">
-              <div className="rounded-3xl border border-slate-800 bg-slate-900/90 p-5 sm:p-6 shadow-2xl ring-1 ring-white/10 space-y-4">
-                {/* Header bar */}
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-4">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-400 font-bold text-sm">
-                      G
-                    </div>
+                  <div className="space-y-3 text-sm">
                     <div>
-                      <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-bold text-white">Google — Software Engineer</h4>
-                        <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
-                          Selected 🎉
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-400">On-Campus Drive • ₹52 LPA • Anonymous Senior</p>
+                      <p className="font-medium text-slate-200">Rounds</p>
+                      <p className="mt-1 leading-relaxed text-slate-400">
+                        Round 1 was an OA with two questions: DP on trees and string manipulation. Round 2 was DSA, focused
+                        on graph shortest paths. Round 3 covered behavioural and leadership questions.
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-slate-950/60 p-3">
+                      <p className="font-medium text-slate-200">Tip</p>
+                      <p className="mt-1 leading-relaxed text-slate-400">
+                        "Talk through the time complexity trade-offs out loud before you start writing code."
+                      </p>
                     </div>
                   </div>
-                  <span className="rounded-md bg-amber-500/10 px-2 py-1 text-[11px] font-semibold text-amber-300 border border-amber-500/20">
-                    Medium Difficulty
-                  </span>
-                </div>
 
-                {/* Experience Content Snippet */}
-                <div className="space-y-3 text-xs text-slate-300">
-                  <div>
-                    <span className="font-bold text-slate-200">Rounds Breakdown:</span>
-                    <p className="text-slate-400 mt-0.5">
-                      Round 1 was OA (2 questions: DP on Trees &amp; String manipulation). Round 2 was DSA with focus on Graph shortest paths. Round 3 was Googliness &amp; leadership principles.
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border border-slate-800/80 bg-slate-950/60 p-3 space-y-1">
-                    <span className="font-bold text-indigo-300">Top Pro-Tip:</span>
-                    <p className="text-slate-400 italic">
-                      "Make sure to explain time complexity tradeoffs out loud before you start writing code in Google Docs."
-                    </p>
+                  <div className="flex items-center justify-between border-t border-slate-800 pt-3 text-xs text-slate-400">
+                    <span className="inline-flex items-center gap-1.5">
+                      <ThumbsUp size={14} aria-hidden="true" />
+                      Helpful
+                    </span>
+                    <span>2026 batch</span>
                   </div>
                 </div>
-
-                {/* Footer / Interaction Bar */}
-                <div className="flex items-center justify-between border-t border-slate-800 pt-3 text-xs text-slate-400">
-                  <div className="flex items-center gap-1.5 text-indigo-400 font-semibold">
-                    <ThumbsUp size={14} />
-                    <span>48 students found this helpful</span>
-                  </div>
-                  <span className="text-[11px] text-slate-500 font-mono">Shared for 2026 Batch</span>
-                </div>
-              </div>
+                <figcaption className="mt-3 text-center text-xs text-slate-500">Example of a shared experience</figcaption>
+              </figure>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ---------------- Bottom CTA Banner ---------------- */}
-      <section className="py-24 border-t border-slate-900 relative overflow-hidden">
-        <div className="pointer-events-none absolute bottom-0 left-1/2 -z-10 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-indigo-600/20 blur-[120px]" />
-        <div className="mx-auto max-w-5xl px-4 sm:px-8 text-center space-y-6">
-          <h2 className="text-3xl font-extrabold text-white tracking-tight sm:text-5xl">
-            Own your placement season starting today.
-          </h2>
-          <p className="text-base text-slate-400 max-w-xl mx-auto leading-relaxed">
-            Join hundreds of students turning placement stress into a structured, trackable journey.
-          </p>
-          <div className="pt-2">
-            <Link to="/signup">
-              <Button size="lg" className="px-9 py-3 text-base font-bold shadow-xl shadow-indigo-600/30">
-                Create Free Account
-                <ArrowRight size={16} />
-              </Button>
+        {/* ---------------- Closing call to action ---------------- */}
+        <section className="relative overflow-hidden border-t border-slate-900 py-20 sm:py-24">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-[360px] bg-[radial-gradient(50%_70%_at_50%_100%,rgba(79,70,229,0.18),transparent_70%)]"
+          />
+          <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-8">
+            <h2 className="text-balance text-3xl font-semibold tracking-tight text-white sm:text-5xl">
+              Take control of your placement season.
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-pretty text-base leading-relaxed text-slate-400">
+              It's free. Create an account and add your first company in a couple of minutes.
+            </p>
+            <Link to="/signup" className={cn(PRIMARY_LINK, 'group mt-8 h-11 px-7 text-sm')}>
+              Create a free account
+              <ArrowRight size={16} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5" />
             </Link>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
       {/* ---------------- Footer ---------------- */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-8 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-500">
+      <footer className="border-t border-slate-900 py-10">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 text-sm text-slate-400 sm:px-8">
           <div className="flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-600 text-white">
               <PlaceTrackIcon size={13} />
             </div>
-            <span className="font-bold text-slate-300">PlaceTrack</span>
-            <span>— Placement Command Center</span>
+            <span className="font-medium text-slate-200">PlaceTrack</span>
+            <span className="text-slate-500">· Placement tracker</span>
           </div>
-          <p>© {new Date().getFullYear()} PlaceTrack. Built for ambitious students.</p>
+          <p className="text-slate-500">© {new Date().getFullYear()} PlaceTrack</p>
         </div>
       </footer>
     </div>

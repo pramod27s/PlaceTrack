@@ -5,6 +5,14 @@
 @theme {
   --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Plus Jakarta Sans', sans-serif;
+
+  /*
+   * Type scale: 2xs (11) · xs (12) · sm (14) · base (16) · lg (18) · xl (20) · 2xl (24).
+   * 2xs is reserved for dense metadata (card footers, mobile tab labels).
+   * Use these instead of arbitrary sizes like text-[10px].
+   */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
 }
 
 @layer base {
@@ -18,7 +26,6 @@
     background-color: #f8fafc;
     color: #0f172a;
     font-family: var(--font-sans);
-    letter-spacing: -0.011em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition: background-color 0.15s ease, color 0.15s ease;
@@ -47,57 +54,7 @@
     padding-bottom: max(0.25rem, env(safe-area-inset-bottom));
   }
 
-  .scrollbar-thin::-webkit-scrollbar {
-    height: 6px;
-    width: 6px;
-  }
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    border-radius: 9999px;
-    background-color: #cbd5e1;
-  }
-  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: #334155;
-  }
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: #94a3b8;
-  }
-  .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: #475569;
-  }
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  /* Glassmorphism effects */
-  .glass-card {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(226, 232, 240, 0.8);
-  }
-
-  .dark .glass-card {
-    background: rgba(15, 23, 42, 0.85);
-    border: 1px solid rgba(51, 65, 85, 0.6);
-  }
-
-  .glass-panel-dark {
-    background: rgba(15, 23, 42, 0.92);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(51, 65, 85, 0.6);
-  }
-
-  /* Subtle card hover elevation */
-  .card-hover {
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
-  }
-
-  /* Keyframes & Animations */
+  /* Entrance animations (disabled by the reduced-motion rule above). */
   @keyframes pt-pop {
     from {
       opacity: 0;
@@ -120,68 +77,10 @@
     }
   }
 
-  @keyframes pt-float {
-    0%, 100% {
-      transform: translateY(0px);
-    }
-    50% {
-      transform: translateY(-8px);
-    }
-  }
-
-  @keyframes pt-float-slow {
-    0%, 100% {
-      transform: translateY(0px) rotate(0deg);
-    }
-    50% {
-      transform: translateY(-12px) rotate(1deg);
-    }
-  }
-
-  @keyframes pt-float-reverse {
-    0%, 100% {
-      transform: translateY(0px);
-    }
-    50% {
-      transform: translateY(8px);
-    }
-  }
-
-  @keyframes pt-pulse-glow {
-    0%, 100% {
-      opacity: 0.25;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 0.45;
-      transform: scale(1.08);
-    }
-  }
-
-  @keyframes pt-shimmer {
-    0% {
-      background-position: -200% center;
-    }
-    100% {
-      background-position: 200% center;
-    }
-  }
-
-  @keyframes pt-soft-pulse {
-    0%, 100% {
-      opacity: 0.7;
-      transform: scale(0.96);
-    }
-    50% {
-      opacity: 1;
-      transform: scale(1.05);
-    }
-  }
-
   @keyframes pt-slide-up {
     from {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(12px);
     }
     to {
       opacity: 1;
@@ -197,101 +96,19 @@
     animation: pt-fade-in 0.25s ease-out forwards;
   }
 
-  .animate-float {
-    animation: pt-float 4s ease-in-out infinite;
-  }
-
-  .animate-float-slow {
-    animation: pt-float-slow 6s ease-in-out infinite;
-  }
-
-  .animate-float-reverse {
-    animation: pt-float-reverse 5s ease-in-out infinite;
-  }
-
-  .animate-pulse-glow {
-    animation: pt-pulse-glow 5s ease-in-out infinite;
-  }
-
-  .animate-shimmer {
-    background-size: 200% auto;
-    animation: pt-shimmer 8s ease-in-out infinite;
-  }
-
-  .animate-soft-pulse {
-    animation: pt-soft-pulse 3s ease-in-out infinite;
-  }
-
   .animate-slide-up {
-    animation: pt-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-  @keyframes pt-gradient-flow {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
-    }
-  }
-
-  @keyframes pt-badge-glow {
-    0%, 100% {
-      box-shadow: 0 0 10px -2px rgba(168, 85, 247, 0.25), inset 0 0 10px rgba(168, 85, 247, 0.05);
-      border-color: rgba(168, 85, 247, 0.35);
-    }
-    50% {
-      box-shadow: 0 0 20px 2px rgba(168, 85, 247, 0.45), inset 0 0 15px rgba(168, 85, 247, 0.15);
-      border-color: rgba(216, 180, 254, 0.7);
-    }
-  }
-
-  @keyframes pt-cta-pulse {
-    0%, 100% {
-      box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.35);
-    }
-    50% {
-      box-shadow: 0 6px 26px 2px rgba(99, 102, 241, 0.55);
-    }
-  }
-
-  .gradient-text-animated {
-    background: linear-gradient(
-      120deg,
-      #818cf8 0%,
-      #c084fc 25%,
-      #f472b6 50%,
-      #38bdf8 75%,
-      #818cf8 100%
-    );
-    background-size: 250% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    display: inline-block;
-    animation: pt-gradient-flow 4.5s ease infinite;
-  }
-
-  .animate-badge-glow {
-    animation: pt-badge-glow 3s ease-in-out infinite;
-  }
-
-  .animate-cta-pulse {
-    animation: pt-cta-pulse 3s ease-in-out infinite;
+    animation: pt-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   .animate-slide-up-delay-1 {
-    animation: pt-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+    animation: pt-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
   }
 
   .animate-slide-up-delay-2 {
-    animation: pt-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+    animation: pt-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
   }
 
   .animate-slide-up-delay-3 {
-    animation: pt-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+    animation: pt-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.24s both;
   }
 }

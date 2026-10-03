@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { format } from 'date-fns'
-import { Check, ChevronDown, ChevronUp, Key, Loader2, Sparkles, Zap } from 'lucide-react'
-import { apiError, parseRoundNotice } from '../lib/api'
+import { ChevronDown, ChevronUp } from 'lucide-react'
+import { apiError, apiFieldErrors, parseRoundNotice } from '../lib/api'
 import { useSaveRound } from '../hooks/queries'
 import { ROUND_MODES, ROUND_STATUSES, ROUND_STATUS_META, ROUND_TYPES, ROUND_TYPE_META } from '../lib/constants'
-import { cn, toDateTimeLocal } from '../lib/format'
-import { Button, ErrorNote, Field, Input, Modal, Select, Textarea } from './ui'
-import { AiSettingsModal } from './AiSettingsModal'
+import { toDateTimeLocal } from '../lib/format'
+import { Button, ErrorNote, Field, FilterChip, Input, Modal, Select } from './ui'
+import { AiNoticePanel } from './AiNoticePanel'
 import type { Round, RoundInput } from '../lib/types'
 
 interface RoundModalProps {
@@ -58,19 +58,17 @@ export function RoundModal({ open, onClose, companyId, round }: RoundModalProps)
       open={open}
       onClose={onClose}
       size="lg"
-      title={round ? 'Edit round' : 'Schedule a Round'}
+      title={round ? 'Edit round' : 'Schedule a round'}
       description={
-        round
-          ? 'Update your round details and schedule.'
-          : 'Schedule an interview, OA, or GD in seconds.'
+        round ? 'Update the details and timing of this round.' : 'Only the type and time are required.'
       }
       footer={
         <>
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" form="round-form" disabled={save.isPending}>
-            {save.isPending ? 'Saving…' : round ? 'Save changes' : 'Add to schedule'}
+          <Button type="submit" form="round-form" loading={save.isPending}>
+            {round ? 'Save changes' : 'Add to schedule'}
           </Button>
         </>
       }
@@ -101,57 +99,41 @@ function RoundForm({
     round ? fromRound(round) : blankForm(),
   )
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [showMore, setShowMore] = useState<boolean>(
     Boolean(round && (round.title || round.meetingLink || round.location || round.durationMinutes !== 60 || round.mode !== 'ONLINE')),
   )
 
-  const [aiOpen, setAiOpen] = useState(false)
-  const [aiSettingsOpen, setAiSettingsOpen] = useState(false)
-  const [rawNotice, setRawNotice] = useState('')
-  const [isExtracting, setIsExtracting] = useState(false)
-  const [aiError, setAiError] = useState('')
-  const [aiSuccess, setAiSuccess] = useState('')
-
   const set = <K extends keyof RoundInput>(key: K, value: RoundInput[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }))
 
-  const handleExtractInvite = async () => {
-    if (!rawNotice.trim()) return
-    setIsExtracting(true)
-    setAiError('')
-    setAiSuccess('')
-    try {
-      const data = await parseRoundNotice(rawNotice)
-      setForm((prev) => ({
-        ...prev,
-        type: data.type || prev.type,
-        title: data.title || prev.title,
-        scheduledAt: data.scheduledAt || prev.scheduledAt,
-        durationMinutes: data.durationMinutes ?? prev.durationMinutes,
-        mode: data.mode || prev.mode,
-        meetingLink: data.meetingLink || prev.meetingLink,
-        location: data.location || prev.location,
-      }))
-      if (
-        data.title ||
-        data.meetingLink ||
-        data.location ||
-        (data.durationMinutes && data.durationMinutes !== 60) ||
-        (data.mode && data.mode !== 'ONLINE')
-      ) {
-        setShowMore(true)
-      }
-      setAiSuccess('Interview schedule extracted and populated! Review or edit details below.')
-    } catch (err) {
-      setAiError(apiError(err))
-    } finally {
-      setIsExtracting(false)
+  const fillFromInvite = async (text: string) => {
+    const data = await parseRoundNotice(text)
+    setForm((prev) => ({
+      ...prev,
+      type: data.type || prev.type,
+      title: data.title || prev.title,
+      scheduledAt: data.scheduledAt || prev.scheduledAt,
+      durationMinutes: data.durationMinutes ?? prev.durationMinutes,
+      mode: data.mode || prev.mode,
+      meetingLink: data.meetingLink || prev.meetingLink,
+      location: data.location || prev.location,
+    }))
+    if (
+      data.title ||
+      data.meetingLink ||
+      data.location ||
+      (data.durationMinutes && data.durationMinutes !== 60) ||
+      (data.mode && data.mode !== 'ONLINE')
+    ) {
+      setShowMore(true)
     }
   }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError('')
+    setFieldErrors({})
     try {
       await save.mutateAsync({
         roundId: round?.id,
@@ -163,7 +145,12 @@ function RoundForm({
       })
       onClose()
     } catch (err) {
-      setError(apiError(err))
+      const perField = apiFieldErrors(err)
+      setFieldErrors(perField)
+      setError(Object.keys(perField).length ? 'Please fix the highlighted fields.' : apiError(err))
+      if (perField.title || perField.durationMinutes || perField.meetingLink || perField.location) {
+        setShowMore(true)
+      }
     }
   }
 
@@ -171,170 +158,45 @@ function RoundForm({
     <form id="round-form" onSubmit={handleSubmit} className="space-y-4">
       {error && <ErrorNote message={error} />}
 
-      {/* AI Auto-Fill Card */}
-      <div className="overflow-hidden rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-50/70 via-indigo-50/40 to-fuchsia-50/30 dark:border-violet-900/60 dark:from-violet-950/30 dark:via-indigo-950/20 dark:to-purple-950/10 p-3.5 shadow-sm transition-all duration-200">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Sparkles size={16} className="text-violet-600 dark:text-violet-400 shrink-0" />
-            <div>
-              <p className="text-xs font-bold text-violet-950 dark:text-violet-200">
-                AI Auto-Fill from Invite / Email
-              </p>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Paste schedule notice, Google Meet invite, or email
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setAiOpen((prev) => !prev)}
-            className="inline-flex items-center gap-1 rounded-lg border border-violet-200 bg-white/80 px-2.5 py-1 text-xs font-semibold text-violet-700 hover:bg-violet-50 dark:border-violet-800 dark:bg-violet-900/40 dark:text-violet-300 dark:hover:bg-violet-900/60 transition-colors"
-          >
-            {aiOpen ? (
-              <>
-                Hide <ChevronUp size={14} />
-              </>
-            ) : (
-              <>
-                Paste invite <ChevronDown size={14} />
-              </>
-            )}
-          </button>
-        </div>
+      <AiNoticePanel
+        heading="Fill from an invite"
+        description="Paste an interview email, Meet invite or schedule message."
+        placeholder="e.g. Technical interview with Amazon on 18 Oct at 3:00 PM IST (45 mins). Meet: https://meet.google.com/…"
+        onExtract={fillFromInvite}
+      />
 
-        {aiOpen && (
-          <div className="mt-3 space-y-2.5 pt-2.5 border-t border-violet-200/60 dark:border-violet-900/40">
-            <Textarea
-              value={rawNotice}
-              onChange={(e) => setRawNotice(e.target.value)}
-              placeholder="Paste invite email or message here (e.g. Technical interview with Amazon on 18th Oct at 3:00 PM IST (45 mins). Meet: https://meet.google.com/xyz...)"
-              rows={3}
-              className="text-xs font-mono bg-white/90 dark:bg-slate-900/90"
-            />
-
-            {aiError && (
-              <div className="space-y-2">
-                <ErrorNote message={aiError} />
-                <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-violet-200 bg-white/90 p-2.5 dark:border-violet-800/80 dark:bg-violet-950/40 shadow-sm">
-                  <div className="flex items-center gap-2 text-xs text-violet-950 dark:text-violet-200">
-                    <Key size={14} className="text-violet-600 dark:text-violet-400 shrink-0" />
-                    <span>Bypass shared limits with your own free Gemini API key:</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setAiSettingsOpen(true)}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-2.5 py-1 text-xs font-semibold text-white shadow-sm hover:bg-violet-700 transition active:scale-95"
-                  >
-                    <Key size={12} />
-                    Add API Key
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {aiSuccess && (
-              <div className="flex items-center gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 p-2 text-xs font-medium text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
-                <Check size={14} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
-                <span>{aiSuccess}</span>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                Unspecified details will remain blank.
-              </span>
-              <div className="flex items-center gap-1.5">
-                {rawNotice && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setRawNotice('')
-                      setAiSuccess('')
-                      setAiError('')
-                    }}
-                    className="text-xs"
-                  >
-                    Clear
-                  </Button>
-                )}
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={handleExtractInvite}
-                  disabled={isExtracting || !rawNotice.trim()}
-                  className="bg-violet-600 hover:bg-violet-700 text-white font-semibold text-xs shadow-sm shadow-violet-500/20"
-                >
-                  {isExtracting ? (
-                    <>
-                      <Loader2 size={13} className="animate-spin mr-1" />
-                      Extracting…
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles size={13} className="mr-1" />
-                      Extract & Auto-Fill
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {!round && !aiOpen && (
-        <div className="flex items-center gap-2 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 p-2.5 text-xs text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200/60 dark:ring-indigo-800/60">
-          <Zap size={14} className="shrink-0 text-indigo-600 dark:text-indigo-400" />
-          <span className="font-medium">
-            <strong>Fast Track:</strong> Pick the round type and timing. Meeting links and custom durations can be added anytime.
-          </span>
-        </div>
-      )}
-
-      {/* 1. Fast Round Type Selector Pills */}
-      <div className="space-y-1.5">
-        <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-          Round Type
-        </label>
+      <fieldset>
+        <legend className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Round type
+          <span className="ml-0.5 text-rose-500" aria-hidden="true">*</span>
+        </legend>
         <div className="flex flex-wrap gap-1.5">
-          {ROUND_TYPES.map((typeKey) => {
-            const meta = ROUND_TYPE_META[typeKey]
-            const isSelected = form.type === typeKey
-            return (
-              <button
-                key={typeKey}
-                type="button"
-                onClick={() => set('type', typeKey)}
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-150',
-                  isSelected
-                    ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20 scale-[1.02]'
-                    : 'bg-slate-100/80 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700',
-                )}
-              >
-                {meta.label}
-              </button>
-            )
-          })}
+          {ROUND_TYPES.map((typeKey) => (
+            <FilterChip key={typeKey} selected={form.type === typeKey} onClick={() => set('type', typeKey)}>
+              {ROUND_TYPE_META[typeKey].label}
+            </FilterChip>
+          ))}
         </div>
-      </div>
+        {fieldErrors.type && (
+          <p role="alert" className="mt-1.5 text-xs font-medium text-rose-600 dark:text-rose-400">
+            {fieldErrors.type}
+          </p>
+        )}
+      </fieldset>
 
-      {/* 2. Date & Time */}
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Date & time" htmlFor="r-when" required>
+        <Field label="Date and time" htmlFor="r-when" required error={fieldErrors.scheduledAt}>
           <Input
             id="r-when"
             type="datetime-local"
             value={form.scheduledAt}
             onChange={(e) => set('scheduledAt', e.target.value)}
             required
-            className="text-sm font-semibold"
+            aria-invalid={Boolean(fieldErrors.scheduledAt) || undefined}
           />
         </Field>
 
-        <Field label="Status" htmlFor="r-status">
+        <Field label="Status" htmlFor="r-status" error={fieldErrors.status}>
           <Select
             id="r-status"
             value={form.status}
@@ -349,40 +211,33 @@ function RoundForm({
         </Field>
       </div>
 
-      {/* Expand / Collapse More Details */}
-      <div className="pt-1">
-        <button
-          type="button"
-          onClick={() => setShowMore((prev) => !prev)}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
-        >
-          {showMore ? (
-            <>
-              <ChevronUp size={14} />
-              Hide extra details
-            </>
-          ) : (
-            <>
-              <ChevronDown size={14} />
-              + Add extra details (meeting link, duration, mode, title)
-            </>
-          )}
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={() => setShowMore((prev) => !prev)}
+        aria-expanded={showMore}
+        className="inline-flex items-center gap-1.5 rounded text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+      >
+        {showMore ? <ChevronUp size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
+        {showMore ? 'Fewer details' : 'More details'}
+        {!showMore && (
+          <span className="font-normal text-slate-500 dark:text-slate-400">· title, duration, mode, link</span>
+        )}
+      </button>
 
       {showMore && (
-        <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800 animate-fade-in">
+        <div className="animate-fade-in space-y-4 border-t border-slate-100 pt-4 dark:border-slate-800">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Title / Focus (optional)" htmlFor="r-title" hint="e.g. 'DSA & Trees' or 'Director Interview'">
+            <Field label="Title" htmlFor="r-title" hint="e.g. DSA and trees, or Director interview" error={fieldErrors.title}>
               <Input
                 id="r-title"
                 value={form.title}
                 onChange={(e) => set('title', e.target.value)}
-                placeholder="Round topic / label"
+                placeholder="What this round focuses on"
+                aria-invalid={Boolean(fieldErrors.title) || undefined}
               />
             </Field>
 
-            <Field label="Duration (minutes)" htmlFor="r-duration">
+            <Field label="Duration (minutes)" htmlFor="r-duration" error={fieldErrors.durationMinutes}>
               <Input
                 id="r-duration"
                 type="number"
@@ -394,22 +249,18 @@ function RoundForm({
                   const val = e.target.value
                   set('durationMinutes', val === '' ? ('' as unknown as number) : Number(val))
                 }}
+                aria-invalid={Boolean(fieldErrors.durationMinutes) || undefined}
               />
-              <div className="mt-1.5 flex flex-wrap gap-1">
+              <div className="mt-1.5 flex flex-wrap gap-1" role="group" aria-label="Common durations">
                 {[30, 45, 60, 90, 120].map((mins) => (
-                  <button
+                  <FilterChip
                     key={mins}
-                    type="button"
+                    selected={Number(form.durationMinutes) === mins}
                     onClick={() => set('durationMinutes', mins)}
-                    className={cn(
-                      'rounded-md px-2 py-0.5 text-[11px] font-semibold transition',
-                      Number(form.durationMinutes) === mins
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700',
-                    )}
+                    className="h-7 px-2.5 tabular-nums"
                   >
-                    {mins}m
-                  </button>
+                    {mins} min
+                  </FilterChip>
                 ))}
               </div>
             </Field>
@@ -430,32 +281,29 @@ function RoundForm({
           </Field>
 
           {form.mode === 'ONLINE' ? (
-            <Field label="Meeting link" htmlFor="r-link">
+            <Field label="Meeting link" htmlFor="r-link" error={fieldErrors.meetingLink}>
               <Input
                 id="r-link"
                 type="url"
                 value={form.meetingLink}
                 onChange={(e) => set('meetingLink', e.target.value)}
-                placeholder="https://meet.google.com/… or MS Teams link"
+                placeholder="https://meet.google.com/… or a Teams link"
+                aria-invalid={Boolean(fieldErrors.meetingLink) || undefined}
               />
             </Field>
           ) : (
-            <Field label="Location" htmlFor="r-location">
+            <Field label="Location" htmlFor="r-location" error={fieldErrors.location}>
               <Input
                 id="r-location"
                 value={form.location}
                 onChange={(e) => set('location', e.target.value)}
-                placeholder="Auditorium / Placement Cell Room 302"
+                placeholder="e.g. Auditorium, Placement cell room 302"
+                aria-invalid={Boolean(fieldErrors.location) || undefined}
               />
             </Field>
           )}
         </div>
       )}
-
-      <AiSettingsModal
-        open={aiSettingsOpen}
-        onClose={() => setAiSettingsOpen(false)}
-      />
     </form>
   )
 }

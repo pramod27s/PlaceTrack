@@ -5,15 +5,14 @@ import { useCompanies } from '../hooks/queries'
 import { KanbanBoard } from '../components/KanbanBoard'
 import { CompanyModal } from '../components/CompanyModal'
 import { ExperienceModal } from '../components/ExperienceModal'
-import { Button, EmptyState, ErrorNote, Input } from '../components/ui'
-import { cn } from '../lib/format'
+import { Button, EmptyState, ErrorNote, FilterChip, Input } from '../components/ui'
 import type { Company, Verdict } from '../lib/types'
 
 function PipelineSkeleton() {
   return (
     <div className="space-y-6 animate-pulse" aria-busy="true" aria-label="Loading pipeline">
       {/* Top Header Card Skeleton */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-sm">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="h-6 w-44 rounded-lg bg-slate-200 dark:bg-slate-800" />
@@ -36,11 +35,11 @@ function PipelineSkeleton() {
       </div>
 
       {/* Columns Skeleton */}
-      <div className="flex gap-4 overflow-x-auto pb-4">
-        {[1, 2, 3, 4, 5].map((col) => (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {[1, 2, 3, 4, 5, 6].map((col) => (
           <div
             key={col}
-            className="w-72 shrink-0 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-900/50 p-3 space-y-3"
+            className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-900/50 p-3 space-y-3"
           >
             {/* Column Header */}
             <div className="flex items-center justify-between px-1">
@@ -143,17 +142,17 @@ export default function Pipeline() {
 
   return (
     <div className="space-y-6">
-      {/* Top Header Card */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-sm">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-sm">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">Placement Pipeline</h2>
-            <span className="rounded-full bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-0.5 text-xs font-bold text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200 dark:ring-indigo-700/50">
-              {filteredCompanies.length} of {totalCount} {totalCount === 1 ? 'company' : 'companies'}
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Placement pipeline</h2>
+            <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium tabular-nums text-slate-600 dark:text-slate-300">
+              {filteredCompanies.length} of {totalCount}
             </span>
           </div>
-          <p className="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">
-            Drag cards across stages or search &amp; filter applications below.
+          <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+            Drag cards between stages, or search and filter below.
           </p>
         </div>
 
@@ -163,86 +162,41 @@ export default function Pipeline() {
         </Button>
       </div>
 
-      {/* 🔍 Search & Filter Bar */}
+      {/* Search and filters */}
       {totalCount > 0 && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          {/* Quick Filters */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => setActiveFilter('all')}
-              className={cn(
-                'rounded-xl px-3 py-1.5 text-xs font-bold transition-all',
-                activeFilter === 'all'
-                  ? 'bg-slate-900 dark:bg-slate-800 text-white shadow-sm'
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800',
-              )}
-            >
-              All ({totalCount})
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveFilter('active')}
-              className={cn(
-                'rounded-xl px-3 py-1.5 text-xs font-bold transition-all',
-                activeFilter === 'active'
-                  ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800',
-              )}
-            >
-              Active Only ({activeCount})
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveFilter('superset')}
-              className={cn(
-                'inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all',
-                activeFilter === 'superset'
-                  ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/20'
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800',
-              )}
-            >
-              <CircleCheckBig size={13} className={activeFilter === 'superset' ? 'text-white' : 'text-emerald-500'} />
-              Superset ({supersetCount})
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveFilter('interview')}
-              className={cn(
-                'rounded-xl px-3 py-1.5 text-xs font-bold transition-all',
-                activeFilter === 'interview'
-                  ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/20'
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800',
-              )}
-            >
-              In Interviews ({interviewCount})
-            </button>
+          <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter companies">
+            <FilterChip selected={activeFilter === 'all'} onClick={() => setActiveFilter('all')}>
+              All <span className="tabular-nums opacity-70">{totalCount}</span>
+            </FilterChip>
+            <FilterChip selected={activeFilter === 'active'} onClick={() => setActiveFilter('active')}>
+              Active <span className="tabular-nums opacity-70">{activeCount}</span>
+            </FilterChip>
+            <FilterChip selected={activeFilter === 'superset'} onClick={() => setActiveFilter('superset')}>
+              <CircleCheckBig size={13} aria-hidden="true" />
+              Superset <span className="tabular-nums opacity-70">{supersetCount}</span>
+            </FilterChip>
+            <FilterChip selected={activeFilter === 'interview'} onClick={() => setActiveFilter('interview')}>
+              Interviewing <span className="tabular-nums opacity-70">{interviewCount}</span>
+            </FilterChip>
             {offerCount > 0 && (
-              <button
-                type="button"
-                onClick={() => setActiveFilter('offer')}
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all',
-                  activeFilter === 'offer'
-                    ? 'bg-amber-600 text-white shadow-sm'
-                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800',
-                )}
-              >
-                <Trophy size={13} className={activeFilter === 'offer' ? 'text-white' : 'text-amber-500'} />
-                Offers ({offerCount})
-              </button>
+              <FilterChip selected={activeFilter === 'offer'} onClick={() => setActiveFilter('offer')}>
+                <Trophy size={13} aria-hidden="true" />
+                Offers <span className="tabular-nums opacity-70">{offerCount}</span>
+              </FilterChip>
             )}
           </div>
 
-          {/* Search Box */}
           <div className="relative w-full sm:w-64">
             <Search
               size={15}
+              aria-hidden="true"
               className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400"
             />
             <Input
-              className="pl-9 pr-8 text-xs font-medium"
+              className="pl-9 pr-8"
               placeholder="Search company, role, CTC…"
+              aria-label="Search companies"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -251,7 +205,7 @@ export default function Pipeline() {
                 type="button"
                 onClick={() => setSearchQuery('')}
                 aria-label="Clear search"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-600 dark:hover:text-slate-200"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded text-slate-500 hover:text-slate-700 dark:hover:text-slate-200"
               >
                 <X size={14} />
               </button>
@@ -316,10 +270,10 @@ export default function Pipeline() {
             title: `${shareCompany.name} ${shareCompany.role || 'Interview'} Experience`,
             summary:
               shareCompany.stage === 'OFFER'
-                ? `Cleared offer from ${shareCompany.name}!`
+                ? `Received an offer from ${shareCompany.name}.`
                 : `Interview experience and learnings from ${shareCompany.name}.`,
             tips: shareCompany.researchNotes
-              ? `Prep Notes: ${shareCompany.researchNotes}`
+              ? `Prep notes: ${shareCompany.researchNotes}`
               : '',
             anonymous: true,
           }}

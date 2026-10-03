@@ -50,6 +50,18 @@ export function apiError(error: unknown): string {
   return 'Something went wrong. Please try again.'
 }
 
+/**
+ * Per-field validation messages from a 400 response
+ * (`{ fieldErrors: { name: "must not be blank" } }`), or an empty object.
+ */
+export function apiFieldErrors(error: unknown): Record<string, string> {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { fieldErrors?: Record<string, string> } | undefined
+    if (data?.fieldErrors && typeof data.fieldErrors === 'object') return data.fieldErrors
+  }
+  return {}
+}
+
 import type { ParsedCompanyData, ParsedRoundData } from './types'
 
 export async function parseCompanyNotice(rawText: string): Promise<ParsedCompanyData> {

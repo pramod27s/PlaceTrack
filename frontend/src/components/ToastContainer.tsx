@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { CheckCircle2, AlertCircle, Info, AlertTriangle, X, Undo2 } from 'lucide-react'
 import { useToast } from '../store/toast'
 import type { Toast } from '../store/toast'
-import { cn } from '../lib/format'
 
 function ToastItem({ toast }: { toast: Toast }) {
   const dismissToast = useToast((s) => s.dismissToast)
@@ -16,34 +15,22 @@ function ToastItem({ toast }: { toast: Toast }) {
   }, [toast.id, toast.durationMs, dismissToast])
 
   const icons = {
-    success: <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />,
-    error: <AlertCircle size={18} className="text-rose-500 shrink-0" />,
-    warning: <AlertTriangle size={18} className="text-amber-500 shrink-0" />,
-    info: <Info size={18} className="text-indigo-500 shrink-0" />,
-  }
-
-  const borderStyles = {
-    success: 'border-emerald-200/80 dark:border-emerald-900/60 bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-slate-100',
-    error: 'border-rose-200/80 dark:border-rose-900/60 bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-slate-100',
-    warning: 'border-amber-200/80 dark:border-amber-900/60 bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-slate-100',
-    info: 'border-indigo-200/80 dark:border-indigo-900/60 bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-slate-100',
+    success: <CheckCircle2 size={18} className="shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />,
+    error: <AlertCircle size={18} className="shrink-0 text-rose-600 dark:text-rose-400" aria-hidden="true" />,
+    warning: <AlertTriangle size={18} className="shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />,
+    info: <Info size={18} className="shrink-0 text-slate-500 dark:text-slate-400" aria-hidden="true" />,
   }
 
   return (
     <div
-      role="alert"
-      className={cn(
-        'pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-2xl border p-4 shadow-xl shadow-slate-950/10 dark:shadow-black/50 backdrop-blur-md transition-all duration-200 animate-in fade-in slide-in-from-bottom-5',
-        borderStyles[toast.type],
-      )}
+      role={toast.type === 'error' ? 'alert' : 'status'}
+      className="animate-pop pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-lg border border-slate-200 bg-white p-3.5 text-slate-900 shadow-lg shadow-slate-900/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/40"
     >
       <div className="mt-0.5">{icons[toast.type]}</div>
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-bold tracking-tight text-slate-900 dark:text-slate-100">{toast.title}</p>
+        <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{toast.title}</p>
         {toast.message && (
-          <p className="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
-            {toast.message}
-          </p>
+          <p className="mt-0.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{toast.message}</p>
         )}
       </div>
 
@@ -54,9 +41,9 @@ function ToastItem({ toast }: { toast: Toast }) {
             toast.action?.onClick()
             dismissToast(toast.id)
           }}
-          className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-1 text-xs font-bold text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200/60 dark:ring-indigo-700/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
+          className="inline-flex h-7 shrink-0 items-center gap-1 rounded-md px-2 text-xs font-medium text-indigo-600 transition-colors hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-950/60"
         >
-          <Undo2 size={12} />
+          <Undo2 size={12} aria-hidden="true" />
           {toast.action.label}
         </button>
       )}
@@ -64,9 +51,10 @@ function ToastItem({ toast }: { toast: Toast }) {
       <button
         type="button"
         onClick={() => dismissToast(toast.id)}
-        className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+        aria-label="Dismiss notification"
+        className="shrink-0 rounded-md p-1 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-300"
       >
-        <X size={14} />
+        <X size={14} aria-hidden="true" />
       </button>
     </div>
   )
