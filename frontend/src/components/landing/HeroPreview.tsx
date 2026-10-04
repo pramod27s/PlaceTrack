@@ -5,17 +5,29 @@ import { cn } from '../../lib/format'
 import { prefersReducedMotion } from '../../hooks/useInView'
 
 /*
- * A scripted product demo for the landing hero. It plays once:
+ * A scripted product demo for the landing hero. A ghost cursor walks through it:
  *   1. a placement notice is "pasted" and read,
  *   2. AI fills in the company details,
  *   3. the new company slides into the pipeline,
  *   4. a schedule clash is flagged.
- * Every change is a transition on opacity/transform (or grid rows for the
- * card that makes room), so nothing snaps or jumps. Visitors who prefer
- * reduced motion see the final state straight away.
+ * It then holds, rewinds and plays again. Every change is a transition on
+ * opacity/transform (or grid rows for the card that makes room), so it runs
+ * just as smoothly backwards. Visitors who prefer reduced motion see the final
+ * state straight away.
  */
 const STEP_AT_MS = [900, 2700, 4100, 5300]
 const FINAL_STEP = STEP_AT_MS.length
+/** How long the finished demo stays on screen before rewinding. */
+const HOLD_MS = 4800
+
+/** Where the ghost cursor points at each step, as % of the preview (sm screens and up). */
+const CURSOR_AT = [
+  { left: '82%', top: '94%' },
+  { left: '24%', top: '17%' },
+  { left: '46%', top: '21%' },
+  { left: '20%', top: '60%' },
+  { left: '58%', top: '35%' },
+]
 
 const NOTICE = 'Deloitte USI drive · Associate Analyst · 7.6 LPA · register on Superset by Friday'
 const CHIPS = ['Deloitte USI', 'Associate Analyst', '7.6 LPA', 'Superset link']
@@ -130,11 +142,22 @@ export function HeroPreview() {
   const [step, setStep] = useState(() => (prefersReducedMotion() ? FINAL_STEP : 0))
   // Lets the initial cards transition in after the first paint instead of appearing pre-placed.
   const [mounted, setMounted] = useState(() => prefersReducedMotion())
+  const [animated] = useState(() => !prefersReducedMotion())
 
   useEffect(() => {
     if (prefersReducedMotion()) return
     const raf = requestAnimationFrame(() => setMounted(true))
-    const timers = STEP_AT_MS.map((ms, i) => setTimeout(() => setStep(i + 1), ms))
+    const timers: number[] = []
+    const play = () => {
+      STEP_AT_MS.forEach((ms, i) => timers.push(window.setTimeout(() => setStep(i + 1), ms)))
+      timers.push(
+        window.setTimeout(() => {
+          setStep(0)
+          play()
+        }, STEP_AT_MS[FINAL_STEP - 1] + HOLD_MS),
+      )
+    }
+    play()
     return () => {
       cancelAnimationFrame(raf)
       timers.forEach(clearTimeout)
@@ -148,7 +171,24 @@ export function HeroPreview() {
   const clash = step >= 4
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-3 text-left shadow-2xl shadow-black/50 sm:p-4">
+    <div className="relative rounded-2xl border border-slate-800 bg-slate-900/90 p-3 text-left shadow-2xl shadow-black/50 sm:p-4">
+      {/* Ghost cursor: glides to whatever the demo is doing and "clicks" when it arrives. */}
+      {animated && (
+      <div
+        aria-hidden="true"
+        style={CURSOR_AT[step]}
+        className={cn(
+          `pointer-events-none absolute z-20 hidden transition-[left,top,opacity] duration-700 sm:block ${EASE_IN_OUT}`,
+          step === 0 ? 'opacity-0' : 'opacity-100',
+        )}
+      >
+        {step > 0 && <span key={step} className="animate-click absolute -left-3 -top-3 h-6 w-6 rounded-full bg-indigo-400/50" />}
+        <svg width="18" height="20" viewBox="0 0 18 20" className="relative drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]">
+          <path d="M1 1l15 7.5-6.5 1.8L6.6 18 1 1z" fill="white" stroke="#0f172a" strokeWidth="1.2" strokeLinejoin="round" />
+        </svg>
+      </div>
+      )}
+
       {/* Window bar */}
       <div className="flex items-center gap-3 border-b border-slate-800 px-2 pb-3">
         <div className="flex items-center gap-1.5" aria-hidden="true">

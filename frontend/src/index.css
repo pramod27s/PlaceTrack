@@ -2,6 +2,13 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Animatable angle for the orbiting border beam (.fx-beam). */
+@property --pt-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
 @theme {
   --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Plus Jakarta Sans', sans-serif;
@@ -145,6 +152,21 @@
     animation: pt-scan 1.2s ease-in-out infinite;
   }
 
+  /* A band of light passing once from top to bottom. */
+  @keyframes pt-scan-down {
+    from {
+      transform: translateY(-100%);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(600%);
+      opacity: 0;
+    }
+  }
+  .animate-scan-down {
+    animation: pt-scan-down 1.4s cubic-bezier(0.45, 0, 0.55, 1) both;
+  }
+
   /* Blinking text caret. */
   @keyframes pt-caret {
     0%,
@@ -192,6 +214,24 @@
     animation: pt-ping 1s cubic-bezier(0, 0, 0.2, 1) 2 both;
   }
 
+  /* A single click ripple, timed to land as the ghost cursor arrives. */
+  @keyframes pt-click {
+    0% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    10% {
+      opacity: 0.9;
+    }
+    100% {
+      opacity: 0;
+      transform: scale(2.2);
+    }
+  }
+  .animate-click {
+    animation: pt-click 0.6s ease-out 0.65s both;
+  }
+
   /* Slowly drifting background glows (transform only, so it stays cheap). */
   @keyframes pt-aurora {
     from {
@@ -206,5 +246,305 @@
   }
   .animate-aurora-slow {
     animation: pt-aurora 24s ease-in-out infinite alternate-reverse;
+  }
+
+  /* ---- Landing page: kinetic type ---- */
+
+  /* A word that rises, un-tilts and comes into focus. */
+  @keyframes pt-word {
+    from {
+      opacity: 0;
+      transform: translateY(0.5em) rotate(4deg);
+      filter: blur(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+      filter: blur(0);
+    }
+  }
+  .animate-word {
+    animation: pt-word 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* The highlighted phrase in the hero: lands last, with a little overshoot. */
+  @keyframes pt-land {
+    0% {
+      opacity: 0;
+      filter: blur(14px);
+    }
+    100% {
+      opacity: 1;
+      filter: blur(0);
+    }
+  }
+  .animate-land {
+    animation: pt-land 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* A gradient that slowly flows through text (pair with bg-clip-text). */
+  @keyframes pt-flow {
+    to {
+      background-position: 200% center;
+    }
+  }
+  .animate-flow {
+    background-size: 200% auto;
+    animation: pt-flow 5s linear infinite;
+  }
+
+  /* Values in the "extracted" panel type out character by character (monospace text, `--n` characters). */
+  @keyframes pt-type {
+    from {
+      width: 0;
+    }
+    to {
+      width: calc(var(--n) * 1ch);
+    }
+  }
+  .animate-type {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    vertical-align: bottom;
+    animation: pt-type calc(var(--n) * 35ms) steps(var(--n)) both;
+  }
+
+  /* ---- Landing page: entrances ---- */
+
+  @keyframes pt-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(-24px);
+      filter: blur(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+      filter: blur(0);
+    }
+  }
+  @keyframes pt-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(24px);
+      filter: blur(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+      filter: blur(0);
+    }
+  }
+  .animate-in-left {
+    animation: pt-in-left 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .animate-in-right {
+    animation: pt-in-right 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* An icon that springs in from nothing with a small overshoot. */
+  @keyframes pt-icon-pop {
+    0% {
+      opacity: 0;
+      transform: scale(0) rotate(-45deg);
+    }
+    60% {
+      opacity: 1;
+      transform: scale(1.3) rotate(8deg);
+    }
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .animate-icon-pop {
+    animation: pt-icon-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  /* The logo's three bars grow down into place. */
+  @keyframes pt-bar {
+    from {
+      transform: scaleY(0);
+    }
+  }
+  .fx-logo rect {
+    transform-box: fill-box;
+    transform-origin: top;
+    animation: pt-bar 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  .fx-logo rect:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+  .fx-logo rect:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+  .group:hover .fx-logo rect {
+    animation: pt-bar 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  /* ---- Landing page: ambient motion ---- */
+
+  @keyframes pt-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  .animate-float {
+    animation: pt-float 6s ease-in-out infinite;
+  }
+  .animate-float-slow {
+    animation: pt-float 8s ease-in-out -3s infinite;
+  }
+
+  @keyframes pt-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .animate-spin-slow {
+    animation: pt-spin 18s linear infinite;
+  }
+
+  /* A light sweeping across a button every few seconds. */
+  @keyframes pt-shine {
+    0% {
+      transform: translateX(-120%) skewX(-20deg);
+    }
+    60%,
+    100% {
+      transform: translateX(320%) skewX(-20deg);
+    }
+  }
+  .fx-shine {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .fx-shine::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 35%;
+    z-index: -1;
+    transform: translateX(-120%);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    animation: pt-shine 3.6s ease-in-out 1.5s infinite;
+  }
+
+  /* A comet of light travelling along a section's top border. */
+  @keyframes pt-comet {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(100vw);
+    }
+  }
+  .animate-comet {
+    transform: translateX(-100%);
+    animation: pt-comet 7s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+
+  /* A receding grid floor whose lines roll towards the viewer. */
+  @keyframes pt-grid-roll {
+    to {
+      transform: translateY(56px);
+    }
+  }
+  .fx-grid-floor {
+    transform: perspective(600px) rotateX(58deg);
+    transform-origin: 50% 100%;
+    mask-image: linear-gradient(to top, black 5%, transparent 70%);
+    -webkit-mask-image: linear-gradient(to top, black 5%, transparent 70%);
+  }
+  .fx-grid-floor > div {
+    position: absolute;
+    inset: -56px 0 0;
+    background-image:
+      linear-gradient(rgba(129, 140, 248, 0.32) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(129, 140, 248, 0.32) 1px, transparent 1px);
+    background-size: 56px 56px;
+    animation: pt-grid-roll 1.8s linear infinite;
+  }
+
+  /* ---- Landing page: pointer-reactive surfaces ---- */
+
+  /*
+   * A soft light under the cursor plus a brighter rim where the cursor nears the edge.
+   * Position comes from --mx/--my (see usePointerFx); colour from --spot.
+   */
+  .fx-spotlight {
+    position: relative;
+    isolation: isolate;
+    --spot: 99, 102, 241;
+  }
+  .fx-spotlight::before,
+  .fx-spotlight::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .fx-spotlight::before {
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(var(--spot), 0.14), transparent 45%);
+  }
+  .fx-spotlight::after {
+    inset: -1px;
+    padding: 1px;
+    background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(var(--spot), 0.75), transparent 60%);
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+  }
+  .fx-spotlight:hover::before,
+  .fx-spotlight:hover::after {
+    opacity: 1;
+  }
+
+  /* A short bright arc that circles an element's border. */
+  @keyframes pt-orbit {
+    to {
+      --pt-angle: 360deg;
+    }
+  }
+  .fx-beam {
+    position: relative;
+  }
+  .fx-beam::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    z-index: 1;
+    padding: 1px;
+    border-radius: inherit;
+    pointer-events: none;
+    background: conic-gradient(
+      from var(--pt-angle),
+      transparent 0 62%,
+      rgba(129, 140, 248, 0.9) 76%,
+      rgba(56, 189, 248, 0.95) 84%,
+      rgba(232, 121, 249, 0.8) 90%,
+      transparent 97%
+    );
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    animation: pt-orbit 5s linear infinite;
+  }
+  .fx-beam-slow::after {
+    animation-duration: 9s;
   }
 }
